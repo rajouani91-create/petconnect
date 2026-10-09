@@ -160,6 +160,55 @@ select,input[type="text"],textarea{border:1px solid var(--line);background:var(-
 [dir="rtl"] .toggle input:checked+span::after{transform:translateX(-16px)}
 .toggle input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
 
+.erow{flex-wrap:wrap}
+.eside{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.eacts{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.eacts .link,.ebtns .link{font-size:.8rem}
+.link.danger{color:var(--crit,#c0392b)}
+.pill-btn{border:0;cursor:pointer;margin-top:4px;font-family:inherit}
+.editbox{display:flex;flex-direction:column;gap:10px;padding:14px;margin:8px 0;border:1px solid var(--brand);border-radius:10px;background:var(--surface)}
+.editbox.crit{border-color:var(--crit,#c0392b)}
+.ebtns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.hist{margin-top:8px;padding:8px 10px;border-inline-start:3px solid var(--line);font-size:.8rem;display:flex;flex-direction:column;gap:6px}
+@media (max-width:640px){.erow>.eacts{flex-basis:100%}.erow .eside{flex-direction:row;flex-basis:100%;justify-content:space-between;align-items:center}}
+.erow .grow{min-width:0}
+.struck{text-decoration:line-through;color:var(--muted)}
+.toast .toast-undo{color:inherit;text-decoration:underline;margin-inline-start:8px;font-size:inherit}
+.cform{flex-direction:column;align-items:flex-start;gap:10px;max-width:660px}
+.cform .cgrid{width:100%}
+.ncard .slots{display:flex;flex-wrap:wrap;gap:8px}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.cgrid{grid-template-columns:1fr}}
+.ncard{margin-bottom:16px;border-inline-start:4px solid var(--warn)}
+.nitem{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-top:1px solid var(--line);align-items:flex-start}
+.nitem:first-of-type{border-top:0}
+.warnchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.alertbox{border:1px solid var(--crit);background:var(--crit-soft);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;margin:8px 0 14px}
+a.btn{text-decoration:none;display:inline-flex;align-items:center}
+.nsbar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:10px 0}
+.nsbar span{display:block;height:100%;background:var(--crit)}
+.caltools{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.calnav{display:flex;gap:6px}
+.calnav .btn{min-width:42px;justify-content:center}
+.caltitle{margin:4px 0 12px;text-transform:capitalize}
+.dlink{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:start;display:flex;justify-content:space-between;gap:6px}
+.dlink:hover b{text-decoration:underline}
+.dslot{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
+.dslot .mono{width:48px;flex:none;padding-top:6px}
+.dslot .grow{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ap.ns{border-color:var(--crit)}
+.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.mh{font-size:.75rem;color:var(--muted);text-align:center;padding-bottom:2px}
+.mcell{min-height:68px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:6px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;cursor:pointer;font:inherit;color:inherit;text-align:start}
+.mcell:hover{border-color:var(--brand)}
+.mcell.off{background:var(--surface-2);opacity:.65}
+.mcell.today{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.mcell .n{font-weight:600}
+@media (max-width:640px){.mcell{min-height:52px;padding:4px}.month{gap:4px}}
+.waitbox{border:1px dashed var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;margin-top:14px}
+.nvrow{padding:6px 0}
+.ap.clash{border-color:var(--crit)}
+.clashline{font-size:.8rem;color:var(--crit)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:8px;font-weight:500;z-index:50;max-width:calc(100% - 32px)}
 .empty{color:var(--muted);font-size:.9rem;padding:8px 0}
 
@@ -1339,6 +1388,689 @@ const renderBeforeLegal=render;
 render=function(){
   if(S.legal){ applyLang(); document.querySelector('.app').classList.add('pre'); const m=document.getElementById('main'); m.innerHTML=vLegal(); m.classList.remove('enter'); void m.offsetWidth; m.classList.add('enter'); setTimeout(()=>m.classList.remove('enter'),700); return; }
   renderBeforeLegal();
+};
+
+
+/* ---------- Korrigieren, Stornieren, Rückgängig (Praxis) ---------- */
+const STR6={
+de:{validUntil:"Gültig bis",edit:"Bearbeiten",storno:"Stornieren",cancelBtn:"Abbrechen",editTitle:"Eintrag korrigieren",stornoTitle:"Eintrag stornieren",
+reason:"Grund",reasonNote:"Bemerkung",reasonNoteOpt:"Bemerkung (optional)",rTypo:"Tippfehler",rWrongPet:"Beim falschen Tier eingetragen",rWrongDate:"Falsches Datum",rWrongContent:"Falscher Inhalt",rDouble:"Doppelt erfasst",rOther:"Sonstiges",
+stornoInfo:"Der Eintrag wird nicht gelöscht. Er wird als storniert markiert und bleibt mit Datum, Person und Grund nachvollziehbar.",
+changed:"geändert",histTitle:"Änderungsverlauf",histLine:"{d} · {by} · {r}",before:"Vorher: {v}",created:"Erfasst am {d} von {by}",
+stornoList:"Stornierte Einträge ({n})",stornoBy:"Storniert am {d} von {by} · {r}",restore:"Wiederherstellen",undo:"Rückgängig",
+toastEdited:"Eintrag korrigiert.",toastStorno:"Eintrag storniert.",toastRestored:"Eintrag wiederhergestellt.",toastUndone:"Rückgängig gemacht.",toastStamm:"Stammdaten aktualisiert.",
+auditNote:"Einträge werden nie endgültig gelöscht. Korrekturen und Stornierungen bleiben mit Datum, Person und Grund sichtbar, so wie es die tierärztliche Dokumentationspflicht verlangt.",
+editStamm:"Stammdaten bearbeiten",stammTitle:"Stammdaten bearbeiten",petNameL:"Name",breedL:"Rasse",sexL:"Geschlecht",weightFix:"Letzten Wert korrigieren",
+kV:"Impfung",kB:"Befund",kW:"Gewicht",kS:"Stammdaten",remSynced:"Die Erinnerung für den Tierhalter wurde angepasst.",err_note:"Bitte kurz beschreiben."},
+en:{validUntil:"Valid until",edit:"Edit",storno:"Void",cancelBtn:"Cancel",editTitle:"Correct entry",stornoTitle:"Void entry",
+reason:"Reason",reasonNote:"Note",reasonNoteOpt:"Note (optional)",rTypo:"Typo",rWrongPet:"Entered for the wrong animal",rWrongDate:"Wrong date",rWrongContent:"Wrong content",rDouble:"Duplicate entry",rOther:"Other",
+stornoInfo:"The entry is not deleted. It is marked as void and stays traceable with date, person and reason.",
+changed:"edited",histTitle:"Change history",histLine:"{d} · {by} · {r}",before:"Before: {v}",created:"Entered on {d} by {by}",
+stornoList:"Voided entries ({n})",stornoBy:"Voided on {d} by {by} · {r}",restore:"Restore",undo:"Undo",
+toastEdited:"Entry corrected.",toastStorno:"Entry voided.",toastRestored:"Entry restored.",toastUndone:"Undone.",toastStamm:"Master data updated.",
+auditNote:"Entries are never permanently deleted. Corrections and voided entries stay visible with date, person and reason, as veterinary record-keeping rules require.",
+editStamm:"Edit master data",stammTitle:"Edit master data",petNameL:"Name",breedL:"Breed",sexL:"Sex",weightFix:"Correct last value",
+kV:"Vaccination",kB:"Finding",kW:"Weight",kS:"Master data",remSynced:"The owner's reminder was updated.",err_note:"Please describe briefly."},
+fr:{validUntil:"Valable jusqu’au",edit:"Modifier",storno:"Annuler l’entrée",cancelBtn:"Annuler",editTitle:"Corriger l’entrée",stornoTitle:"Annuler l’entrée",
+reason:"Motif",reasonNote:"Remarque",reasonNoteOpt:"Remarque (facultatif)",rTypo:"Faute de frappe",rWrongPet:"Saisi pour le mauvais animal",rWrongDate:"Mauvaise date",rWrongContent:"Contenu erroné",rDouble:"Saisi en double",rOther:"Autre",
+stornoInfo:"L’entrée n’est pas supprimée. Elle est marquée comme annulée et reste traçable avec date, personne et motif.",
+changed:"modifié",histTitle:"Historique des modifications",histLine:"{d} · {by} · {r}",before:"Avant : {v}",created:"Saisi le {d} par {by}",
+stornoList:"Entrées annulées ({n})",stornoBy:"Annulé le {d} par {by} · {r}",restore:"Restaurer",undo:"Annuler",
+toastEdited:"Entrée corrigée.",toastStorno:"Entrée annulée.",toastRestored:"Entrée restaurée.",toastUndone:"Action annulée.",toastStamm:"Données de base mises à jour.",
+auditNote:"Les entrées ne sont jamais supprimées définitivement. Corrections et annulations restent visibles avec date, personne et motif, comme l’exige l’obligation de documentation vétérinaire.",
+editStamm:"Modifier les données de base",stammTitle:"Modifier les données de base",petNameL:"Nom",breedL:"Race",sexL:"Sexe",weightFix:"Corriger la dernière valeur",
+kV:"Vaccination",kB:"Constat",kW:"Poids",kS:"Données de base",remSynced:"Le rappel du propriétaire a été mis à jour.",err_note:"Merci de préciser brièvement."},
+ar:{validUntil:"صالح حتى",edit:"تعديل",storno:"إلغاء القيد",cancelBtn:"إلغاء",editTitle:"تصحيح القيد",stornoTitle:"إلغاء القيد",
+reason:"السبب",reasonNote:"ملاحظة",reasonNoteOpt:"ملاحظة (اختياري)",rTypo:"خطأ إملائي",rWrongPet:"سُجّل لحيوان آخر",rWrongDate:"تاريخ خاطئ",rWrongContent:"محتوى خاطئ",rDouble:"مسجّل مرتين",rOther:"أخرى",
+stornoInfo:"لا يُحذف القيد، بل يُعلَّم كملغى ويبقى قابلاً للتتبع مع التاريخ والشخص والسبب.",
+changed:"معدّل",histTitle:"سجل التعديلات",histLine:"{d} · {by} · {r}",before:"قبل: {v}",created:"سُجّل في {d} بواسطة {by}",
+stornoList:"القيود الملغاة ({n})",stornoBy:"أُلغي في {d} بواسطة {by} · {r}",restore:"استعادة",undo:"تراجع",
+toastEdited:"تم تصحيح القيد.",toastStorno:"تم إلغاء القيد.",toastRestored:"تمت استعادة القيد.",toastUndone:"تم التراجع.",toastStamm:"تم تحديث البيانات الأساسية.",
+auditNote:"لا تُحذف القيود نهائياً أبداً. تبقى التصحيحات والإلغاءات ظاهرة مع التاريخ والشخص والسبب، كما يقتضي واجب التوثيق البيطري.",
+editStamm:"تعديل البيانات الأساسية",stammTitle:"تعديل البيانات الأساسية",petNameL:"الاسم",breedL:"السلالة",sexL:"الجنس",weightFix:"تصحيح آخر قيمة",
+kV:"تطعيم",kB:"نتيجة فحص",kW:"الوزن",kS:"البيانات الأساسية",remSynced:"تم تحديث تذكير المالك.",err_note:"يرجى الوصف باختصار."},
+nl:{validUntil:"Geldig tot",edit:"Bewerken",storno:"Vervallen verklaren",cancelBtn:"Annuleren",editTitle:"Invoer corrigeren",stornoTitle:"Invoer vervallen verklaren",
+reason:"Reden",reasonNote:"Opmerking",reasonNoteOpt:"Opmerking (optioneel)",rTypo:"Typefout",rWrongPet:"Bij het verkeerde dier ingevoerd",rWrongDate:"Verkeerde datum",rWrongContent:"Verkeerde inhoud",rDouble:"Dubbel ingevoerd",rOther:"Overig",
+stornoInfo:"De invoer wordt niet verwijderd. Hij wordt als vervallen gemarkeerd en blijft herleidbaar met datum, persoon en reden.",
+changed:"gewijzigd",histTitle:"Wijzigingsgeschiedenis",histLine:"{d} · {by} · {r}",before:"Eerder: {v}",created:"Ingevoerd op {d} door {by}",
+stornoList:"Vervallen invoer ({n})",stornoBy:"Vervallen op {d} door {by} · {r}",restore:"Herstellen",undo:"Ongedaan maken",
+toastEdited:"Invoer gecorrigeerd.",toastStorno:"Invoer vervallen verklaard.",toastRestored:"Invoer hersteld.",toastUndone:"Ongedaan gemaakt.",toastStamm:"Basisgegevens bijgewerkt.",
+auditNote:"Invoer wordt nooit definitief verwijderd. Correcties en vervallen invoer blijven zichtbaar met datum, persoon en reden, zoals de veterinaire documentatieplicht vereist.",
+editStamm:"Basisgegevens bewerken",stammTitle:"Basisgegevens bewerken",petNameL:"Naam",breedL:"Ras",sexL:"Geslacht",weightFix:"Laatste waarde corrigeren",
+kV:"Vaccinatie",kB:"Bevinding",kW:"Gewicht",kS:"Basisgegevens",remSynced:"De herinnering voor de eigenaar is aangepast.",err_note:"Beschrijf het kort."},
+es:{validUntil:"Válido hasta",edit:"Editar",storno:"Anular",cancelBtn:"Cancelar",editTitle:"Corregir entrada",stornoTitle:"Anular entrada",
+reason:"Motivo",reasonNote:"Observación",reasonNoteOpt:"Observación (opcional)",rTypo:"Error tipográfico",rWrongPet:"Registrado en el animal equivocado",rWrongDate:"Fecha incorrecta",rWrongContent:"Contenido incorrecto",rDouble:"Registrado dos veces",rOther:"Otro",
+stornoInfo:"La entrada no se borra. Se marca como anulada y queda trazable con fecha, persona y motivo.",
+changed:"modificado",histTitle:"Historial de cambios",histLine:"{d} · {by} · {r}",before:"Antes: {v}",created:"Registrado el {d} por {by}",
+stornoList:"Entradas anuladas ({n})",stornoBy:"Anulado el {d} por {by} · {r}",restore:"Restaurar",undo:"Deshacer",
+toastEdited:"Entrada corregida.",toastStorno:"Entrada anulada.",toastRestored:"Entrada restaurada.",toastUndone:"Deshecho.",toastStamm:"Datos básicos actualizados.",
+auditNote:"Las entradas nunca se borran definitivamente. Las correcciones y anulaciones quedan visibles con fecha, persona y motivo, como exige la obligación de documentación veterinaria.",
+editStamm:"Editar datos básicos",stammTitle:"Editar datos básicos",petNameL:"Nombre",breedL:"Raza",sexL:"Sexo",weightFix:"Corregir último valor",
+kV:"Vacunación",kB:"Hallazgo",kW:"Peso",kS:"Datos básicos",remSynced:"Se actualizó el recordatorio del propietario.",err_note:"Descríbelo brevemente."}
+};
+for (const l in STR6) Object.assign(STR[l], STR6[l]);
+Object.assign(S,{edit:null,histOpen:null,stornoOpen:false,undo:null});
+
+const REASONS=['rTypo','rWrongPet','rWrongDate','rWrongContent','rDouble','rOther'];
+const actor=()=> (S.role==='vet' && S.auth.name) ? S.auth.name : 'Dr. Hartmann';
+let EID=0;
+const eid=e=>e.id||(e.id='e'+(++EID));
+const reasonTxt=(r,n)=>t(r)+(n?` (${n})`:'');
+const kArr=(p,k)=>k==='v'?p.impf:p.befunde;
+const entryTxt=(k,e)=> k==='v' ? `${t(e.n)} · ${fmt(e.d)} → ${fmt(e.f)}` : k==='b' ? `${fmt(e.d)} · ${t(e.t)}${e.x?' – '+t(e.x):''}` : k==='w' ? `${num(e)} kg` : e;
+const snap=p=>({impf:p.impf.map(e=>({...e,hist:[...(e.hist||[])]})),befunde:p.befunde.map(e=>({...e,hist:[...(e.hist||[])]})),gewicht:[...p.gewicht],storno:[...(p.storno||[])],whist:[...(p.whist||[])],
+  stamm:{name:p.name,rasse:p.rasse,sex:p.sex,geb:p.geb,chip:p.chip,allergien:p.allergien,shist:[...(p.shist||[])]},rem:S.rem.map(r=>({...r}))});
+function restoreSnap(p,s){ p.impf=s.impf; p.befunde=s.befunde; p.gewicht=s.gewicht; p.storno=s.storno; p.whist=s.whist; Object.assign(p,s.stamm); S.rem=s.rem; }
+function withUndo(p,fn,msg){ const s=snap(p); fn(); S.undo=()=>restoreSnap(p,s); S.edit=null; S.auth.errors={}; render(); toastUndo(msg); }
+function toastUndo(msg){
+  const el=document.getElementById('toast');
+  el.innerHTML=`<span>${esc(msg)}</span> <button class="link toast-undo" data-act="undo">${t('undo')}</button>`;
+  el.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>{el.hidden=true; S.undo=null;},8000);
+}
+/* Erinnerung beim Tierhalter mitziehen (nur eigene Tiere haben Halter-Erinnerungen in diesem Prototyp) */
+function syncRem(pid,old,neu){
+  const r=S.rem.find(x=>x.pet===pid && x.t===old.n && x.d && x.d.getTime()===old.f.getTime());
+  if(!r) return false;
+  if(neu){ r.t=neu.n; r.d=neu.f; } else S.rem=S.rem.filter(x=>x!==r);
+  return true;
+}
+function reasonFields(){
+  return `<div class="grid g2">${sel('eReason',t('reason'),REASONS.map(r=>[r,t(r)]))}${fld('eNote',F().eReason==='rOther'?t('reasonNote'):t('reasonNoteOpt'))}</div>`;
+}
+function checkReason(){
+  const f=F(); if(!f.eReason) f.eReason=REASONS[0];
+  if(f.eReason==='rOther' && !(f.eNote||'').trim()){ S.auth.errors={eNote:'err_note'}; return false; }
+  return true;
+}
+function editBox(p,pid,k,e){
+  const ed=S.edit, f=F();
+  if(ed.mode==='storno') return `<div class="editbox crit"><b>${t('stornoTitle')}</b><p class="muted" style="margin:0;font-size:.85rem">${esc(entryTxt(k,e))}</p><p class="note" style="margin:0">${t('stornoInfo')}</p>${reasonFields()}
+    <div class="ebtns"><button class="btn crit" data-act="eStornoYes">${t('storno')}</button><button class="btn ghost" data-act="eCancel">${t('cancelBtn')}</button></div></div>`;
+  let inner='';
+  if(k==='v') inner=`${sel('eVacName',t('vaccine'),vacOpts(p))}<div class="grid g2">${fld('eVacDate',t('date'),'date')}${fld('eVacDue',t('validUntil'),'date')}</div>`;
+  if(k==='b') inner=`<div class="grid g2">${fld('eFinDate',t('date'),'date')}${fld('eFinTitle',t('findingTitle'))}</div>${fld('eFinText',t('findingText'))}`;
+  if(k==='w') inner=fld('eKg',t('weightKg').replace(/\s*\(.*\)\s*$/,'')+' (kg)','number','min="0" step="0.1"');
+  if(k==='s') inner=`<div class="grid g2">${fld('sName',t('petNameL'))}${fld('sRasse',t('breedL'))}${fld('sSex',t('sexL'))}${fld('sGeb',t('born'),'date')}${fld('sChip',t('chip'))}${fld('sAll',t('allergies'))}</div>`;
+  return `<div class="editbox"><b>${k==='s'?t('stammTitle'):t('editTitle')}</b>${inner}${reasonFields()}
+    <div class="ebtns"><button class="btn" data-act="eSave">${t('saveBtn')}</button><button class="btn ghost" data-act="eCancel">${t('cancelBtn')}</button>${k!=='s'?`<button class="link danger" data-act="eStorno" style="margin-inline-start:auto">${t('storno')}</button>`:''}</div></div>`;
+}
+const isEd=(k,id)=>S.edit&&S.edit.k===k&&S.edit.id===id;
+function histHtml(e){
+  if(!e.hist||!e.hist.length) return '';
+  return `<div class="hist"><b>${t('histTitle')}</b>${e.hist.slice().reverse().map(h=>`<div>${t('histLine',{d:fmt(h.at),by:esc(h.by),r:esc(reasonTxt(h.r,h.note))})}<br><span class="muted">${t('before',{v:esc(h.old)})}</span></div>`).join('')}</div>`;
+}
+function metaHtml(e){
+  const h=e.hist&&e.hist.length;
+  return `${e.by?`<div class="muted" style="font-size:.75rem">${t('created',{d:fmt(e.at),by:esc(e.by)})}</div>`:''}${h?`<button class="pill warn pill-btn" data-act="eHist" data-id="${e.id}">✎ ${t('changed')}</button>`:''}${S.histOpen===e.id?histHtml(e):''}`;
+}
+const actBtns=(k,id)=>`<div class="eacts"><button class="link" data-act="eOpen" data-k="${k}" data-id="${id}">${t('edit')}</button><button class="link danger" data-act="eStornoOpen" data-k="${k}" data-id="${id}">${t('storno')}</button></div>`;
+
+vPatDetail=function(id){
+  const p=getPet(id), g=p.gewicht, f=F();
+  p.impf.forEach(eid); p.befunde.forEach(eid); p.storno=p.storno||[];
+  if(!f.vacDate) f.vacDate=isoDate(TODAY);
+  const vo=vacOpts(p); if(!vo.some(o=>o[0]===f.vacName)) f.vacName=vo[0][0];
+  if(!f.vacYears) f.vacYears='1';
+  const vacc=p.impf.length?[...p.impf].sort((a,b)=>b.d-a.d).map(i=>{ if(isEd('v',i.id)) return editBox(p,id,'v',i);
+    const [c,l]=remStatus(i.f);
+    return `<div class="row erow"><div class="grow"><div style="font-weight:600">${esc(t(i.n))}</div><div class="muted mono" style="font-size:.8rem">${t('vaccinated',{d:fmt(i.d),f:fmt(i.f)})}</div>${metaHtml(i)}</div><div class="eside"><span class="pill ${c}">${l}</span>${actBtns('v',i.id)}</div></div>`}).join(''):`<p class="empty">${t('noVacc')}</p>`;
+  const finds=p.befunde.length?[...p.befunde].sort((a,b)=>b.d-a.d).map(b=>{ if(isEd('b',b.id)) return editBox(p,id,'b',b);
+    return `<div class="row erow" style="align-items:flex-start"><span class="when">${fmt(b.d)}</span><div class="grow"><div style="font-weight:600">${esc(t(b.t))}</div><div class="muted" style="font-size:.9rem">${esc(t(b.x))}</div>${metaHtml(b)}</div>${actBtns('b',b.id)}</div>`}).join(''):`<p class="empty">${t('noData')}</p>`;
+  const wh=p.whist&&p.whist.length;
+  const wBlock = isEd('w','last') ? editBox(p,id,'w',g.at(-1)) : (g.length?`<div class="eacts" style="margin-top:6px"><button class="link" data-act="eOpen" data-k="w" data-id="last">${t('weightFix')}</button>${wh?`<button class="pill warn pill-btn" data-act="eHist" data-id="w-${id}">✎ ${t('changed')}</button>`:''}</div>${S.histOpen==='w-'+id?histHtml({hist:p.whist}):''}`:'');
+  const stamm = isEd('s','s') ? editBox(p,id,'s',null) : `<dl class="kv"><dt>${t('sex')}</dt><dd>${esc(t(p.sex))}</dd><dt>${t('born')}</dt><dd class="mono">${p.geb?fmt(p.geb):'—'}</dd><dt>${t('chip')}</dt><dd class="mono" dir="ltr" style="text-align:start">${esc(p.chip)}</dd><dt>${t('allergies')}</dt><dd>${esc(t(p.allergien))}</dd><dt>${t('weight')}</dt><dd class="mono">${g.length?num(g.at(-1))+' kg':'—'}</dd></dl>${g.length>=2?sparkline(g,lastMonths(g.length)):''}${wBlock}
+      <div class="eacts" style="margin-top:8px"><button class="link" data-act="eOpen" data-k="s" data-id="s">${t('editStamm')}</button>${p.shist&&p.shist.length?`<button class="pill warn pill-btn" data-act="eHist" data-id="s-${id}">✎ ${t('changed')}</button>`:''}</div>${S.histOpen==='s-'+id?histHtml({hist:p.shist}):''}`;
+  const st=p.storno;
+  const stornoCard = st.length?`<div class="card"><button class="link" data-act="eStornoList">${S.stornoOpen?'▾':'▸'} ${t('stornoList',{n:st.length})}</button>${S.stornoOpen?`<div class="list">${st.map((s,ix)=>`<div class="row" style="align-items:flex-start"><div class="grow"><div class="muted" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.04em">${t(s.k==='v'?'kV':s.k==='b'?'kB':'kW')}</div><div class="struck">${esc(entryTxt(s.k,s.e))}</div><div class="muted" style="font-size:.8rem">${t('stornoBy',{d:fmt(s.at),by:esc(s.by),r:esc(reasonTxt(s.r,s.note))})}</div></div>${s.k!=='w'?`<button class="link" data-act="eRestore" data-ix="${ix}">${t('restore')}</button>`:''}</div>`).join('')}</div>`:''}</div>`:'';
+  return head(esc(p.name), `${t(p.art)} · ${esc(t(p.rasse))} · ${t('ownerCol')}: ${esc(ownerOf(id))}`, `<button class="btn ghost" data-act="backPats">${t('backList')}</button>`) + `
+  <div class="grid split">
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <div class="card">${stamm}</div>
+      <div class="card"><h2>${t('vaccs')}</h2><div class="list">${vacc}</div></div>
+      <div class="card"><h2>${t('findings')}</h2><div class="list">${finds}</div></div>
+      ${stornoCard}
+      <p class="note">${t('auditNote')}</p>
+    </div>
+    <div class="card" style="align-self:start">
+      <h2>${t('addVacc')}</h2>${sel('vacName',t('vaccine'),vo)}<div class="grid g2">${fld('vacDate',t('date'),'date')}${sel('vacYears',t('validity'),[['1',t('y1')],['3',t('y3')]])}</div><button class="btn" data-act="saveVacc" data-pid="${id}" style="align-self:flex-start">${t('saveBtn')}</button>
+      <hr class="sep">
+      <h2>${t('addFinding')}</h2>${fld('finTitle',t('findingTitle'))}${fld('finText',t('findingText'))}<button class="btn" data-act="saveFinding" data-pid="${id}" style="align-self:flex-start">${t('saveBtn')}</button>
+      <hr class="sep">
+      <h2>${t('addWeight')}</h2>${fld('wKg',t('weightKg').replace(/\s*\(.*\)\s*$/,''),'number','min="0" step="0.1"')}<button class="btn" data-act="saveWeight" data-pid="${id}" style="align-self:flex-start">${t('saveBtn')}</button>
+      <p class="note">${t('sharedNote')}</p>
+    </div>
+  </div>`;
+};
+
+function openEdit(p,k,id,mode){
+  const f=F(); ['eReason','eNote','eVacName','eVacDate','eVacDue','eFinDate','eFinTitle','eFinText','eKg','sName','sRasse','sSex','sGeb','sChip','sAll'].forEach(x=>delete f[x]);
+  f.eReason=REASONS[0]; S.auth.errors={}; S.edit={k,id,mode};
+  if(mode==='edit'){
+    if(k==='v'){ const e=p.impf.find(x=>x.id===id); f.eVacName=e.n; f.eVacDate=isoDate(e.d); f.eVacDue=isoDate(e.f); }
+    if(k==='b'){ const e=p.befunde.find(x=>x.id===id); f.eFinDate=isoDate(e.d); f.eFinTitle=t(e.t); f.eFinText=t(e.x); }
+    if(k==='w'){ f.eKg=String(p.gewicht.at(-1)); }
+    if(k==='s'){ f.sName=p.name; f.sRasse=t(p.rasse); f.sSex=t(p.sex); f.sGeb=p.geb?isoDate(p.geb):''; f.sChip=p.chip; f.sAll=t(p.allergien); }
+  }
+}
+const vetActionCore=vetAction;
+vetAction=function(a,d){
+  const pid=S.vpat, p=pid?getPet(pid):null, f=F();
+  switch(a){
+    case 'undo': if(S.undo){ S.undo(); S.undo=null; S.edit=null; render(); toast(t('toastUndone')); } return true;
+    case 'eOpen': openEdit(p,d.k,d.id,'edit'); render(); return true;
+    case 'eStornoOpen': openEdit(p,d.k,d.id,'storno'); render(); return true;
+    case 'eStorno': S.edit.mode='storno'; S.auth.errors={}; render(); return true;
+    case 'eCancel': S.edit=null; S.auth.errors={}; render(); return true;
+    case 'eHist': S.histOpen=S.histOpen===d.id?null:d.id; render(); return true;
+    case 'eStornoList': S.stornoOpen=!S.stornoOpen; render(); return true;
+    case 'eSave': {
+      if(!checkReason()){ render(); return true; }
+      const {k,id}=S.edit, h={at:new Date(TODAY),by:actor(),r:f.eReason,note:(f.eNote||'').trim()};
+      if(k==='v'){
+        if(!f.eVacDate||!f.eVacDue){ S.auth.errors={[f.eVacDate?'eVacDue':'eVacDate']:'err_required'}; render(); return true; }
+        const e=p.impf.find(x=>x.id===id), old={n:e.n,f:e.f}, nd=new Date(f.eVacDate+'T00:00'), nf=new Date(f.eVacDue+'T00:00');
+        withUndo(p,()=>{ const live=p.impf.find(x=>x.id===id); live.hist=[...(live.hist||[]),{...h,old:entryTxt('v',live)}]; live.n=f.eVacName; live.d=nd; live.f=nf; const sy=syncRem(pid,old,{n:live.n,f:live.f}); h.sy=sy; }, t('toastEdited')+(syncRemWould(pid,old)?' '+t('remSynced'):''));
+        return true; }
+      if(k==='b'){
+        if(!(f.eFinTitle||'').trim()||!f.eFinDate){ S.auth.errors={[f.eFinDate?'eFinTitle':'eFinDate']:'err_required'}; render(); return true; }
+        withUndo(p,()=>{ const live=p.befunde.find(x=>x.id===id); live.hist=[...(live.hist||[]),{...h,old:entryTxt('b',live)}]; live.d=new Date(f.eFinDate+'T00:00'); live.t=f.eFinTitle.trim(); live.x=(f.eFinText||'').trim(); }, t('toastEdited'));
+        return true; }
+      if(k==='w'){
+        const kg=parseFloat(f.eKg); if(isNaN(kg)||kg<=0){ S.auth.errors={eKg:'err_required'}; render(); return true; }
+        withUndo(p,()=>{ p.whist=[...(p.whist||[]),{...h,old:entryTxt('w',p.gewicht.at(-1))}]; p.gewicht[p.gewicht.length-1]=kg; }, t('toastEdited'));
+        return true; }
+      if(k==='s'){
+        if(!(f.sName||'').trim()){ S.auth.errors={sName:'err_required'}; render(); return true; }
+        withUndo(p,()=>{ const oldTxt=[p.name,t(p.rasse),t(p.sex),p.geb?fmt(p.geb):'—',p.chip,t(p.allergien)].join(' · ');
+          p.shist=[...(p.shist||[]),{...h,old:oldTxt}]; p.name=f.sName.trim(); p.rasse=(f.sRasse||'').trim()||'—'; p.sex=(f.sSex||'').trim()||'—';
+          p.geb=f.sGeb?new Date(f.sGeb+'T00:00'):null; p.chip=(f.sChip||'').trim()||'—'; p.allergien=(f.sAll||'').trim()||'—'; }, t('toastStamm'));
+        return true; }
+      return true; }
+    case 'eStornoYes': {
+      if(!checkReason()){ render(); return true; }
+      const {k,id}=S.edit, s={k,at:new Date(TODAY),by:actor(),r:f.eReason,note:(f.eNote||'').trim()};
+      let synced=false;
+      withUndo(p,()=>{
+        p.storno=p.storno||[];
+        if(k==='w'){ s.e=p.gewicht.pop(); }
+        else { const arr=kArr(p,k), ix=arr.findIndex(x=>x.id===id); s.e=arr.splice(ix,1)[0]; if(k==='v') synced=s.sy=syncRem(pid,{n:s.e.n,f:s.e.f},null); }
+        p.storno.unshift(s);
+      }, t('toastStorno'));
+      if(synced) toastUndo(t('toastStorno')+' '+t('remSynced'));
+      return true; }
+    case 'eRestore': {
+      const s=p.storno[+d.ix];
+      withUndo(p,()=>{ p.storno.splice(+d.ix,1); const e=s.e; e.hist=[...(e.hist||[]),{at:new Date(TODAY),by:actor(),r:'restore',note:'',old:t('stornoBy',{d:fmt(s.at),by:s.by,r:reasonTxt(s.r,s.note)})}]; kArr(p,s.k).push(e);
+        if(s.k==='v' && s.sy && S.pets[pid]) S.rem.push({id:Date.now(),pet:pid,t:e.n,d:e.f,k:'kVacc'}); }, t('toastRestored'));
+      return true; }
+    case 'openPat': case 'backPats': S.edit=null; S.histOpen=null; S.stornoOpen=false; break;
+  }
+  /* Neue Einträge: Person und Datum merken, Rückgängig anbieten */
+  if(a==='saveVacc'||a==='saveFinding'||a==='saveWeight'){
+    const q=getPet(d.pid), s=snap(q), before=[q.impf.length,q.befunde.length,q.gewicht.length];
+    const r=vetActionCore(a,d);
+    const added=[q.impf.length>before[0],q.befunde.length>before[1],q.gewicht.length>before[2]];
+    if(added.some(Boolean)){
+      const e=added[0]?q.impf.at(-1):added[1]?q.befunde.at(-1):null;
+      if(e){ e.by=actor(); e.at=new Date(TODAY); eid(e); }
+      S.undo=()=>restoreSnap(q,s); render();
+      toastUndo(document.getElementById('toast').textContent||t('saveBtn'));
+    }
+    return r;
+  }
+  return vetActionCore(a,d);
+};
+const syncRemWould=(pid,old)=>S.rem.some(x=>x.pet===pid && x.t===old.n && x.d && x.d.getTime()===old.f.getTime());
+
+
+/* ---------- Termine: Absage mit Grund, Erinnerungen, Ausfälle, Warnzeichen ---------- */
+const STR7={
+de:{acSick:"Behandler:in erkrankt",acEmerg:"Notfall in der Praxis",acClosed:"Praxis kurzfristig geschlossen",acDouble:"Termin doppelt vergeben",acOther:"Sonstiges",
+cReasonL:"Grund der Absage",cNote:"Nachricht an die Halter:in (optional)",cOffer:"Drei Ausweichtermine mitschicken",cSend:"Absagen und benachrichtigen",
+cInfoSend:"Grund und Ausweichtermine gehen sofort per App und E-Mail an die Halter:in. Der Termin wird nicht gelöscht, sondern als abgesagt vermerkt.",
+toastCancelledMsg:"Abgesagt. {who} wurde benachrichtigt.",cInfoLine:"Grund: {r}",
+nTitle:"Mitteilungen der Praxis",nCancelled:"Die Praxis musste Ihren Termin am {d} um {t} ({pet}) absagen.",nMoved:"Ihr Termin für {pet} wurde auf {d} um {t} verschoben.",nReason:"Grund: {r}",nPick:"Neuen Termin wählen",nNoOffer:"Bitte buchen Sie einen neuen Termin.",nRebooked:"Neuer Termin gebucht: {d}, {t}",nDismiss:"Ausblenden",
+ownCancel:"Absagen",ownCancelYes:"Ja, Termin absagen",ownCancelLate:"Weniger als 24 Stunden vorher: Bitte geben Sie der Praxis zusätzlich kurz telefonisch Bescheid.",toastOwnCancelled:"Termin abgesagt. Der Platz ist für andere wieder frei.",
+stCanOwn:"Von Halter:in abgesagt",stCanPrac:"Von der Praxis abgesagt",remRow:"Erinnerung: {h} vorher",
+remTitle:"Terminerinnerungen",remSub:"Halter:innen werden automatisch erinnert, damit weniger Termine ausfallen.",rem48:"48 Stunden vorher erinnern",rem2:"2 Stunden vorher erinnern",remNote:"Per App-Mitteilung und E-Mail. In der Erinnerung können Halter:innen mit einem Klick absagen, dann wird der Platz wieder frei.",
+chReview:"Zu klären",outShow:"Erschienen",outNo:"Nicht erschienen",pillShow:"Erschienen",pillNo:"Nicht erschienen",toastOut:"Vermerkt.",
+noShowTitle:"Termin-Vermerke",nsRate:"Quote",nsOf:"{n} von {m} Terminen nicht wahrgenommen",nsOpen:"{n} Termine noch zu klären",nsNote:"Zählt die Vermerke „Erschienen“ und „Nicht erschienen“ aus den Buchungen. Im Pilot fließen sie in die Ausfallquote oben ein, so sehen Sie, ob die Erinnerungen wirken.",pillAcute:"Akut",
+urgTitle:"Warnzeichen prüfen",urgSub:"Trifft etwas davon zu, ist ein Online-Termin nicht der richtige Weg.",w1:"Atemnot",w2:"Bewusstlos oder zusammengebrochen",w3:"Starke Blutung",w4:"Krampfanfall",w5:"Vergiftung vermutet",w6:"Aufgeblähter, harter Bauch",w7:"Kann nicht urinieren",w8:"Unfall oder Sturz",
+urgNone:"Keine Warnzeichen ausgewählt. Wählen Sie nur, was gerade zutrifft.",urgAlertT:"Das kann ein Notfall sein.",urgAlertB:"Bitte buchen Sie keinen Online-Termin. Rufen Sie sofort die Praxis an oder fahren Sie zur nächsten Notfallpraxis.",urgCall:"Praxis anrufen",urgEr:"Notfallpraxis finden",urgBlocked:"Bei Warnzeichen ist die Online-Buchung gesperrt."},
+en:{acSick:"Vet unwell",acEmerg:"Emergency at the practice",acClosed:"Practice closed at short notice",acDouble:"Slot booked twice",acOther:"Other",
+cReasonL:"Reason for cancelling",cNote:"Message to the owner (optional)",cOffer:"Include three alternative slots",cSend:"Cancel and notify",
+cInfoSend:"The reason and alternative slots go to the owner at once by app and email. The appointment is not deleted, it is marked as cancelled.",
+toastCancelledMsg:"Cancelled. {who} has been notified.",cInfoLine:"Reason: {r}",
+nTitle:"Messages from the practice",nCancelled:"The practice had to cancel your appointment on {d} at {t} ({pet}).",nMoved:"Your appointment for {pet} was moved to {d} at {t}.",nReason:"Reason: {r}",nPick:"Choose a new time",nNoOffer:"Please book a new appointment.",nRebooked:"New appointment booked: {d}, {t}",nDismiss:"Dismiss",
+ownCancel:"Cancel",ownCancelYes:"Yes, cancel appointment",ownCancelLate:"Less than 24 hours ahead: please also let the practice know by phone.",toastOwnCancelled:"Appointment cancelled. The slot is free for others again.",
+stCanOwn:"Cancelled by owner",stCanPrac:"Cancelled by practice",remRow:"Reminder: {h} before",
+remTitle:"Appointment reminders",remSub:"Owners are reminded automatically so fewer appointments are missed.",rem48:"Remind 48 hours before",rem2:"Remind 2 hours before",remNote:"By app message and email. Owners can cancel with one click from the reminder, which frees the slot.",
+chReview:"To clarify",outShow:"Attended",outNo:"No-show",pillShow:"Attended",pillNo:"No-show",toastOut:"Recorded.",
+noShowTitle:"Appointment outcomes",nsRate:"Rate",nsOf:"{n} of {m} appointments missed",nsOpen:"{n} appointments still to clarify",nsNote:"Counts the “Attended” and “No-show” marks from bookings. In the pilot they feed the no-show rate above, so you can see whether reminders work.",pillAcute:"Acute",
+urgTitle:"Check warning signs",urgSub:"If any of these apply, an online appointment is not the right route.",w1:"Difficulty breathing",w2:"Unconscious or collapsed",w3:"Heavy bleeding",w4:"Seizure",w5:"Suspected poisoning",w6:"Swollen, hard belly",w7:"Cannot urinate",w8:"Accident or fall",
+urgNone:"No warning signs selected. Choose only what applies right now.",urgAlertT:"This could be an emergency.",urgAlertB:"Please do not book an online appointment. Call the practice now or go to the nearest emergency clinic.",urgCall:"Call the practice",urgEr:"Find an emergency clinic",urgBlocked:"Online booking is blocked when warning signs are selected."},
+fr:{acSick:"Vétérinaire malade",acEmerg:"Urgence au cabinet",acClosed:"Cabinet fermé au dernier moment",acDouble:"Créneau réservé deux fois",acOther:"Autre",
+cReasonL:"Motif de l’annulation",cNote:"Message au propriétaire (facultatif)",cOffer:"Joindre trois créneaux alternatifs",cSend:"Annuler et prévenir",
+cInfoSend:"Le motif et les créneaux alternatifs sont envoyés tout de suite au propriétaire par appli et e-mail. Le rendez-vous n’est pas supprimé, il est noté comme annulé.",
+toastCancelledMsg:"Annulé. {who} a été prévenu.",cInfoLine:"Motif : {r}",
+nTitle:"Messages du cabinet",nCancelled:"Le cabinet a dû annuler votre rendez-vous du {d} à {t} ({pet}).",nMoved:"Votre rendez-vous pour {pet} a été déplacé au {d} à {t}.",nReason:"Motif : {r}",nPick:"Choisir un nouveau créneau",nNoOffer:"Veuillez réserver un nouveau rendez-vous.",nRebooked:"Nouveau rendez-vous réservé : {d}, {t}",nDismiss:"Masquer",
+ownCancel:"Annuler",ownCancelYes:"Oui, annuler le rendez-vous",ownCancelLate:"Moins de 24 heures avant : prévenez aussi le cabinet par téléphone.",toastOwnCancelled:"Rendez-vous annulé. Le créneau est de nouveau libre.",
+stCanOwn:"Annulé par le propriétaire",stCanPrac:"Annulé par le cabinet",remRow:"Rappel : {h} avant",
+remTitle:"Rappels de rendez-vous",remSub:"Les propriétaires sont rappelés automatiquement pour limiter les rendez-vous manqués.",rem48:"Rappeler 48 heures avant",rem2:"Rappeler 2 heures avant",remNote:"Par message dans l’appli et par e-mail. Depuis le rappel, le propriétaire peut annuler en un clic, ce qui libère le créneau.",
+chReview:"À clarifier",outShow:"Présent",outNo:"Absent",pillShow:"Présent",pillNo:"Absent",toastOut:"Noté.",
+noShowTitle:"Suivi des rendez-vous",nsRate:"Taux",nsOf:"{n} rendez-vous sur {m} non honorés",nsOpen:"{n} rendez-vous à clarifier",nsNote:"Compte les mentions « Présent » et « Absent » des réservations. Pendant le pilote, elles alimentent le taux d’absence ci-dessus : vous voyez si les rappels fonctionnent.",pillAcute:"Urgent",
+urgTitle:"Vérifier les signes d’alerte",urgSub:"Si l’un d’eux s’applique, un rendez-vous en ligne n’est pas la bonne voie.",w1:"Difficulté à respirer",w2:"Inconscient ou effondré",w3:"Forte hémorragie",w4:"Crise convulsive",w5:"Intoxication suspectée",w6:"Ventre gonflé et dur",w7:"Ne peut pas uriner",w8:"Accident ou chute",
+urgNone:"Aucun signe d’alerte sélectionné. Ne choisissez que ce qui s’applique maintenant.",urgAlertT:"Il peut s’agir d’une urgence.",urgAlertB:"Ne réservez pas en ligne. Appelez le cabinet tout de suite ou rendez-vous à la clinique d’urgence la plus proche.",urgCall:"Appeler le cabinet",urgEr:"Trouver une clinique d’urgence",urgBlocked:"La réservation en ligne est bloquée en cas de signe d’alerte."},
+ar:{acSick:"الطبيب البيطري مريض",acEmerg:"حالة طارئة في العيادة",acClosed:"إغلاق العيادة بشكل مفاجئ",acDouble:"حجز الموعد مرتين",acOther:"سبب آخر",
+cReasonL:"سبب الإلغاء",cNote:"رسالة إلى المالك (اختيارية)",cOffer:"إرفاق ثلاثة مواعيد بديلة",cSend:"إلغاء وإبلاغ المالك",
+cInfoSend:"يصل السبب والمواعيد البديلة إلى المالك فورًا عبر التطبيق والبريد الإلكتروني. لا يُحذف الموعد بل يُسجَّل كملغى.",
+toastCancelledMsg:"تم الإلغاء. تم إبلاغ {who}.",cInfoLine:"السبب: {r}",
+nTitle:"رسائل من العيادة",nCancelled:"اضطرت العيادة إلى إلغاء موعدكم يوم {d} الساعة {t} ({pet}).",nMoved:"تم نقل موعد {pet} إلى {d} الساعة {t}.",nReason:"السبب: {r}",nPick:"اختاروا موعدًا جديدًا",nNoOffer:"يرجى حجز موعد جديد.",nRebooked:"تم حجز موعد جديد: {d}، {t}",nDismiss:"إخفاء",
+ownCancel:"إلغاء",ownCancelYes:"نعم، إلغاء الموعد",ownCancelLate:"أقل من 24 ساعة قبل الموعد: يرجى إبلاغ العيادة هاتفيًا أيضًا.",toastOwnCancelled:"تم إلغاء الموعد. أصبح الموعد متاحًا للآخرين.",
+stCanOwn:"ألغاه المالك",stCanPrac:"ألغته العيادة",remRow:"تذكير: قبل {h}",
+remTitle:"تذكيرات المواعيد",remSub:"يُذكَّر المالكون تلقائيًا لتقليل المواعيد الفائتة.",rem48:"التذكير قبل 48 ساعة",rem2:"التذكير قبل ساعتين",remNote:"عبر إشعار التطبيق والبريد الإلكتروني. يمكن للمالك الإلغاء بنقرة واحدة من التذكير فيصبح الموعد متاحًا.",
+chReview:"بحاجة إلى توضيح",outShow:"حضر",outNo:"لم يحضر",pillShow:"حضر",pillNo:"لم يحضر",toastOut:"تم التسجيل.",
+noShowTitle:"نتائج المواعيد",nsRate:"النسبة",nsOf:"{n} من {m} مواعيد فائتة",nsOpen:"{n} مواعيد بحاجة إلى توضيح",nsNote:"يحصي تسجيلات «حضر» و«لم يحضر» من الحجوزات. في المرحلة التجريبية تغذّي هذه التسجيلات نسبة التغيّب أعلاه، فترون إن كانت التذكيرات مفيدة.",pillAcute:"عاجل",
+urgTitle:"تحققوا من علامات الخطر",urgSub:"إذا انطبق أي منها فالحجز عبر الإنترنت ليس الطريق المناسب.",w1:"صعوبة في التنفس",w2:"فقدان الوعي أو انهيار",w3:"نزيف شديد",w4:"نوبة تشنج",w5:"اشتباه بتسمم",w6:"انتفاخ وصلابة في البطن",w7:"لا يستطيع التبول",w8:"حادث أو سقوط",
+urgNone:"لم تُحدَّد علامات خطر. اختاروا فقط ما ينطبق الآن.",urgAlertT:"قد تكون حالة طارئة.",urgAlertB:"يرجى عدم الحجز عبر الإنترنت. اتصلوا بالعيادة فورًا أو توجهوا إلى أقرب عيادة طوارئ.",urgCall:"الاتصال بالعيادة",urgEr:"البحث عن عيادة طوارئ",urgBlocked:"الحجز عبر الإنترنت متوقف عند وجود علامات خطر."},
+nl:{acSick:"Dierenarts ziek",acEmerg:"Noodgeval in de praktijk",acClosed:"Praktijk op korte termijn gesloten",acDouble:"Afspraak dubbel geboekt",acOther:"Anders",
+cReasonL:"Reden van annulering",cNote:"Bericht aan de eigenaar (optioneel)",cOffer:"Drie alternatieve tijden meesturen",cSend:"Annuleren en informeren",
+cInfoSend:"Reden en alternatieve tijden gaan direct per app en e-mail naar de eigenaar. De afspraak wordt niet verwijderd maar als geannuleerd genoteerd.",
+toastCancelledMsg:"Geannuleerd. {who} is geïnformeerd.",cInfoLine:"Reden: {r}",
+nTitle:"Berichten van de praktijk",nCancelled:"De praktijk moest uw afspraak op {d} om {t} ({pet}) annuleren.",nMoved:"Uw afspraak voor {pet} is verplaatst naar {d} om {t}.",nReason:"Reden: {r}",nPick:"Kies een nieuwe tijd",nNoOffer:"Boek alstublieft een nieuwe afspraak.",nRebooked:"Nieuwe afspraak geboekt: {d}, {t}",nDismiss:"Verbergen",
+ownCancel:"Annuleren",ownCancelYes:"Ja, afspraak annuleren",ownCancelLate:"Minder dan 24 uur van tevoren: laat het de praktijk ook even telefonisch weten.",toastOwnCancelled:"Afspraak geannuleerd. De plek is weer vrij voor anderen.",
+stCanOwn:"Geannuleerd door eigenaar",stCanPrac:"Geannuleerd door praktijk",remRow:"Herinnering: {h} van tevoren",
+remTitle:"Afspraakherinneringen",remSub:"Eigenaren worden automatisch herinnerd, zodat minder afspraken uitvallen.",rem48:"48 uur van tevoren herinneren",rem2:"2 uur van tevoren herinneren",remNote:"Via appbericht en e-mail. Vanuit de herinnering kan de eigenaar met één klik annuleren, waardoor de plek vrijkomt.",
+chReview:"Uit te zoeken",outShow:"Verschenen",outNo:"Niet verschenen",pillShow:"Verschenen",pillNo:"Niet verschenen",toastOut:"Genoteerd.",
+noShowTitle:"Afspraakuitkomsten",nsRate:"Percentage",nsOf:"{n} van {m} afspraken gemist",nsOpen:"{n} afspraken nog uit te zoeken",nsNote:"Telt de notities ‘Verschenen’ en ‘Niet verschenen’ uit de boekingen. In de pilot voeden ze het uitvalpercentage hierboven, zodat u ziet of herinneringen werken.",pillAcute:"Acuut",
+urgTitle:"Waarschuwingssignalen controleren",urgSub:"Als iets hiervan speelt, is een online afspraak niet de juiste weg.",w1:"Ademnood",w2:"Bewusteloos of ingestort",w3:"Hevige bloeding",w4:"Epileptische aanval",w5:"Vermoeden van vergiftiging",w6:"Opgezette, harde buik",w7:"Kan niet plassen",w8:"Ongeluk of val",
+urgNone:"Geen waarschuwingssignalen gekozen. Kies alleen wat nu speelt.",urgAlertT:"Dit kan een noodgeval zijn.",urgAlertB:"Boek geen online afspraak. Bel direct de praktijk of ga naar de dichtstbijzijnde spoedkliniek.",urgCall:"Praktijk bellen",urgEr:"Spoedkliniek zoeken",urgBlocked:"Online boeken is geblokkeerd bij waarschuwingssignalen."},
+es:{acSick:"Veterinario/a enfermo/a",acEmerg:"Urgencia en la clínica",acClosed:"Clínica cerrada con poca antelación",acDouble:"Cita reservada dos veces",acOther:"Otro",
+cReasonL:"Motivo de la cancelación",cNote:"Mensaje al propietario (opcional)",cOffer:"Incluir tres horarios alternativos",cSend:"Cancelar y avisar",
+cInfoSend:"El motivo y los horarios alternativos llegan al propietario al instante por app y correo. La cita no se borra, se anota como cancelada.",
+toastCancelledMsg:"Cancelada. {who} ha sido avisado.",cInfoLine:"Motivo: {r}",
+nTitle:"Mensajes de la clínica",nCancelled:"La clínica tuvo que cancelar su cita del {d} a las {t} ({pet}).",nMoved:"Su cita de {pet} se ha movido al {d} a las {t}.",nReason:"Motivo: {r}",nPick:"Elegir un nuevo horario",nNoOffer:"Reserve una nueva cita, por favor.",nRebooked:"Nueva cita reservada: {d}, {t}",nDismiss:"Ocultar",
+ownCancel:"Cancelar",ownCancelYes:"Sí, cancelar la cita",ownCancelLate:"Con menos de 24 horas de antelación: avise también a la clínica por teléfono.",toastOwnCancelled:"Cita cancelada. El hueco vuelve a estar libre.",
+stCanOwn:"Cancelada por el propietario",stCanPrac:"Cancelada por la clínica",remRow:"Recordatorio: {h} antes",
+remTitle:"Recordatorios de citas",remSub:"Los propietarios reciben recordatorios automáticos para que fallen menos citas.",rem48:"Recordar 48 horas antes",rem2:"Recordar 2 horas antes",remNote:"Por mensaje en la app y correo. Desde el recordatorio el propietario puede cancelar con un clic y el hueco queda libre.",
+chReview:"Por aclarar",outShow:"Asistió",outNo:"No asistió",pillShow:"Asistió",pillNo:"No asistió",toastOut:"Anotado.",
+noShowTitle:"Resultado de las citas",nsRate:"Tasa",nsOf:"{n} de {m} citas no atendidas",nsOpen:"{n} citas por aclarar",nsNote:"Cuenta las anotaciones «Asistió» y «No asistió» de las reservas. En el piloto alimentan la tasa de ausencias de arriba, así verá si los recordatorios funcionan.",pillAcute:"Urgente",
+urgTitle:"Comprobar señales de alarma",urgSub:"Si alguna se cumple, una cita en línea no es el camino adecuado.",w1:"Dificultad para respirar",w2:"Inconsciente o desplomado",w3:"Hemorragia fuerte",w4:"Convulsiones",w5:"Sospecha de intoxicación",w6:"Barriga hinchada y dura",w7:"No puede orinar",w8:"Accidente o caída",
+urgNone:"Sin señales de alarma. Elija solo lo que ocurre ahora.",urgAlertT:"Puede ser una urgencia.",urgAlertB:"No reserve en línea. Llame ya a la clínica o acuda a la clínica de urgencias más cercana.",urgCall:"Llamar a la clínica",urgEr:"Buscar clínica de urgencias",urgBlocked:"La reserva en línea se bloquea si hay señales de alarma."}
+};
+for (const l in STR7) Object.assign(STR[l], STR7[l]);
+
+const CREASONS=['acSick','acEmerg','acClosed','acDouble','acOther'];
+const WARN=['w1','w2','w3','w4','w5','w6','w7','w8'];
+const PRAC_TEL='06142 000 100';
+Object.assign(S,{notes:[],ocancel:null,apptRem:{h48:true,h2:true}});
+S.book.red=[];
+/* Beispieldaten der letzten Wochen für die Ausfall-Auswertung */
+[
+ AP('h1',{owner:'Tim R.',petName:'Bello',d:addDays(-2),t:'09:30',grund:'r1',out:'show'}),
+ AP('h2',{owner:'Lea B.',petName:'Nala',d:addDays(-3),t:'11:00',grund:'r3',out:'noshow'}),
+ AP('h3',{owner:'Max W.',petName:'Rocky',d:addDays(-6),t:'15:00',grund:'r1',out:'show'}),
+ AP('h4',{owner:'Sandra K.',petName:'catPaul',d:addDays(-9),t:'10:30',grund:'r2',out:'show'}),
+ AP('h5',{owner:'Jonas M.',petName:'dogKira',d:addDays(-10),t:'14:30',grund:'r1',out:'noshow'}),
+ AP('h6',{owner:'Tim R.',petName:'Bello',d:addDays(-1),t:'08:30',grund:'r3'})
+].forEach(a=>S.appts.push(a));
+
+const apDT=a=>{ const [h,m]=a.t.split(':').map(Number); const d=new Date(a.d); d.setHours(h,m,0,0); return d; };
+const needsOut=a=>a.status==='confirmed' && !a.out && apDT(a)<new Date();
+const remText=()=>{ const p=[S.apptRem.h48&&'48 h',S.apptRem.h2&&'2 h'].filter(Boolean); return p.length?t('remRow',{h:p.join(' · ')}):''; };
+
+/* ----- Praxis: Buchungen mit Absagegrund, Ausfall-Vermerk, Erinnerung ----- */
+vBuchungen=function(){
+  const f=S.bfilter;
+  const all=practiceAppts().sort((a,b)=>(a.d-b.d)||(a.t<b.t?-1:1));
+  const cnt=k=>k==='all'?all.length:k==='review'?all.filter(needsOut).length:all.filter(a=>a.status===k).length;
+  const list=all.filter(a=>f==='all'||(f==='review'?needsOut(a):a.status===f));
+  const stc={pending:'warn',confirmed:'ok',cancelled:'crit'};
+  const chips=['pending','confirmed','review','all'].map(k=>`<button class="chip" data-act="bf" data-v="${k}" aria-pressed="${f===k}">${k==='all'?t('f_all'):k==='review'?t('chReview'):t('st_'+k)} · <span class="mono">${cnt(k)}</span></button>`).join('');
+  const rows=list.map(a=>{
+    const open=needsOut(a), done=!!a.out, canc=a.status==='cancelled';
+    let acts='';
+    if(open) acts=`<button class="btn" data-act="bOut" data-id="${a.id}" data-v="show">${t('outShow')}</button><button class="btn ghost" data-act="bOut" data-id="${a.id}" data-v="noshow">${t('outNo')}</button>`;
+    else if(!canc && !done) acts=`${a.status==='pending'?`<button class="btn" data-act="bConfirm" data-id="${a.id}">${t('confirm')}</button>`:''}<button class="btn ghost" data-act="bMove" data-id="${a.id}" aria-expanded="${S.moving===a.id}">${t('move')}</button><button class="btn ghost" data-act="bCancel" data-id="${a.id}">${t('ownCancel')}</button>`;
+    const pill=done?`<span class="pill ${a.out==='show'?'ok':'crit'}">${t(a.out==='show'?'pillShow':'pillNo')}</span>`
+      :canc?`<span class="pill crit">${t(a.cancel&&a.cancel.by==='owner'?'stCanOwn':'stCanPrac')}</span>`
+      :open?`<span class="pill warn">${t('chReview')}</span>`
+      :`<span class="pill ${stc[a.status]}">${t('st_'+a.status)}</span>`;
+    const acute=((a.grund==='r2'&&!canc&&!done)?` <span class="pill crit">${t('pillAcute')}</span>`:'')+extraPills(a,canc,done);
+    let extra='';
+    if(S.moving===a.id) extra=`<div class="subrow"><span class="muted">${t('pickNew')}</span>${altSlots(a).map(([i,tm])=>`<button class="slot" data-act="bMoveTo" data-id="${a.id}" data-to="${i}|${tm}">${wd(addDays(i))} ${dm(addDays(i))} · ${tm}</button>`).join('')}</div>`;
+    if(S.cancelling===a.id) extra=`<div class="subrow cform"><div class="cgrid">${sel('cReason',t('cReasonL'),CREASONS.map(r=>[r,t(r)]))}${fld('cNote',t('cNote'))}</div>${chk('cOffer',t('cOffer'))}<p class="note">${t('cInfoSend')}</p><div class="ebtns"><button class="btn crit" data-act="bCancelYes" data-id="${a.id}">${t('cSend')}</button><button class="btn ghost" data-act="bCancelNo">${t('back')}</button></div></div>`;
+    const line=canc&&a.cancel&&a.cancel.reason?`<div class="muted" style="font-size:.8rem">${t('cInfoLine',{r:t(a.cancel.reason)})}${a.cancel.note?' · '+esc(a.cancel.note):''}</div>`
+      :(a.status==='confirmed'&&!done&&!open&&remText())?`<div class="muted" style="font-size:.8rem">${esc(remText())}</div>`:'';
+    return `<div class="brow"><div class="row" style="flex-wrap:wrap">${dateBox(a.d)}<div class="grow"><div style="font-weight:600">${esc(apPet(a))} <span class="muted" style="font-weight:400">· ${esc(apOwner(a))}</span></div><div class="muted" style="font-size:.85rem"><span class="mono">${wd(a.d)} ${a.t}</span> · ${esc(t(a.grund))} · ${a.art==='Video'?t('videoShort'):t('onSite')} · ${t('src_'+a.src)}</div>${line}${clashLine(a,canc,done)}</div>${pill}${acute}<div class="acts">${acts}</div></div>${extra}</div>`;
+  }).join('');
+  return head(t('nav_vbuchungen'),t('bookSubVet')) + `<div class="card"><div class="chips">${chips}</div><div class="list">${rows||`<p class="empty">${t('noBookings')}</p>`}</div></div>`;
+};
+
+/* ----- Praxis: Kalender + Erinnerungseinstellungen, Auswertung + Ausfallquote ----- */
+const vKalenderCore=vKalender;
+vKalender=function(){
+  return vKalenderCore()+`<div class="card" style="margin-top:16px"><h2>${t('remTitle')}</h2><p class="muted">${t('remSub')}</p>
+  <div class="list"><label class="row"><span class="toggle"><input type="checkbox" data-rem="h48" ${S.apptRem.h48?'checked':''}><span></span></span><span class="grow">${t('rem48')}</span></label>
+  <label class="row"><span class="toggle"><input type="checkbox" data-rem="h2" ${S.apptRem.h2?'checked':''}><span></span></span><span class="grow">${t('rem2')}</span></label></div>
+  <p class="note" style="margin-top:10px">${t('remNote')}</p></div>`;
+};
+document.addEventListener('change',e=>{ const el=e.target; if(el.dataset && el.dataset.rem){ S.apptRem[el.dataset.rem]=el.checked; render(); } });
+const vAuswertungCore=vAuswertung;
+vAuswertung=function(){
+  const done=practiceAppts().filter(a=>a.out), no=done.filter(a=>a.out==='noshow').length, ok=done.length-no, open=practiceAppts().filter(needsOut).length;
+  return vAuswertungCore()+`<div class="card" style="margin-top:16px"><h2>${t('noShowTitle')}</h2>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><span class="pill ok">${t('pillShow')} · ${ok}</span><span class="pill crit">${t('pillNo')} · ${no}</span>${open?`<span class="pill warn">${t('chReview')} · ${open}</span>`:''}</div>
+  <p class="note">${t('nsNote')}</p></div>`;
+};
+
+/* ----- Halter:in: Mitteilungen, Absagen, Warnzeichen ----- */
+function notesCard(){
+  const open=S.notes.filter(n=>!n.done);
+  if(!open.length) return '';
+  return `<div class="card ncard" role="region" aria-label="${esc(t('nTitle'))}"><h2>${t('nTitle')}</h2>${open.map(n=>{
+    const pet=esc(S.pets[n.pet]?S.pets[n.pet].name:'—');
+    const dt=`${wd(n.d)} ${dm(n.d)}`;
+    const body=n.kind==='wait'?waitBody(n):n.kind==='cancel'
+      ? `<p><b>${t('nCancelled',{d:dt,t:n.t,pet})}</b></p><p class="muted">${t('nReason',{r:t(n.reason)})}${n.note?' · '+esc(n.note):''}</p>`
+        +(n.offer.length?`<span class="label">${t('nPick')}</span><div class="slots">${n.offer.map((o,i)=>`<button class="slot" data-act="nRebook" data-nid="${n.id}" data-i="${i}">${wd(o.d)} ${dm(o.d)} · ${o.t}</button>`).join('')}</div>`:`<p class="muted">${t('nNoOffer')}</p>`)
+      : `<p><b>${t('nMoved',{pet,d:dt,t:n.t})}</b></p>`;
+    return `<div class="nitem">${body}<button class="link" data-act="nDismiss" data-nid="${n.id}">${n.kind==='wait'?t('wDecline'):t('nDismiss')}</button></div>`;
+  }).join('')}</div>`;
+}
+const apptRowCore=apptRow;
+apptRow=function(a){
+  const hrs=(apDT(a)-new Date())/36e5, rt=remText();
+  const sub=S.ocancel===a.id
+    ? `<div class="subrow">${hrs<24?`<span class="note">${t('ownCancelLate')}</span>`:''}<button class="btn crit" data-act="oCancelYes" data-id="${a.id}">${t('ownCancelYes')}</button><button class="btn ghost" data-act="oCancelNo">${t('back')}</button></div>`
+    : `<div class="subrow">${rt?`<span class="muted" style="font-size:.8rem">${esc(rt)}</span>`:''}<button class="link danger" data-act="oCancel" data-id="${a.id}">${t('ownCancel')}</button></div>`;
+  return `<div class="brow">${apptRowCore(a)}${sub}</div>`;
+};
+function urgBlock(red){
+  const chips=WARN.map(w=>`<button class="chip" data-act="rfToggle" data-v="${w}" aria-pressed="${red.includes(w)}">${t(w)}</button>`).join('');
+  const alert=red.length?`<div class="alertbox" role="alert"><b>${t('urgAlertT')}</b><span>${t('urgAlertB')}</span><div class="ebtns"><a class="btn crit" href="tel:${PRAC_TEL.replace(/\s/g,'')}">${t('urgCall')} · ${PRAC_TEL}</a><button class="btn ghost" data-go="notfall">${t('urgEr')}</button></div></div>`:'';
+  return `<span class="label">${t('urgTitle')}</span><p class="muted" style="font-size:.88rem;margin:-2px 0 8px">${t('urgSub')}</p><div class="warnchips">${chips}</div>${red.length?'':`<p class="note">${t('urgNone')}</p>`}${alert}`;
+}
+const vTermineCore=vTermine;
+vTermine=function(){
+  let h=vTermineCore();
+  const red=S.book.red||(S.book.red=[]);
+  const s3=`<span class="label">${t('step3')}</span>`;
+  h=h.replace(s3,urgBlock(red)+s3);
+  h=h.replace('<div class="grid split">',notesCard()+'<div class="grid split">');
+  if(red.length) h=h.replace('id="bookbtn"','id="bookbtn" disabled');
+  return h;
+};
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('button'); if(b && b.id==='bookbtn' && (S.book.red||[]).length){ e.stopImmediatePropagation(); e.preventDefault(); toast(t('urgBlocked')); } },true);
+const vHomeCore=vHome;
+vHome=function(){ return vHomeCore().replace('<div class="grid g2">',notesCard()+'<div class="grid g2">'); };
+const renderNavCore=renderNav;
+renderNav=function(){
+  renderNavCore();
+  if(S.role==='owner'){ const n=S.notes.filter(x=>!x.done).length, b=document.querySelector('#nav [data-view="termine"]'); if(n&&b&&!b.querySelector('.badge')) b.insertAdjacentHTML('beforeend',`<span class="badge">${n}</span>`); }
+};
+
+/* ----- Aktionen ----- */
+const vetActionCore2=vetAction;
+vetAction=function(a,d){
+  const f=F(), ap=d.id?findAp(d.id):null;
+  switch(a){
+    case 'bCancel': if(!ap) return true; S.cancelling=ap.id; S.moving=null; f.cReason='acSick'; f.cNote=''; f.cOffer=true; render(); return true;
+    case 'bCancelYes': {
+      if(!ap) return true;
+      const reason=f.cReason||'acSick', note=(f.cNote||'').trim(), prev=ap.status;
+      const offer=f.cOffer===false?[]:altSlots(ap).map(([i,tm])=>({d:addDays(i),t:tm}));
+      ap.status='cancelled'; ap.cancel={by:'practice',reason,note,at:new Date(),offer}; S.cancelling=null;
+      let nn=null;
+      if(ap.owner==='me'){ nn={id:'n'+Date.now(),kind:'cancel',ap:ap.id,pet:ap.pet,d:ap.d,t:ap.t,grund:ap.grund,art:ap.art,reason,note,offer,done:false}; S.notes.unshift(nn); }
+      S.undo=()=>{ ap.status=prev; delete ap.cancel; if(nn) S.notes=S.notes.filter(x=>x!==nn); };
+      render(); toastUndo(t('toastCancelledMsg',{who:apOwner(ap)})); return true; }
+    case 'bMoveTo': {
+      if(!ap) return true;
+      vetActionCore2(a,d);
+      if(ap.owner==='me') S.notes.unshift({id:'n'+Date.now(),kind:'move',ap:ap.id,pet:ap.pet,d:ap.d,t:ap.t,done:false});
+      render(); return true; }
+    case 'bOut': if(!ap) return true; ap.out=d.v; ap.outBy=actor(); S.undo=()=>{ delete ap.out; delete ap.outBy; }; render(); toastUndo(t('toastOut')); return true;
+    case 'rfToggle': { const r=S.book.red||(S.book.red=[]), i=r.indexOf(d.v); i<0?r.push(d.v):r.splice(i,1); render(); return true; }
+    case 'nRebook': {
+      const n=S.notes.find(x=>x.id===d.nid); if(!n) return true; const o=n.offer[+d.i]; if(!o) return true;
+      S.appts.push({id:'b'+Date.now(),owner:'me',status:'confirmed',src:'online',pet:n.pet,p:'p1',d:o.d,t:o.t,grund:n.grund,art:n.art});
+      n.done=true; celebrate(t('nRebooked',{d:`${wd(o.d)} ${fmt(o.d)}`,t:o.t})); render(); return true; }
+    case 'nDismiss': { const n=S.notes.find(x=>x.id===d.nid); if(n) n.done=true; render(); return true; }
+    case 'oCancel': S.ocancel=d.id; render(); return true;
+    case 'oCancelNo': S.ocancel=null; render(); return true;
+    case 'oCancelYes': if(ap){ ap.status='cancelled'; ap.cancel={by:'owner',at:new Date()}; } S.ocancel=null; toast(t('toastOwnCancelled')); render(); return true;
+  }
+  return vetActionCore2(a,d);
+};
+
+
+/* ---------- Kalender: Tages-, Wochen- und Monatsansicht ---------- */
+const STR8={
+de:{vDay:"Tag",vWeek:"Woche",vMonth:"Monat",vToday:"Heute",vPrev:"Zurück",vNext:"Weiter",vKW:"KW {n}",vFree:"frei",vNoApp:"Keine Termine",vCnt:"{n} Termine",vViews:"Ansicht"},
+en:{vDay:"Day",vWeek:"Week",vMonth:"Month",vToday:"Today",vPrev:"Previous",vNext:"Next",vKW:"Wk {n}",vFree:"free",vNoApp:"No appointments",vCnt:"{n} appointments",vViews:"View"},
+fr:{vDay:"Jour",vWeek:"Semaine",vMonth:"Mois",vToday:"Aujourd’hui",vPrev:"Précédent",vNext:"Suivant",vKW:"Sem. {n}",vFree:"libre",vNoApp:"Aucun rendez-vous",vCnt:"{n} rendez-vous",vViews:"Vue"},
+ar:{vDay:"اليوم",vWeek:"الأسبوع",vMonth:"الشهر",vToday:"اليوم الحالي",vPrev:"السابق",vNext:"التالي",vKW:"الأسبوع {n}",vFree:"متاح",vNoApp:"لا مواعيد",vCnt:"{n} مواعيد",vViews:"العرض"},
+nl:{vDay:"Dag",vWeek:"Week",vMonth:"Maand",vToday:"Vandaag",vPrev:"Vorige",vNext:"Volgende",vKW:"Wk {n}",vFree:"vrij",vNoApp:"Geen afspraken",vCnt:"{n} afspraken",vViews:"Weergave"},
+es:{vDay:"Día",vWeek:"Semana",vMonth:"Mes",vToday:"Hoy",vPrev:"Anterior",vNext:"Siguiente",vKW:"Sem. {n}",vFree:"libre",vNoApp:"Sin citas",vCnt:"{n} citas",vViews:"Vista"}
+};
+for (const l in STR8) Object.assign(STR[l], STR8[l]);
+S.cal={v:'week',date:new Date(TODAY)};
+const isoWeek=d=>{ const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); const dn=x.getUTCDay()||7; x.setUTCDate(x.getUTCDate()+4-dn); const y0=new Date(Date.UTC(x.getUTCFullYear(),0,1)); return Math.ceil(((x-y0)/864e5+1)/7); };
+const mondayOf=d=>{ const x=new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; };
+const plusDays=(d,n)=>{ const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+const appsOn=d=>practiceAppts().filter(a=>a.status!=='cancelled'&&sameDay(a.d,d)).sort((a,b)=>a.t<b.t?-1:1);
+const dayState=d=>{ const h=S.hours[d.getDay()], blk=S.blocks.find(b=>sameDay(b.d,d)); return {h,blk,off:!h.open||!!blk}; };
+const dayStatusTxt=d=>{ const {h,blk}=dayState(d); return blk?t(blk.reason):!h.open?t('closed'):`${h.from}–${h.to}`; };
+const apLine=a=>`<div class="ap ${a.status}${a.out==='noshow'?' ns':''}${clashOf(a).length?' clash':''}"><span class="mono">${a.t}</span><b>${esc(apPet(a))}</b><small>${esc(t(a.grund))}${a.art==='Video'?' · '+t('videoShort'):''}${a.status==='pending'?' · '+t('st_pending'):''}${a.out?' · '+t(a.out==='show'?'pillShow':'pillNo'):''}${a.newCust?' · '+t('newCust'):''}${clashOf(a).length?' · '+t('clashShort'):''}</small></div>`;
+
+function calTitle(){
+  const c=S.cal, o=L();
+  if(c.v==='day') return c.date.toLocaleDateString(o,{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  if(c.v==='month') return c.date.toLocaleDateString(o,{month:'long',year:'numeric'});
+  const m=mondayOf(c.date), e=plusDays(m,6);
+  return `${t('vKW',{n:isoWeek(m)})} · ${dm(m)} – ${dm(e)}`;
+}
+function calBody(){
+  const c=S.cal;
+  if(c.v==='day'){
+    const d=c.date, {off}=dayState(d), aps=appsOn(d);
+    const {h}=dayState(d);
+    const slots=off?[]:ALL_SLOTS.filter(x=>x>=h.from&&x<h.to);
+    const rows=slots.map(sl=>{ const a=aps.filter(x=>x.t===sl); return `<div class="dslot"><span class="mono muted">${sl}</span><div class="grow">${a.length?a.map(apLine).join(''):`<span class="muted">${t('vFree')}</span>`}</div></div>`; }).join('');
+    const stray=aps.filter(a=>!slots.includes(a.t)).map(apLine).join('');
+    return `<p class="muted" style="margin:0 0 6px">${esc(dayStatusTxt(d))} · ${t('vCnt',{n:aps.length})}</p>${rows||`<p class="empty">${off?esc(dayStatusTxt(d)):t('vNoApp')}</p>`}${stray}`;
+  }
+  if(c.v==='month'){
+    const first=new Date(c.date.getFullYear(),c.date.getMonth(),1), start=(first.getDay()+6)%7, n=new Date(c.date.getFullYear(),c.date.getMonth()+1,0).getDate();
+    const wds=Array.from({length:7},(_,i)=>`<span class="mh">${wd(plusDays(mondayOf(TODAY),i))}</span>`).join('');
+    const cells=[...Array(start).fill('<span></span>'),...Array.from({length:n},(_,i)=>{
+      const d=new Date(first.getFullYear(),first.getMonth(),i+1), aps=appsOn(d), {off}=dayState(d), pend=aps.filter(a=>a.status==='pending').length;
+      return `<button class="mcell${off?' off':''}${sameDay(d,TODAY)?' today':''}" data-act="calDay" data-d="${isoDate(d)}" aria-label="${esc(d.toLocaleDateString(L(),{weekday:'long',day:'numeric',month:'long'}))}: ${esc(aps.length?t('vCnt',{n:aps.length}):t('vNoApp'))}"><span class="n">${i+1}</span>${aps.length?`<span class="pill ${pend?'warn':'info'}">${aps.length}</span>`:''}</button>`; })];
+    return `<div class="month">${wds}${cells.join('')}</div>`;
+  }
+  const m=mondayOf(c.date);
+  const cols=Array.from({length:7},(_,i)=>{ const d=plusDays(m,i), {off}=dayState(d), aps=appsOn(d);
+    return `<div class="daycol${off?' off':''}"><button class="dh dlink" data-act="calDay" data-d="${isoDate(d)}"><b>${sameDay(d,TODAY)?t('todayCap'):wd(d)}</b><span class="mono muted">${dm(d)}</span></button><span class="muted mono">${esc(dayStatusTxt(d))}</span>${aps.map(apLine).join('')}</div>`; }).join('');
+  return `<div class="week-scroll"><div class="week">${cols}</div></div>`;
+}
+function calCard(){
+  const c=S.cal;
+  const seg=['day','week','month'].map(v=>`<button class="chip" data-act="calView" data-v="${v}" aria-pressed="${c.v===v}">${t({day:'vDay',week:'vWeek',month:'vMonth'}[v])}</button>`).join('');
+  return `<div class="card"><div class="caltools"><div class="chips" role="group" aria-label="${esc(t('vViews'))}">${seg}</div><div class="calnav"><button class="btn ghost" data-act="calNav" data-dir="-1" aria-label="${esc(t('vPrev'))}">‹</button><button class="btn ghost" data-act="calToday">${t('vToday')}</button><button class="btn ghost" data-act="calNav" data-dir="1" aria-label="${esc(t('vNext'))}">›</button></div></div>
+  <h2 class="caltitle" aria-live="polite">${esc(calTitle())}</h2>${calBody()}<p class="note">${t('kalNote')}</p></div>`;
+}
+const vKalenderCore2=vKalender;
+vKalender=function(){
+  const h=vKalenderCore2();
+  const a=h.indexOf(`<div class="card"><h2>${t('next7')}</h2>`), b=h.indexOf('<div class="grid g2" style="margin-top:16px">');
+  if(a<0||b<0) return h;
+  return h.slice(0,a)+calCard()+h.slice(b);
+};
+const vetActionCore3=vetAction;
+vetAction=function(a,d){
+  const c=S.cal;
+  switch(a){
+    case 'calView': c.v=d.v; render(); return true;
+    case 'calToday': c.date=new Date(TODAY); render(); return true;
+    case 'calNav': { const k=+d.dir; if(c.v==='day') c.date=plusDays(c.date,k); else if(c.v==='week') c.date=plusDays(c.date,7*k); else c.date=new Date(c.date.getFullYear(),c.date.getMonth()+k,1); render(); return true; }
+    case 'calDay': c.date=new Date(d.d+'T00:00'); c.v='day'; render(); window.scrollTo(0,0); return true;
+  }
+  return vetActionCore3(a,d);
+};
+
+
+/* ---------- Neukunden, Überschneidungen, Telefontermine, Warteliste ---------- */
+const STR9={
+de:{newCust:"Neukunde",newVisit:"Erster Besuch in dieser Praxis",clashShort:"Überschneidung",clashWith:"Überschneidung mit {who} um {t}",
+mBtn:"Termin telefonisch eintragen",mTitle:"Termin eintragen",mOwner:"Name der Halter:in",mPet:"Name des Tieres",mReason:"Grund",mDate:"Datum",mTime:"Uhrzeit",mNewL:"Neukunde (erster Besuch)",mSave:"Eintragen",mClose:"Schließen",mForce:"Trotzdem eintragen",mOther:"Andere Zeit wählen",
+mWarn:"Zu dieser Zeit gibt es schon einen Termin:",mClosedW:"An diesem Tag ist die Praxis geschlossen oder gesperrt.",mToast:"Termin eingetragen: {who}, {d}, {t}",
+wTitle:"Warteliste",wSubFull:"Alle Zeiten an diesem Tag sind vergeben. Wir melden uns, sobald etwas frei wird.",wSubFree:"Nichts Passendes dabei? Wir melden uns, sobald an diesem Tag ein Termin frei wird.",wJoin:"Auf die Warteliste setzen",wOn:"Sie stehen für diesen Tag auf der Warteliste.",
+wList:"Ihre Warteliste",wRemove:"Entfernen",wToast:"Auf der Warteliste. Sie werden benachrichtigt, sobald etwas frei wird.",wEmpty:"Niemand wartet.",wWaiting:"wartet",wNotified:"benachrichtigt",
+wNote:"Wird ein Termin abgesagt, geht der Platz automatisch an die erste passende Person auf der Liste.",wFree:"Ein Platz ist frei geworden: {d} um {t} ({pet}).",wTake:"Termin übernehmen",wDecline:"Nein, danke",wTaken:"Termin übernommen: {d}, {t}",wGone:"Leider ist der Platz inzwischen vergeben.",
+wNotifiedToast:"Warteliste: {who} wurde benachrichtigt.",wDayWish:"Wunsch: {d}",wAnyDay:"Wunsch: beliebiger Tag"},
+en:{newCust:"New client",newVisit:"First visit to this practice",clashShort:"Overlap",clashWith:"Overlaps with {who} at {t}",
+mBtn:"Add appointment by phone",mTitle:"Add appointment",mOwner:"Owner’s name",mPet:"Pet’s name",mReason:"Reason",mDate:"Date",mTime:"Time",mNewL:"New client (first visit)",mSave:"Add",mClose:"Close",mForce:"Add anyway",mOther:"Choose another time",
+mWarn:"There is already an appointment at this time:",mClosedW:"The practice is closed or blocked on this day.",mToast:"Appointment added: {who}, {d}, {t}",
+wTitle:"Waiting list",wSubFull:"All times on this day are taken. We will let you know as soon as something frees up.",wSubFree:"Nothing suitable? We will let you know as soon as a slot frees up on this day.",wJoin:"Join the waiting list",wOn:"You are on the waiting list for this day.",
+wList:"Your waiting list",wRemove:"Remove",wToast:"On the waiting list. You will be notified as soon as something frees up.",wEmpty:"Nobody is waiting.",wWaiting:"waiting",wNotified:"notified",
+wNote:"When an appointment is cancelled, the slot goes automatically to the first matching person on the list.",wFree:"A slot has opened up: {d} at {t} ({pet}).",wTake:"Take this slot",wDecline:"No, thanks",wTaken:"Appointment taken: {d}, {t}",wGone:"Sorry, the slot has been taken in the meantime.",
+wNotifiedToast:"Waiting list: {who} has been notified.",wDayWish:"Wish: {d}",wAnyDay:"Wish: any day"},
+fr:{newCust:"Nouveau client",newVisit:"Première visite dans ce cabinet",clashShort:"Chevauchement",clashWith:"Chevauche {who} à {t}",
+mBtn:"Ajouter un rendez-vous par téléphone",mTitle:"Ajouter un rendez-vous",mOwner:"Nom du propriétaire",mPet:"Nom de l’animal",mReason:"Motif",mDate:"Date",mTime:"Heure",mNewL:"Nouveau client (première visite)",mSave:"Ajouter",mClose:"Fermer",mForce:"Ajouter quand même",mOther:"Choisir une autre heure",
+mWarn:"Il y a déjà un rendez-vous à cette heure :",mClosedW:"Le cabinet est fermé ou bloqué ce jour-là.",mToast:"Rendez-vous ajouté : {who}, {d}, {t}",
+wTitle:"Liste d’attente",wSubFull:"Tous les créneaux de ce jour sont pris. Nous vous prévenons dès qu’une place se libère.",wSubFree:"Rien de convenable ? Nous vous prévenons dès qu’un créneau se libère ce jour-là.",wJoin:"Rejoindre la liste d’attente",wOn:"Vous êtes sur la liste d’attente pour ce jour.",
+wList:"Votre liste d’attente",wRemove:"Retirer",wToast:"Sur la liste d’attente. Vous serez prévenu dès qu’une place se libère.",wEmpty:"Personne n’attend.",wWaiting:"en attente",wNotified:"prévenu",
+wNote:"Si un rendez-vous est annulé, la place va automatiquement à la première personne concernée de la liste.",wFree:"Une place s’est libérée : {d} à {t} ({pet}).",wTake:"Prendre ce créneau",wDecline:"Non merci",wTaken:"Rendez-vous pris : {d}, {t}",wGone:"Désolé, le créneau a été pris entre-temps.",
+wNotifiedToast:"Liste d’attente : {who} a été prévenu.",wDayWish:"Souhait : {d}",wAnyDay:"Souhait : n’importe quel jour"},
+ar:{newCust:"عميل جديد",newVisit:"أول زيارة لهذه العيادة",clashShort:"تداخل",clashWith:"يتداخل مع {who} الساعة {t}",
+mBtn:"إضافة موعد هاتفي",mTitle:"إضافة موعد",mOwner:"اسم المالك",mPet:"اسم الحيوان",mReason:"السبب",mDate:"التاريخ",mTime:"الوقت",mNewL:"عميل جديد (أول زيارة)",mSave:"إضافة",mClose:"إغلاق",mForce:"أضف على أي حال",mOther:"اختيار وقت آخر",
+mWarn:"يوجد موعد في هذا الوقت بالفعل:",mClosedW:"العيادة مغلقة أو غير متاحة في هذا اليوم.",mToast:"تمت إضافة الموعد: {who}، {d}، {t}",
+wTitle:"قائمة الانتظار",wSubFull:"جميع الأوقات في هذا اليوم محجوزة. سنبلغكم فور توفر موعد.",wSubFree:"لا يوجد ما يناسب؟ سنبلغكم فور توفر موعد في هذا اليوم.",wJoin:"الانضمام إلى قائمة الانتظار",wOn:"أنتم على قائمة الانتظار لهذا اليوم.",
+wList:"قائمة انتظاركم",wRemove:"إزالة",wToast:"تمت الإضافة إلى قائمة الانتظار. سنبلغكم فور توفر موعد.",wEmpty:"لا أحد ينتظر.",wWaiting:"في الانتظار",wNotified:"تم الإبلاغ",
+wNote:"عند إلغاء موعد، يذهب الموعد تلقائيًا إلى أول شخص مناسب في القائمة.",wFree:"توفر موعد: {d} الساعة {t} ({pet}).",wTake:"قبول الموعد",wDecline:"لا، شكرًا",wTaken:"تم حجز الموعد: {d}، {t}",wGone:"عذرًا، تم حجز الموعد في الأثناء.",
+wNotifiedToast:"قائمة الانتظار: تم إبلاغ {who}.",wDayWish:"الرغبة: {d}",wAnyDay:"الرغبة: أي يوم"},
+nl:{newCust:"Nieuwe klant",newVisit:"Eerste bezoek aan deze praktijk",clashShort:"Overlap",clashWith:"Overlapt met {who} om {t}",
+mBtn:"Afspraak telefonisch invoeren",mTitle:"Afspraak invoeren",mOwner:"Naam eigenaar",mPet:"Naam dier",mReason:"Reden",mDate:"Datum",mTime:"Tijd",mNewL:"Nieuwe klant (eerste bezoek)",mSave:"Invoeren",mClose:"Sluiten",mForce:"Toch invoeren",mOther:"Andere tijd kiezen",
+mWarn:"Er is op dit tijdstip al een afspraak:",mClosedW:"De praktijk is op deze dag gesloten of geblokkeerd.",mToast:"Afspraak ingevoerd: {who}, {d}, {t}",
+wTitle:"Wachtlijst",wSubFull:"Alle tijden op deze dag zijn bezet. We laten het weten zodra er iets vrijkomt.",wSubFree:"Niets passends? We laten het weten zodra er op deze dag iets vrijkomt.",wJoin:"Op de wachtlijst zetten",wOn:"U staat voor deze dag op de wachtlijst.",
+wList:"Uw wachtlijst",wRemove:"Verwijderen",wToast:"Op de wachtlijst. U hoort het zodra er iets vrijkomt.",wEmpty:"Niemand wacht.",wWaiting:"wacht",wNotified:"geïnformeerd",
+wNote:"Wordt een afspraak geannuleerd, dan gaat de plek automatisch naar de eerste passende persoon op de lijst.",wFree:"Er is een plek vrijgekomen: {d} om {t} ({pet}).",wTake:"Afspraak overnemen",wDecline:"Nee, bedankt",wTaken:"Afspraak overgenomen: {d}, {t}",wGone:"Helaas, de plek is intussen vergeven.",
+wNotifiedToast:"Wachtlijst: {who} is geïnformeerd.",wDayWish:"Wens: {d}",wAnyDay:"Wens: elke dag"},
+es:{newCust:"Cliente nuevo",newVisit:"Primera visita a esta clínica",clashShort:"Solapamiento",clashWith:"Se solapa con {who} a las {t}",
+mBtn:"Añadir cita por teléfono",mTitle:"Añadir cita",mOwner:"Nombre del propietario",mPet:"Nombre del animal",mReason:"Motivo",mDate:"Fecha",mTime:"Hora",mNewL:"Cliente nuevo (primera visita)",mSave:"Añadir",mClose:"Cerrar",mForce:"Añadir de todos modos",mOther:"Elegir otra hora",
+mWarn:"Ya hay una cita a esa hora:",mClosedW:"La clínica está cerrada o bloqueada ese día.",mToast:"Cita añadida: {who}, {d}, {t}",
+wTitle:"Lista de espera",wSubFull:"Todas las horas de ese día están ocupadas. Le avisamos en cuanto quede un hueco.",wSubFree:"¿Nada adecuado? Le avisamos en cuanto quede un hueco ese día.",wJoin:"Apuntarse a la lista de espera",wOn:"Está en la lista de espera para este día.",
+wList:"Su lista de espera",wRemove:"Quitar",wToast:"En la lista de espera. Le avisaremos en cuanto quede un hueco.",wEmpty:"Nadie espera.",wWaiting:"en espera",wNotified:"avisado",
+wNote:"Si se cancela una cita, el hueco pasa automáticamente a la primera persona adecuada de la lista.",wFree:"Ha quedado un hueco: {d} a las {t} ({pet}).",wTake:"Quedarme con la cita",wDecline:"No, gracias",wTaken:"Cita aceptada: {d}, {t}",wGone:"Lo sentimos, el hueco ya se ha ocupado.",
+wNotifiedToast:"Lista de espera: {who} ha sido avisado.",wDayWish:"Deseo: {d}",wAnyDay:"Deseo: cualquier día"}
+};
+for (const l in STR9) Object.assign(STR[l], STR9[l]);
+
+/* Beispieldaten */
+Object.assign(S,{manual:false,mConf:null,wait:[]});
+S.book.newCust=false;
+(()=>{ const a1=S.appts.find(x=>x.id==='a1');
+  ['a5','a8'].forEach(id=>{ const a=S.appts.find(x=>x.id===id); if(a) a.newCust=true; });
+  S.appts.push(AP('a12',{owner:'Paula S.',petName:'Mimi',d:a1.d,t:'09:30',grund:'r1',src:'phone',newCust:true}));
+  S.wait.push({id:'w1',owner:'Tim R.',petName:'Bello',d:a1.d,grund:'r1',art:'Praxis',p:'p1',status:'waiting'},
+              {id:'w2',owner:'Max W.',petName:'Rocky',d:null,grund:'r3',art:'Praxis',p:'p1',status:'waiting'}); })();
+
+/* Überschneidungen */
+const durOf=a=>{ const x=S.types.find(y=>y.k===a.grund); return x?x.min:20; };
+const toMin=s=>{ const [h,m]=s.split(':').map(Number); return h*60+m; };
+const clashOf=a=>a.status==='cancelled'?[]:practiceAppts().filter(o=>o!==a&&o.status!=='cancelled'&&sameDay(o.d,a.d)&&toMin(o.t)<toMin(a.t)+durOf(a)&&toMin(a.t)<toMin(o.t)+durOf(o));
+const extraPills=(a,canc,done)=>(a.newCust&&!canc)?` <span class="pill info">${t('newCust')}</span>`:'';
+const clashLine=(a,canc,done)=>{ if(canc||done) return ''; const c=clashOf(a); return c.length?`<div class="clashline">${t('clashWith',{who:`${apPet(c[0])} (${apOwner(c[0])})`,t:c[0].t})}</div>`:''; };
+const waitWho=w=>w.owner==='me'?myName():w.owner;
+const waitPet=w=>w.owner==='me'?(S.pets[w.pet]?S.pets[w.pet].name:'—'):t(w.petName);
+const waitWish=w=>w.d?t('wDayWish',{d:`${wd(w.d)} ${dm(w.d)}`}):t('wAnyDay');
+function waitBody(n){ return `<p><b>${t('wFree',{d:`${wd(n.d)} ${dm(n.d)}`,t:n.t,pet:esc(S.pets[n.pet]?S.pets[n.pet].name:'—')})}</b></p><button class="btn" data-act="nTake" data-nid="${n.id}">${t('wTake')}</button>`; }
+function offerFreed(ap){
+  if(ap.p!=='p1') return null;
+  const ok=w=>w.p==='p1'&&w.status==='waiting';
+  const cand=S.wait.find(w=>ok(w)&&w.d&&sameDay(w.d,ap.d))||S.wait.find(w=>ok(w)&&!w.d);
+  if(!cand) return null;
+  cand.status='offered'; cand.slot={d:ap.d,t:ap.t};
+  let nn=null;
+  if(cand.owner==='me'){ nn={id:'n'+Date.now()+'w',kind:'wait',wid:cand.id,pet:cand.pet,d:ap.d,t:ap.t,grund:cand.grund,art:cand.art,done:false}; S.notes.unshift(nn); }
+  return {msg:t('wNotifiedToast',{who:waitWho(cand)}),undo:()=>{ cand.status='waiting'; delete cand.slot; if(nn) S.notes=S.notes.filter(x=>x!==nn); }};
+}
+
+/* Praxis: Telefontermin + Warteliste in den Buchungen */
+function manualBlock(){
+  if(!S.manual) return `<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn ghost" data-act="mOpen">${t('mBtn')}</button></div>`;
+  const c=S.mConf;
+  const warn=c?`<div class="alertbox" role="alert">${c.closed?`<b>${t('mClosedW')}</b>`:''}${c.list.length?`<b>${t('mWarn')}</b>${c.list.map(o=>`<span>${esc(apPet(o))} · ${esc(apOwner(o))} · <span class="mono">${o.t}</span></span>`).join('')}`:''}<div class="ebtns"><button class="btn crit" data-act="mForce">${t('mForce')}</button><button class="btn ghost" data-act="mOther">${t('mOther')}</button></div></div>`:'';
+  return `<div class="editbox" style="margin-bottom:12px"><h3 style="font-family:var(--f-display);font-size:1.05rem">${t('mTitle')}</h3>
+  <div class="cgrid">${fld('mOwner',t('mOwner'))}${fld('mPet',t('mPet'))}${sel('mReason',t('mReason'),S.types.map(x=>[x.k,t(x.k)]))}${fld('mDate',t('mDate'),'date')}${sel('mTime',t('mTime'),ALL_SLOTS.map(x=>[x,x]))}</div>
+  ${chk('mNew',t('mNewL'))}${warn}
+  <div class="ebtns"><button class="btn" data-act="mSave">${t('mSave')}</button><button class="btn ghost" data-act="mClose">${t('mClose')}</button></div></div>`;
+}
+function waitCardPractice(){
+  const rows=S.wait.filter(w=>w.p==='p1').map(w=>`<div class="row" style="flex-wrap:wrap"><div class="grow"><div style="font-weight:600">${esc(waitPet(w))} <span class="muted" style="font-weight:400">· ${esc(waitWho(w))}</span></div><div class="muted" style="font-size:.85rem">${esc(t(w.grund))} · ${esc(waitWish(w))}${w.slot?` · <span class="mono">${wd(w.slot.d)} ${dm(w.slot.d)} ${w.slot.t}</span>`:''}</div></div><span class="pill ${w.status==='offered'?'info':'warn'}">${t(w.status==='offered'?'wNotified':'wWaiting')}</span><button class="link" data-act="wRemove" data-id="${w.id}">${t('wRemove')}</button></div>`).join('');
+  return `<div class="card" style="margin-top:16px"><h2>${t('wTitle')} · <span class="mono">${S.wait.filter(w=>w.p==='p1').length}</span></h2><div class="list">${rows||`<p class="empty">${t('wEmpty')}</p>`}</div><p class="note">${t('wNote')}</p></div>`;
+}
+const vBuchungenCore2=vBuchungen;
+vBuchungen=function(){
+  let h=vBuchungenCore2();
+  h=h.replace('<div class="card"><div class="chips">','<div class="card">'+manualBlock()+'<div class="chips">');
+  return h+waitCardPractice();
+};
+/* Halter:in: Erstbesuch + Warteliste beim Buchen */
+const vTermineCore2=vTermine;
+vTermine=function(){
+  let h=vTermineCore2();
+  const b=S.book, s3=`<span class="label">${t('step3')}</span>`;
+  h=h.replace(s3,`<label class="row nvrow"><span class="toggle"><input type="checkbox" data-nc ${b.newCust?'checked':''}><span></span></span><span class="grow">${t('newVisit')}</span></label>`+s3);
+  const free=slotsFor(b.day).filter(s=>s.free).length, day=addDays(b.day);
+  const on=S.wait.some(w=>w.owner==='me'&&w.pet===b.pet&&w.p===b.p&&w.d&&sameDay(w.d,day));
+  const wb=`<div class="waitbox"><b>${t('wTitle')}</b><span class="muted">${t(free?'wSubFree':'wSubFull')}</span>${on?`<span class="pill ok">${t('wOn')}</span>`:`<button class="btn ghost" data-act="wJoin">${t('wJoin')} · ${wd(day)} ${dm(day)}</button>`}</div>`;
+  const anchor='\n    </div>\n    <div class="card" style="align-self:start';
+  h=h.includes(anchor)?h.replace(anchor,wb+anchor):h;
+  const mine=S.wait.filter(w=>w.owner==='me');
+  if(mine.length) h+=`<div class="card" style="margin-top:16px"><h2>${t('wList')}</h2><div class="list">${mine.map(w=>`<div class="row"><div class="grow"><div style="font-weight:600">${esc(waitPet(w))}</div><div class="muted" style="font-size:.85rem">${esc(t(w.grund))} · ${esc(waitWish(w))}</div></div><span class="pill ${w.status==='offered'?'info':'warn'}">${t(w.status==='offered'?'wNotified':'wWaiting')}</span><button class="link danger" data-act="wRemove" data-id="${w.id}">${t('wRemove')}</button></div>`).join('')}</div></div>`;
+  return h;
+};
+document.addEventListener('change',e=>{ const el=e.target; if(el.dataset && 'nc' in el.dataset){ S.book.newCust=el.checked; } });
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('button'); if(b&&b.id==='bookbtn'&&!b.disabled){ const n=S.appts.length; setTimeout(()=>{ if(S.appts.length>n){ const a=S.appts[S.appts.length-1]; if(a.owner==='me') a.newCust=!!S.book.newCust; } },0); } });
+
+/* Aktionen */
+const vetActionCore4=vetAction;
+vetAction=function(a,d){
+  const f=F();
+  switch(a){
+    case 'mOpen': S.manual=true; S.mConf=null; S.auth.errors={}; Object.assign(f,{mOwner:'',mPet:'',mDate:isoDate(TODAY),mReason:S.types[0].k,mTime:ALL_SLOTS[0],mNew:false}); render(); return true;
+    case 'mClose': S.manual=false; S.mConf=null; S.auth.errors={}; render(); return true;
+    case 'mOther': S.mConf=null; render(); return true;
+    case 'mSave': case 'mForce': {
+      if(!validate(['mOwner','mPet','mDate'])){ render(); return true; }
+      const dt=new Date(f.mDate+'T00:00'), tmp={p:'p1',status:'confirmed',d:dt,t:f.mTime,grund:f.mReason};
+      if(a==='mSave'){ const list=clashOf(tmp), closed=dayState(dt).off; if(list.length||closed){ S.mConf={list,closed}; render(); return true; } }
+      S.appts.push(AP('m'+Date.now(),{owner:f.mOwner.trim(),petName:f.mPet.trim(),d:dt,t:f.mTime,grund:f.mReason,src:'phone',newCust:!!f.mNew}));
+      S.manual=false; S.mConf=null; S.bfilter='all'; render(); toast(t('mToast',{who:f.mOwner.trim(),d:`${wd(dt)} ${fmt(dt)}`,t:f.mTime})); return true; }
+    case 'wJoin': { const b=S.book, day=addDays(b.day); if(!S.wait.some(w=>w.owner==='me'&&w.pet===b.pet&&w.p===b.p&&w.d&&sameDay(w.d,day))) S.wait.push({id:'w'+Date.now(),owner:'me',pet:b.pet,d:day,grund:b.grund,art:b.art,p:b.p,status:'waiting'}); render(); toast(t('wToast')); return true; }
+    case 'wRemove': S.wait=S.wait.filter(w=>w.id!==d.id); render(); return true;
+    case 'nTake': {
+      const n=S.notes.find(x=>x.id===d.nid); if(!n) return true; const w=S.wait.find(x=>x.id===n.wid);
+      const taken=S.appts.some(x=>x.p==='p1'&&x.status!=='cancelled'&&sameDay(x.d,n.d)&&x.t===n.t);
+      n.done=true;
+      if(taken){ if(w){ w.status='waiting'; delete w.slot; } render(); toast(t('wGone')); return true; }
+      S.appts.push({id:'b'+Date.now(),owner:'me',status:'confirmed',src:'online',pet:n.pet,p:'p1',d:n.d,t:n.t,grund:n.grund,art:n.art});
+      S.wait=S.wait.filter(x=>x.id!==n.wid); celebrate(t('wTaken',{d:`${wd(n.d)} ${fmt(n.d)}`,t:n.t})); render(); return true; }
+    case 'nDismiss': { const n=S.notes.find(x=>x.id===d.nid); if(n&&n.kind==='wait'){ const w=S.wait.find(x=>x.id===n.wid); if(w){ w.status='waiting'; delete w.slot; } } break; }
+    case 'bCancelYes': {
+      const ap=d.id?findAp(d.id):null, was=ap&&ap.status;
+      const r0=vetActionCore4(a,d);
+      if(ap&&was!=='cancelled'&&ap.status==='cancelled'){ const r=offerFreed(ap); if(r){ const u=S.undo; S.undo=()=>{ if(u) u(); r.undo(); }; render(); toastUndo(t('toastCancelledMsg',{who:apOwner(ap)})+' '+r.msg); } }
+      return r0; }
+    case 'oCancelYes': {
+      const ap=d.id?findAp(d.id):null;
+      const r0=vetActionCore4(a,d);
+      if(ap&&ap.status==='cancelled'){ const r=offerFreed(ap); if(r){ render(); toast(t('toastOwnCancelled')+' '+r.msg); } }
+      return r0; }
+  }
+  return vetActionCore4(a,d);
 };
 
 const VIEWS={vhome:vVetHome,vkalender:vKalender,vbuchungen:vBuchungen,vpatienten:vPatienten,verinnerung:vRecall,vauswertung:vAuswertung,profil:vProfil,petform:vPetForm,home:vHome,termine:vTermine,akte:vAkte,symptom:vSymptom,tele:vTele,erinnerung:vErinnerung,notfall:vNotfall,vhome:vVetHome,vanfragen:vVetAnfragen};
