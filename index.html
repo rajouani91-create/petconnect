@@ -2666,6 +2666,35 @@ vetAction=function(a,d){
   return vetActionDoc(a,d);
 };
 
+/* ---- Rolle bleibt nach Registrierung fest (Tierhalter ODER Praxis) ---- */
+S.demo=false;
+Object.assign(STR.de,{acctNone:"Zu dieser E-Mail gibt es noch kein Konto. Bitte zuerst registrieren."});
+Object.assign(STR.en,{acctNone:"There is no account for this email yet. Please register first."});
+const accLoad=()=>{ try{ return JSON.parse(localStorage.getItem('pc_accounts')||'{}'); }catch(e){ return S._acc||{}; } };
+const accSave=m=>{ S._acc=m; try{ localStorage.setItem('pc_accounts',JSON.stringify(m)); }catch(e){} };
+const authActionRole=authAction;
+authAction=function(a){
+  const f=F();
+  if(a==='demo'){ S.demo=true; return authActionRole(a); }
+  if(a==='login'){
+    if(!validate(['email','password'])) return render();
+    const acc=accLoad()[(f.email||'').trim().toLowerCase()];
+    if(!acc){ toast(t('acctNone')); return; }
+    S.demo=false; S.role=acc.role; S.auth.email=f.email;
+    if(acc.role==='vet'){ if(acc.practiceName) S.practiceName=acc.practiceName; } else if(acc.name){ S.auth.name=acc.name; }
+    return enterApp();
+  }
+  if(a==='register'){
+    const r=S.auth.regRole, res=authActionRole(a);
+    if(S.auth.stage==='onboard'){ S.demo=false; const m=accLoad(); m[(S.auth.email||'').trim().toLowerCase()]={role:r,name:S.auth.name,practiceName:S.practiceName}; accSave(m); }
+    return res;
+  }
+  return authActionRole(a);
+};
+const renderRoleLock=render;
+render=function(){ renderRoleLock.apply(this,arguments);
+  try{ const lock=S.auth.stage==='in'&&!S.demo; document.querySelectorAll('[data-role]').forEach(b=>{ if(b.parentElement) b.parentElement.style.display=lock?'none':''; }); }catch(e){} };
+
 /* ---- Eingaben ---- */
 document.addEventListener('change',e=>{
   const el=e.target; if(!el||!el.dataset) return;
