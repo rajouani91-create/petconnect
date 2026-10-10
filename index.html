@@ -245,6 +245,12 @@ body.dnd-on{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .svcsel{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
 .svcqty{display:inline-flex;align-items:center;gap:6px}.svcqty .btn{padding:4px 10px}
 .blfree summary{cursor:pointer;font-weight:600;padding:6px 0}.blfree[open] summary{margin-bottom:8px}
+.apeback{position:fixed;inset:0;z-index:400;background:rgba(20,25,22,.45);display:flex;align-items:flex-end;justify-content:center}
+.apedlg{background:var(--surface);color:var(--fg);width:100%;max-width:520px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 30px rgba(0,0,0,.25);outline:none}
+.apedlg .ebtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+@media(min-width:700px){.apeback{align-items:center}.apedlg{border-radius:16px}}
+.ap[data-apid]{cursor:pointer}
+.ap[data-drag="1"]{cursor:grab}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:8px;font-weight:500;z-index:50;max-width:calc(100% - 32px)}
 .empty{color:var(--muted);font-size:.9rem;padding:8px 0}
 
@@ -2693,6 +2699,85 @@ document.addEventListener('change',e=>{
 /* ---- Katalog-Einstellungen, Buchungen ---- */
 const blCatTabTreat=blCatTab;
 blCatTab=function(){ return blCatTabTreat()+`<div class="card"><h2>${t('cfgTitle')}</h2><label class="check"><input type="checkbox" data-cfg="free" ${S.billCfg.allowFree?'checked':''}><span><b>${t('cfgFree')}</b><br><span class="muted">${t('cfgFreeSub')}</span></span></label></div>`; };
+
+/* ===== Termin antippen und bearbeiten (Praxis-Kalender) ===== */
+const STR12={
+de:{apeTitle:'Termin bearbeiten',apeDate:'Datum',apeTime:'Uhrzeit',apeReason:'Grund',apeSave:'Änderungen speichern',apeConfirm:'Termin bestätigen',apeCancel:'Termin stornieren',apeCancelYes:'Ja, stornieren',apeBack:'Zurück',apeClose:'Schließen',apeRec:'Zur Patientenakte',apeDoc:'Behandlung dokumentieren',apeSaved:'Termin aktualisiert.',apeNoChg:'Keine Änderung vorgenommen.',apeDone:'Dieser Termin ist abgeschlossen und kann nicht mehr geändert werden.',apeCanc:'Dieser Termin wurde storniert.',apeHint:'Termin antippen zum Bearbeiten, gedrückt halten zum Verschieben.',apeBadDate:'Bitte ein gültiges Datum wählen.',apeCancelAsk:'Termin wirklich stornieren? Die Halter:in wird informiert.',apeWhen:'Termin am {d} um {t}'},
+en:{apeTitle:'Edit appointment',apeDate:'Date',apeTime:'Time',apeReason:'Reason',apeSave:'Save changes',apeConfirm:'Confirm appointment',apeCancel:'Cancel appointment',apeCancelYes:'Yes, cancel',apeBack:'Back',apeClose:'Close',apeRec:'Open patient record',apeDoc:'Document treatment',apeSaved:'Appointment updated.',apeNoChg:'No changes made.',apeDone:'This appointment is completed and can no longer be changed.',apeCanc:'This appointment was cancelled.',apeHint:'Tap an appointment to edit it, press and hold to move it.',apeBadDate:'Please choose a valid date.',apeCancelAsk:'Really cancel this appointment? The owner will be informed.',apeWhen:'Appointment on {d} at {t}'}
+};
+for(const l in STR12) Object.assign(STR[l]||(STR[l]={}),STR12[l]);
+const apeOpen=id=>{ const a=findAp(id); if(!a||a.p!=='p1') return; const f=F(); S.apE={id:a.id,cancel:false,err:''}; Object.assign(f,{eDate:isoDate(a.d),eTime:a.t,eReason:a.grund,cReason:'acSick',cNote:'',cOffer:true}); render(); };
+const apeClose=()=>{ S.apE=null; render(); };
+function apeHtml(){
+  const E=S.apE, a=E&&findAp(E.id); if(!a) return '';
+  const canc=a.status==='cancelled', done=!!a.out, ed=!canc&&!done, f=F();
+  const pid=apPid(a);
+  const slots=[...new Set([...ALL_SLOTS,a.t])].sort();
+  let body;
+  if(E.cancel){
+    body=`<p class="alertbox" role="alert"><b>${t('apeCancelAsk')}</b></p><div class="cgrid">${sel('cReason',t('cReasonL'),CREASONS.map(r=>[r,t(r)]))}${fld('cNote',t('cNote'))}</div>${chk('cOffer',t('cOffer'))}<div class="ebtns"><button class="btn crit" data-act="apeCancelYes">${t('apeCancelYes')}</button><button class="btn ghost" data-act="apeCancelNo">${t('apeBack')}</button></div>`;
+  } else {
+    const msg=canc?t('apeCanc'):done?t('apeDone'):'';
+    body=`${msg?`<p class="note">${msg}</p>`:''}
+    ${ed?`<div class="cgrid">${fld('eDate',t('apeDate'),'date')}${sel('eTime',t('apeTime'),slots.map(x=>[x,x]))}${sel('eReason',t('apeReason'),S.types.map(x=>[x.k,t(x.k)]))}</div>${E.err?`<div class="alertbox" role="alert">${esc(E.err)}</div>`:''}
+    <div class="ebtns"><button class="btn" data-act="apeSave">${t('apeSave')}</button>${a.status==='pending'?`<button class="btn" data-act="apeConfirm">${t('apeConfirm')}</button>`:''}<button class="btn ghost danger" data-act="apeCancel">${t('apeCancel')}</button></div>`:''}
+    <div class="ebtns">${pid&&!canc?`<button class="btn ghost" data-act="apeRec" data-pid="${pid}">${t('apeRec')}</button><button class="btn ghost" data-act="apDoc" data-id="${a.id}">${t('apeDoc')}</button>`:''}<button class="btn ghost" data-act="apeClose">${t('apeClose')}</button></div>`;
+  }
+  return `<div class="apeback" data-apeback><div class="apedlg" role="dialog" aria-modal="true" aria-label="${t('apeTitle')}" tabindex="-1"><h3 style="font-family:var(--f-display);font-size:1.15rem">${t('apeTitle')}</h3><p class="muted" style="margin:2px 0 12px"><b>${esc(apPet(a))}</b> · ${esc(apOwner(a))} · <span class="pill ${a.status==='pending'?'warn':a.status==='cancelled'?'crit':'ok'}">${t('st_'+a.status)}</span></p>${body}</div></div>`;
+}
+function apeRender(){
+  let el=document.getElementById('apmodal');
+  if(!S.apE||S.role!=='vet'||S.auth.stage!=='in'){ if(el) el.remove(); return; }
+  const had=!!el, y=had?el.querySelector('.apedlg').scrollTop:0;
+  if(!el){ el=document.createElement('div'); el.id='apmodal'; document.body.appendChild(el); }
+  el.innerHTML=apeHtml();
+  const dlg=el.querySelector('.apedlg'); if(dlg){ dlg.scrollTop=y; if(!had) dlg.focus(); }
+}
+const renderCore12=render;
+render=function(){ renderCore12.apply(this,arguments); apeRender(); };
+const vetActionCore12=vetAction;
+vetAction=function(a,d){
+  const f=F(), E=S.apE, ap=E?findAp(E.id):null;
+  switch(a){
+    case 'apeClose': apeClose(); return true;
+    case 'apeCancel': if(E){ E.cancel=true; render(); } return true;
+    case 'apeCancelNo': if(E){ E.cancel=false; render(); } return true;
+    case 'apeRec': { S.apE=null; vetAction('openPat',{pid:d.pid}); S.view='vpatienten'; render(); window.scrollTo(0,0); return true; }
+    case 'apDoc': S.apE=null; return vetActionCore12(a,d);
+    case 'apeConfirm': if(!ap) return true; S.apE=null; return vetAction('bConfirm',{id:ap.id});
+    case 'apeCancelYes': if(!ap) return true; { const id=ap.id; S.apE=null; return vetAction('bCancelYes',{id}); }
+    case 'apeSave': {
+      if(!ap) return true;
+      const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(f.eDate||''); if(!m){ E.err=t('apeBadDate'); render(); return true; }
+      const day=new Date(+m[1],+m[2]-1,+m[3]); day.setHours(0,0,0,0);
+      const tm=f.eTime||ap.t, reason=f.eReason||ap.grund;
+      const moved=!(sameDay(day,ap.d)&&tm===ap.t), rChg=reason!==ap.grund;
+      if(!moved&&!rChg){ S.apE=null; render(); toast(t('apeNoChg')); return true; }
+      const prevReason=ap.grund;
+      if(moved){
+        const r=dndFind(ap,day,tm);
+        if(r.err){ E.err=t(r.err,{who:r.who||''}); render(); return true; }
+        S.apE=null; if(rChg) ap.grund=reason;
+        dndMove(ap,day,r.t);
+        if(rChg){ const u=S.undo; S.undo=()=>{ ap.grund=prevReason; if(u) u(); }; }
+        return true;
+      }
+      ap.grund=reason; S.apE=null; S.undo=()=>{ ap.grund=prevReason; };
+      render(); toastUndo(t('apeSaved')); return true; }
+  }
+  return vetActionCore12(a,d);
+};
+/* Antippen im Kalender öffnet das Bearbeiten-Fenster */
+document.addEventListener('click',e=>{
+  if(S.role!=='vet'||S.auth.stage!=='in') return;
+  if(e.target.closest&&e.target.closest('#apmodal')){ const bk=e.target.closest('[data-apeback]'); if(bk&&e.target===bk) apeClose(); return; }
+  const el=e.target.closest&&e.target.closest('.ap[data-apid]'); if(!el||e.target.closest('button,a,input,select')) return;
+  apeOpen(el.dataset.apid);
+});
+document.addEventListener('keydown',e=>{
+  if(S.apE&&e.key==='Escape'){ apeClose(); return; }
+  if((e.key==='Enter'||e.key===' ')&&S.role==='vet'&&!S.apE){ const el=e.target.closest&&e.target.closest('.ap[data-apid]'); if(el&&e.target===el){ e.preventDefault(); apeOpen(el.dataset.apid); } }
+});
 
 const VIEWS={vabrechnung:vAbrechnung,rechnungen:vRechnungen,vhome:vVetHome,vkalender:vKalender,vbuchungen:vBuchungen,vpatienten:vPatienten,verinnerung:vRecall,vauswertung:vAuswertung,profil:vProfil,petform:vPetForm,home:vHome,termine:vTermine,akte:vAkte,symptom:vSymptom,tele:vTele,erinnerung:vErinnerung,notfall:vNotfall,vhome:vVetHome,vanfragen:vVetAnfragen};
 function render(){ applyLang(); const authed=S.auth.stage==='in'; document.querySelector('.app').classList.toggle('pre',!authed); if(!authed){ document.getElementById('main').innerHTML=vAuth(); return; } renderNav(); const ks=Object.keys(S.pets); if(ks.length){ if(!S.pets[S.book.pet]) S.book.pet=ks[0]; if(!S.pets[S.sym.pet]) S.sym.pet=ks[0]; if(!S.pets[S.pet]) S.pet=ks[0]; }
