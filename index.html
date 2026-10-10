@@ -216,6 +216,35 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .daycol.dropbad,.dslot.dropbad{outline:2px dashed var(--crit);outline-offset:-2px}
 body.dnd-on{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .dndhint{margin-top:8px}
+.btable,.invdoc table{width:100%;border-collapse:collapse}
+.btable th,.btable td,.invdoc th,.invdoc td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
+.btable th,.invdoc th{font-size:.76rem;color:var(--muted);font-weight:600}
+.btable .num,.invdoc .num{text-align:end;white-space:nowrap}
+.btable tr.dim,.blpick.dim{opacity:.55}
+.bltablewrap{overflow-x:auto}
+.qin{width:74px;max-width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font:inherit;text-align:end}
+.pin{width:96px;max-width:110px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font:inherit;text-align:end}
+.bltot,.invdoc .tot{margin-inline-start:auto;width:min(340px,100%)}
+.bltot div,.invdoc .tot div{display:flex;justify-content:space-between;gap:12px;padding:4px 0}
+.bltot .g,.invdoc .tot .g{font-weight:700;font-size:1.1rem;border-top:2px solid var(--fg);margin-top:4px;padding-top:8px}
+.invdoc .dh{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:6px}
+.invdoc h1{font-size:1.4rem;margin:0 0 6px}
+.invdoc .foot{margin-top:10px;font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.blpay{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.blrow{border-top:1px solid var(--line)}.blrow:first-child{border-top:0}
+.blroad{margin:0;padding-inline-start:18px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.card.hl{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.card.stat.crit b{color:var(--crit)}
+.blpicklist{display:flex;flex-direction:column;gap:2px;max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:6px}
+.blpick{padding:6px 8px;border-radius:8px}
+.bladd{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.bladd .field{min-width:220px;flex:1}
+.svclist{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column}
+.svcrow{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border:0;border-bottom:1px solid var(--line);background:transparent;text-align:start;cursor:pointer;font:inherit;color:inherit}
+.svcrow:last-child{border-bottom:0}.svcrow:hover:not(:disabled){background:var(--surface-2)}.svcrow:disabled{opacity:.5;cursor:not-allowed}
+.svcsel{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.svcqty{display:inline-flex;align-items:center;gap:6px}.svcqty .btn{padding:4px 10px}
+.blfree summary{cursor:pointer;font-weight:600;padding:6px 0}.blfree[open] summary{margin-bottom:8px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:8px;font-weight:500;z-index:50;max-width:calc(100% - 32px)}
 .empty{color:var(--muted);font-size:.9rem;padding:8px 0}
 
@@ -1749,7 +1778,7 @@ vBuchungen=function(){
     if(S.cancelling===a.id) extra=`<div class="subrow cform"><div class="cgrid">${sel('cReason',t('cReasonL'),CREASONS.map(r=>[r,t(r)]))}${fld('cNote',t('cNote'))}</div>${chk('cOffer',t('cOffer'))}<p class="note">${t('cInfoSend')}</p><div class="ebtns"><button class="btn crit" data-act="bCancelYes" data-id="${a.id}">${t('cSend')}</button><button class="btn ghost" data-act="bCancelNo">${t('back')}</button></div></div>`;
     const line=canc&&a.cancel&&a.cancel.reason?`<div class="muted" style="font-size:.8rem">${t('cInfoLine',{r:t(a.cancel.reason)})}${a.cancel.note?' · '+esc(a.cancel.note):''}</div>`
       :(a.status==='confirmed'&&!done&&!open&&remText())?`<div class="muted" style="font-size:.8rem">${esc(remText())}</div>`:'';
-    return `<div class="brow"><div class="row" style="flex-wrap:wrap">${dateBox(a.d)}<div class="grow"><div style="font-weight:600">${esc(apPet(a))} <span class="muted" style="font-weight:400">· ${esc(apOwner(a))}</span></div><div class="muted" style="font-size:.85rem"><span class="mono">${wd(a.d)} ${a.t}</span> · ${esc(t(a.grund))} · ${a.art==='Video'?t('videoShort'):t('onSite')} · ${t('src_'+a.src)}</div>${line}${clashLine(a,canc,done)}</div>${pill}${acute}<div class="acts">${acts}</div></div>${extra}</div>`;
+    return `<div class="brow"><div class="row" style="flex-wrap:wrap">${dateBox(a.d)}<div class="grow"><div style="font-weight:600">${esc(apPet(a))} <span class="muted" style="font-weight:400">· ${esc(apOwner(a))}</span></div><div class="muted" style="font-size:.85rem"><span class="mono">${wd(a.d)} ${a.t}</span> · ${esc(t(a.grund))} · ${a.art==='Video'?t('videoShort'):t('onSite')} · ${t('src_'+a.src)}</div>${line}${clashLine(a,canc,done)}</div>${pill}${acute}<div class="acts">${acts}${apDocBtn(a)}</div></div>${extra}</div>`;
   }).join('');
   return head(t('nav_vbuchungen'),t('bookSubVet')) + `<div class="card"><div class="chips">${chips}</div><div class="list">${rows||`<p class="empty">${t('noBookings')}</p>`}</div></div>`;
 };
@@ -2199,7 +2228,473 @@ document.addEventListener('keydown',e=>{
 const calBodyDnd=calBody;
 calBody=function(){ const h=calBodyDnd(); return S.cal.v==='month'?h:h+`<p class="note dndhint">${esc(t('dndHint'))}</p>`; };
 
-const VIEWS={vhome:vVetHome,vkalender:vKalender,vbuchungen:vBuchungen,vpatienten:vPatienten,verinnerung:vRecall,vauswertung:vAuswertung,profil:vProfil,petform:vPetForm,home:vHome,termine:vTermine,akte:vAkte,symptom:vSymptom,tele:vTele,erinnerung:vErinnerung,notfall:vNotfall,vhome:vVetHome,vanfragen:vVetAnfragen};
+/* ---------- Abrechnung: Leistungskatalog, Rechnungen, Zahlungsstatus ---------- */
+const STR11={
+de:{
+nav_vabrechnung:"Abrechnung",nav_rechnungen:"Rechnungen",
+blTitle:"Abrechnung",blSub:"Leistungskatalog, Rechnungsentwürfe und Zahlungseingang an einem Ort",tabInv:"Rechnungen",tabCat:"Leistungskatalog",
+kOpen:"Offene Forderungen",kOverdue:"Überfällig",kPaid:"Bezahlt",kDraft:"Entwürfe",kCnt:"Rechnungen: {n}",
+stDraft:"Entwurf",stOpen:"Offen",stPaid:"Bezahlt",stOver:"Überfällig",stCanc:"Storniert",
+invNo:"Rechnungsnummer",invDate:"Rechnungsdatum",invDue:"Fällig am",invTreat:"Behandlungsdatum",invPetL:"Tier",invTo:"Rechnung an",invTitle:"Rechnung",
+colCode:"Nr.",colName:"Leistung",colQty:"Menge",colFactor:"Faktor",colUnit:"Einzelpreis",colTax:"Steuer",colNet:"Netto",colDesc:"Beschreibung",colValid:"Gültig",
+invNet:"Zwischensumme netto",invTaxL:"Steuer {r} %",invGross:"Gesamtsumme",invCatL:"Leistungskatalog {c}, Version {v}",invNoteL:"Hinweis",
+invNew:"Neue Rechnung",invPickTitle:"Erbrachte Leistungen auswählen",invPickSub:"Wähle aus dem Katalog deiner Praxis, was bei der Behandlung erbracht wurde. Petconnect erstellt daraus den Rechnungsentwurf.",invTreatDate:"Behandlungsdatum",invCreate:"Rechnungsentwurf erstellen",invNeedSel:"Wähle mindestens eine Leistung.",invSearch:"Leistung oder Nummer suchen",invNotValid:"nicht gültig",invSelected:"{n} ausgewählt",
+draftTitle:"Rechnungsentwurf",draftHint:"Automatisch aus dem Praxiskatalog erstellt. Prüfe die Positionen, passe Mengen und Faktoren an und gib die Rechnung dann aktiv frei. Erst danach sieht {who} sie im Portal.",draftAdd:"Leistung hinzufügen",draftAddBtn:"Hinzufügen",draftRemove:"Entfernen",draftSave:"Entwurf speichern",draftDiscard:"Entwurf verwerfen",draftApprove:"Prüfen und freigeben",draftNote:"Hinweis auf der Rechnung (optional)",draftEmpty:"Noch keine Positionen.",draftRange:"Faktor {a} bis {b}",draftSaved:"Entwurf gespeichert.",draftGone:"Entwurf verworfen.",draftNoLines:"Der Entwurf braucht mindestens eine Position.",
+apprTitle:"Rechnung jetzt freigeben?",apprText:"Nach der Freigabe ist die Rechnung endgültig. Leistungen und Preise werden mit Katalogversion {v} festgeschrieben, und {who} sieht die Rechnung sofort im Portal.",apprYes:"Jetzt freigeben",apprBack:"Zurück zum Entwurf",apprDone:"Rechnung {no} freigegeben. {who} sieht sie jetzt im Portal.",
+payBtn:"Zahlungseingang erfassen",payTitle:"Zahlungseingang erfassen",payDate:"Zahlungsdatum",payMethod:"Zahlungsart",payTransfer:"Überweisung",payCash:"Bar",payCard:"Karte",paySave:"Als bezahlt speichern",payNote:"„Bezahlt“ wird nur durch einen erfassten Zahlungseingang gesetzt, nie durch Erstellung oder Freigabe.",payDone:"{no} als bezahlt erfasst. Der Status ist auch im Portal von {who} sichtbar.",paidOn:"Bezahlt am {d} ({m})",payUndone:"Zahlungseingang zurückgenommen.",
+invOpenDoc:"Ansehen",invEditDraft:"Weiter bearbeiten",invBack:"Zurück",invDownload:"Herunterladen",invDocNote:"Beispieldokument des Prototyps. In der fertigen App entsteht daraus ein PDF.",invNone:"Keine Rechnungen in dieser Ansicht.",
+catTitle:"Leistungskatalog",catActive:"Aktiver Katalog",catVerL:"Version",catFrom:"gültig ab {d}",catItems:"{n} Leistungen",catOwn:"Dieser Katalog gehört zu {p}. Eine Praxis arbeitet nur mit ihrem eigenen Katalog.",catNet:"Alle Preise netto. Die Steuer wird zusätzlich berechnet.",
+catEdit:"Preis ändern",catNewPrice:"Neuer Preis",catSavePrice:"Neue Version speichern",catCancel:"Abbrechen",catPriceDone:"Neue Katalogversion {v} gespeichert. Bereits erstellte Rechnungen bleiben unverändert.",
+catImport:"Katalog importieren",catImportSub:"Lade eine CSV-Datei hoch (Excel: Speichern unter „CSV“). Das kann ein nationaler oder dein eigener Katalog sein, zum Beispiel GOT-basiert.",catFile:"CSV-Datei wählen",catTemplate:"Vorlage herunterladen",catSamples:"Oder einen Beispielkatalog laden:",catSampleDE:"Deutschland (GOT-basiert)",catSampleFR:"Frankreich",catSampleUK:"Vereinigtes Königreich",
+catNameL:"Katalogname",catVerNew:"Neue Version",catPreview:"Vorschau",catPreviewN:"{n} Leistungen erkannt, {m} Zeilen übersprungen.",catRowErr:"Zeile {n}: {e}",catAdopt:"Als aktiven Katalog übernehmen",catAdopted:"Katalog {v} ist jetzt aktiv. Frühere Rechnungen bleiben unverändert.",
+catHistory:"Versionen",catActivePill:"aktiv",catOldPill:"abgelöst",catUsedBy:"{n} Rechnungen",catErrCols:"Pflichtspalten fehlen (Nummer, Bezeichnung, Preis).",catErrPrice:"Preis ungültig",catErrCode:"Nummer fehlt",catErrName:"Bezeichnung fehlt",catErrDate:"Datum ungültig",catErrNum:"Zahl ungültig",catErrEmpty:"Die Datei enthält keine Zeilen.",
+roadTitle:"Für spätere Versionen vorgesehen",roadList:"Online-Zahlung innerhalb von Petconnect|Zahlungsstatus automatisch über Zahlungsanbieter|Schnittstellen zu Tierkrankenversicherungen|Elektronische Rechnungsübermittlung an Versicherungen|Automatische Updates nationaler Leistungskataloge|Weitere internationale Steuer- und Abrechnungslogiken",
+svcTitle:"Erbrachte Leistungen",svcSearch:"Nummer oder Stichwort suchen",svcNone:"Noch keine Leistung gewählt.",svcPk:"Pakete",svcPkSave:"Als Paket speichern",svcPkName:"Paketname",svcPkSaved:"Paket „{n}“ gespeichert.",svcFree:"Freie Position",svcFreeAdd:"Freie Position hinzufügen",svcFreeName:"Bezeichnung",svcFreePrice:"Preis netto",svcFreeQty:"Menge",svcFreeTax:"Steuer in %",svcFreeLabel:"Freie Position",svcAuto:"Rechnungsentwurf automatisch erstellen",svcSug:"Vorschlag",svcSugHint:"Impfleistungen wurden vorgeschlagen. Du kannst sie ändern.",svcSave:"Behandlung speichern",svcSaved:"Behandlung gespeichert, Rechnungsentwurf mit {n} Positionen erstellt.",svcReview:"Rechnung prüfen",svcAp:"Zum Termin {d}, {t}",svcEst:"Voraussichtlich: {a}",draftFreeWarn:"Dieser Entwurf enthält freie Positionen, die nicht aus dem Katalog stammen.",freeToCat:"In Katalog übernehmen",freeToCatDone:"„{n}“ ist jetzt Katalogeintrag {c} (Version {v}).",cfgTitle:"Einstellungen",cfgFree:"Freie Positionen erlauben",cfgFreeSub:"Ärzt:innen dürfen Leistungen außerhalb des Katalogs eintragen.",apBill:"Behandlung dokumentieren",
+billBtn:"Leistungen abrechnen",billCardTitle:"Behandlung abrechnen",billCardText:"Wähle die erbrachten Leistungen aus dem Praxiskatalog. Petconnect erstellt den Rechnungsentwurf.",billHint:"Behandlung dokumentiert. Jetzt die erbrachten Leistungen abrechnen?",
+ownTitle:"Rechnungen",ownSub:"Rechnungen deiner Tierarztpraxis mit Zahlungsstatus",ownOpenSum:"Noch zu zahlen",ownNone:"Noch keine Rechnungen.",ownPayInfo:"Bitte überweise den Betrag mit der Rechnungsnummer als Verwendungszweck. Die Praxis erfasst den Zahlungseingang und setzt den Status auf „Bezahlt“. Online-Zahlung folgt in einer späteren Version.",ownBank:"Bankverbindung der Praxis",ownView:"Rechnung anzeigen",ownSync:"Dieselbe Rechnung wie in der Praxis: Ändert die Praxis den Status, siehst du ihn hier sofort.",ownVisit:"{pet} – {what}",ownMore:"und {n} weitere"
+},
+en:{
+nav_vabrechnung:"Billing",nav_rechnungen:"Invoices",
+blTitle:"Billing",blSub:"Service catalogue, invoice drafts and payments in one place",tabInv:"Invoices",tabCat:"Service catalogue",
+kOpen:"Outstanding",kOverdue:"Overdue",kPaid:"Paid",kDraft:"Drafts",kCnt:"Invoices: {n}",
+stDraft:"Draft",stOpen:"Open",stPaid:"Paid",stOver:"Overdue",stCanc:"Cancelled",
+invNo:"Invoice number",invDate:"Invoice date",invDue:"Due date",invTreat:"Treatment date",invPetL:"Pet",invTo:"Bill to",invTitle:"Invoice",
+colCode:"No.",colName:"Service",colQty:"Qty",colFactor:"Factor",colUnit:"Unit price",colTax:"Tax",colNet:"Net",colDesc:"Description",colValid:"Valid",
+invNet:"Subtotal (net)",invTaxL:"Tax {r} %",invGross:"Total",invCatL:"Service catalogue {c}, version {v}",invNoteL:"Note",
+invNew:"New invoice",invPickTitle:"Select the services provided",invPickSub:"Choose from your practice’s catalogue what was done during the treatment. Petconnect builds the invoice draft from it.",invTreatDate:"Treatment date",invCreate:"Create invoice draft",invNeedSel:"Select at least one service.",invSearch:"Search service or number",invNotValid:"not valid",invSelected:"{n} selected",
+draftTitle:"Invoice draft",draftHint:"Created automatically from the practice catalogue. Review the lines, adjust quantities and factors, then approve the invoice. Only then will {who} see it in the portal.",draftAdd:"Add service",draftAddBtn:"Add",draftRemove:"Remove",draftSave:"Save draft",draftDiscard:"Discard draft",draftApprove:"Review and approve",draftNote:"Note on the invoice (optional)",draftEmpty:"No lines yet.",draftRange:"Factor {a} to {b}",draftSaved:"Draft saved.",draftGone:"Draft discarded.",draftNoLines:"The draft needs at least one line.",
+apprTitle:"Approve this invoice now?",apprText:"Once approved, the invoice is final. Services and prices are fixed with catalogue version {v}, and {who} sees the invoice in the portal right away.",apprYes:"Approve now",apprBack:"Back to draft",apprDone:"Invoice {no} approved. {who} can now see it in the portal.",
+payBtn:"Record payment",payTitle:"Record payment",payDate:"Payment date",payMethod:"Payment method",payTransfer:"Bank transfer",payCash:"Cash",payCard:"Card",paySave:"Save as paid",payNote:"“Paid” is only set by a recorded payment, never by creating or approving an invoice.",payDone:"{no} recorded as paid. The status is also visible in {who}’s portal.",paidOn:"Paid on {d} ({m})",payUndone:"Payment withdrawn.",
+invOpenDoc:"View",invEditDraft:"Continue editing",invBack:"Back",invDownload:"Download",invDocNote:"Sample document of the prototype. The finished app will create a PDF.",invNone:"No invoices in this view.",
+catTitle:"Service catalogue",catActive:"Active catalogue",catVerL:"Version",catFrom:"valid from {d}",catItems:"{n} services",catOwn:"This catalogue belongs to {p}. A practice only works with its own catalogue.",catNet:"All prices are net. Tax is added on top.",
+catEdit:"Change price",catNewPrice:"New price",catSavePrice:"Save new version",catCancel:"Cancel",catPriceDone:"New catalogue version {v} saved. Invoices already created stay unchanged.",
+catImport:"Import catalogue",catImportSub:"Upload a CSV file (Excel: Save as “CSV”). It can be a national or your own catalogue, for example GOT-based.",catFile:"Choose CSV file",catTemplate:"Download template",catSamples:"Or load a sample catalogue:",catSampleDE:"Germany (GOT-based)",catSampleFR:"France",catSampleUK:"United Kingdom",
+catNameL:"Catalogue name",catVerNew:"New version",catPreview:"Preview",catPreviewN:"{n} services recognised, {m} rows skipped.",catRowErr:"Row {n}: {e}",catAdopt:"Adopt as active catalogue",catAdopted:"Catalogue {v} is now active. Earlier invoices stay unchanged.",
+catHistory:"Versions",catActivePill:"active",catOldPill:"superseded",catUsedBy:"{n} invoices",catErrCols:"Required columns missing (code, name, price).",catErrPrice:"Invalid price",catErrCode:"Code missing",catErrName:"Name missing",catErrDate:"Invalid date",catErrNum:"Invalid number",catErrEmpty:"The file has no rows.",
+roadTitle:"Planned for later versions",roadList:"Online payment inside Petconnect|Payment status updated automatically by a payment provider|Interfaces to pet health insurers|Electronic invoice submission to insurers|Automatic updates of national catalogues|Further international tax and billing logic",
+svcTitle:"Services provided",svcSearch:"Search by number or keyword",svcNone:"No service selected yet.",svcPk:"Packages",svcPkSave:"Save as package",svcPkName:"Package name",svcPkSaved:"Package “{n}” saved.",svcFree:"Free item",svcFreeAdd:"Add free item",svcFreeName:"Description",svcFreePrice:"Net price",svcFreeQty:"Qty",svcFreeTax:"Tax in %",svcFreeLabel:"Free item",svcAuto:"Create invoice draft automatically",svcSug:"Suggestion",svcSugHint:"Vaccination services were suggested. You can change them.",svcSave:"Save treatment",svcSaved:"Treatment saved, invoice draft with {n} lines created.",svcReview:"Review invoice",svcAp:"For appointment {d}, {t}",svcEst:"Estimated: {a}",draftFreeWarn:"This draft contains free items that are not from the catalogue.",freeToCat:"Add to catalogue",freeToCatDone:"“{n}” is now catalogue item {c} (version {v}).",cfgTitle:"Settings",cfgFree:"Allow free items",cfgFreeSub:"Vets may enter services outside the catalogue.",apBill:"Document treatment",
+billBtn:"Bill services",billCardTitle:"Bill this treatment",billCardText:"Select the services provided from the practice catalogue. Petconnect creates the invoice draft.",billHint:"Treatment documented. Bill the services now?",
+ownTitle:"Invoices",ownSub:"Invoices from your vet practice with payment status",ownOpenSum:"Still to pay",ownNone:"No invoices yet.",ownPayInfo:"Please transfer the amount using the invoice number as reference. The practice records the payment and sets the status to “Paid”. Online payment will follow in a later version.",ownBank:"Practice bank details",ownView:"View invoice",ownSync:"Same invoice as in the practice: when the practice changes the status, you see it here immediately.",ownVisit:"{pet} – {what}",ownMore:"and {n} more"
+}
+};
+for (const l in STR11) Object.assign(STR[l]||(STR[l]={}), STR11[l]);
+
+/* ---- Hilfen ---- */
+const blR2=x=>Math.round((x+Number.EPSILON)*100)/100;
+const blMoney=(v,c)=>{ try{ return new Intl.NumberFormat(L(),{style:'currency',currency:c||'EUR'}).format(v); }catch(e){ return num(v,2)+' '+(c||''); } };
+const blLineNet=l=>blR2(l.price*l.factor*l.qty);
+function blTotals(i){
+  const g={}; let net=0;
+  i.lines.forEach(l=>{ const n=blLineNet(l); net=blR2(net+n); g[l.tax]=blR2((g[l.tax]||0)+n); });
+  const tax=Object.keys(g).map(r=>({r:+r,net:g[r],tax:blR2(g[r]*(+r)/100)})).sort((a,b)=>a.r-b.r);
+  const taxSum=blR2(tax.reduce((s,x)=>s+x.tax,0));
+  return {net,tax,taxSum,gross:blR2(net+taxSum)};
+}
+const blStatus=i=>(i.status==='open'&&i.due<TODAY)?'overdue':i.status;
+const BL_PILL={draft:['','stDraft'],open:['info','stOpen'],overdue:['crit','stOver'],paid:['ok','stPaid'],cancelled:['','stCanc']};
+const blPill=i=>{ const [c,k]=BL_PILL[blStatus(i)]; return `<span class="pill ${c}">${t(k)}</span>`; };
+const BL_PRAC={name:'Tierarztpraxis am Ostpark',addr:'Beispielstraße 12 · 65428 Rüsselsheim',vat:'USt-IdNr. DE000000000 (Beispiel)',iban:'DE00 0000 0000 0000 0000 00 (Beispiel)'};
+const blQ=q=>num(q,Number.isInteger(q)?0:1);
+const blWho=i=>ownerOf(i.pid);
+const blPetName=i=>getPet(i.pid)?getPet(i.pid).name:'—';
+const blWhat=i=>{ const f=i.lines[0]; return f?esc(f.name)+(i.lines.length>1?' '+t('ownMore',{n:i.lines.length-1}):''):'—'; };
+const blValid=(it,d=TODAY)=>(!it.from||it.from<=d)&&(!it.to||it.to>=d);
+const blCat=()=>S.cat.versions.find(v=>!v.to)||S.cat.versions[0];
+
+/* ---- CSV ---- */
+const BL_COLS={code:['code','nr','nummer','leistungsnummer','leistungscode','numero','numéro','kode'],name:['name','bezeichnung','leistung','leistungsbezeichnung','libelle','libellé','service'],desc:['description','beschreibung'],price:['price','preis','gebuehr','gebühr','tarif','betrag','amount'],cur:['currency','waehrung','währung','devise'],factor:['factor','faktor','facteur'],fMin:['factor_min','faktor_min'],fMax:['factor_max','faktor_max'],tax:['tax_rate','steuer','steuersatz','mwst','tva','vat'],taxL:['tax_label','steuerart'],from:['valid_from','gueltig_ab','gültig_ab'],to:['valid_to','gueltig_bis','gültig_bis']};
+function blSplit(line,d){ const o=[]; let c='',q=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(q){ if(ch==='"'){ if(line[i+1]==='"'){ c+='"'; i++; } else q=false; } else c+=ch; } else if(ch==='"') q=true; else if(ch===d){ o.push(c); c=''; } else c+=ch; } o.push(c); return o.map(s=>s.trim()); }
+const blNum=s=>{ s=String(s==null?'':s).replace(/[\s€£$]/g,''); if(!s) return NaN; const c=s.lastIndexOf(','), p=s.lastIndexOf('.'); if(c>-1&&p>-1) s=c>p?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,''); else if(c>-1) s=s.replace(',','.'); return /^-?\d+(\.\d+)?$/.test(s)?parseFloat(s):NaN; };
+const blDate=s=>{ s=String(s||'').trim(); if(!s) return null; let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/); if(m) return new Date(+m[1],m[2]-1,+m[3]); m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/); if(m) return new Date(+m[3],m[2]-1,+m[1]); return undefined; };
+function blParse(text){
+  const lines=String(text||'').replace(/^﻿/,'').split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<2) return {items:[],errors:[],fatal:'catErrEmpty'};
+  const h=lines[0], d=(h.split(';').length>=h.split(',').length)?';':',';
+  const head=blSplit(h,d).map(x=>x.toLowerCase().replace(/^"|"$/g,'')), ix={};
+  for(const k in BL_COLS){ const j=head.findIndex(x=>BL_COLS[k].includes(x)); if(j>=0) ix[k]=j; }
+  if(ix.code==null||ix.name==null||ix.price==null) return {items:[],errors:[],fatal:'catErrCols'};
+  const items=[], errors=[], get=(c,k)=>ix[k]==null?'':(c[ix[k]]||'');
+  for(let i=1;i<lines.length;i++){
+    const c=blSplit(lines[i],d), n=i+1, code=get(c,'code'), name=get(c,'name'), price=blNum(get(c,'price'));
+    if(!code){ errors.push({n,e:'catErrCode'}); continue; } if(!name){ errors.push({n,e:'catErrName'}); continue; } if(isNaN(price)){ errors.push({n,e:'catErrPrice'}); continue; }
+    const fa=get(c,'factor'), f=fa?blNum(fa):1, fi=get(c,'fMin'), fx=get(c,'fMax'), ta=get(c,'tax'), tx=ta?blNum(ta):0;
+    const fMin=fi?blNum(fi):(fx?1:f), fMax=fx?blNum(fx):f, from=blDate(get(c,'from')), to=blDate(get(c,'to'));
+    if([f,fMin,fMax,tx].some(isNaN)){ errors.push({n,e:'catErrNum'}); continue; }
+    if(from===undefined||to===undefined){ errors.push({n,e:'catErrDate'}); continue; }
+    items.push({code,name,desc:get(c,'desc'),price:blR2(price),cur:(get(c,'cur')||'EUR').toUpperCase(),factor:Math.min(Math.max(f,fMin),fMax),fMin,fMax,tax:tx,taxL:get(c,'taxL')||'',from,to});
+  }
+  return {items,errors};
+}
+const BL_CSV_HEAD='code;name;description;price;currency;factor;factor_min;factor_max;tax_rate;tax_label;valid_from;valid_to';
+const BL_SAMPLES={
+DE:{name:'Deutschland, GOT-basiert (Beispielwerte)',csv:BL_CSV_HEAD+`
+G01;Allgemeine Untersuchung mit Beratung;Klinische Allgemeinuntersuchung inkl. Beratung;24,00;EUR;1;1;3;19;MwSt.;2026-01-01;
+G02;Eingehende Untersuchung;Eingehende Untersuchung eines Organsystems;34,00;EUR;1;1;3;19;MwSt.;2026-01-01;
+G03;Impfung (Injektion);Verabreichung einer Impfung;12,00;EUR;1;1;3;19;MwSt.;2026-01-01;
+G04;Impfstoff Tollwut;Material;18,50;EUR;1;1;1;19;MwSt.;2026-01-01;
+G05;Impfstoff SHPPi;Material;24,00;EUR;1;1;1;19;MwSt.;2026-01-01;
+G06;Blutentnahme;Venenpunktion;9,50;EUR;1;1;3;19;MwSt.;2026-01-01;
+G07;Blutstatus (Labor);Großes Blutbild und Organprofil;42,00;EUR;1;1;1;19;MwSt.;2026-01-01;
+G08;Ohrenbehandlung;Reinigung und Behandlung des Gehörgangs;16,00;EUR;1;1;3;19;MwSt.;2026-01-01;
+G09;Zahnsteinentfernung in Narkose;Zahnsanierung inkl. Politur;89,00;EUR;1;1;3;19;MwSt.;2026-01-01;
+G10;Ultraschalluntersuchung;Bauchorgane;38,00;EUR;1;1;3;19;MwSt.;2026-01-01;
+G11;Videosprechstunde;Beratung per Video;25,00;EUR;1;1;3;19;MwSt.;2026-01-01;
+G12;Notdienstgebühr;Zuschlag außerhalb der Sprechzeiten;50,00;EUR;1;1;1;19;MwSt.;2026-01-01;
+G13;Entwurmung (Tablette);Medikament;4,50;EUR;1;1;1;19;MwSt.;2026-01-01;
+G14;Ohrmedikament (Tube);Medikament;14,50;EUR;1;1;1;19;MwSt.;2026-01-01;
+G15;Diätfutter Niere (Beutel);Futtermittel;4,20;EUR;1;1;1;7;MwSt. ermäßigt;2026-01-01;`},
+FR:{name:'France, tarif libre (exemple)',csv:BL_CSV_HEAD+`
+F01;Consultation;Consultation générale;50,00;EUR;1;1;1;20;TVA;2026-01-01;
+F02;Vaccination;Acte vaccinal;28,00;EUR;1;1;1;20;TVA;2026-01-01;
+F03;Prise de sang;Prélèvement sanguin;18,00;EUR;1;1;1;20;TVA;2026-01-01;
+F04;Détartrage sous anesthésie;Soins dentaires;190,00;EUR;1;1;2;20;TVA;2026-01-01;
+F05;Échographie;Abdominale;60,00;EUR;1;1;1;20;TVA;2026-01-01;
+F06;Consultation d’urgence;Majoration hors horaires;40,00;EUR;1;1;1;20;TVA;2026-01-01;`},
+UK:{name:'United Kingdom (example)',csv:BL_CSV_HEAD+`
+U01;Consultation;General consultation;45.00;GBP;1;1;1;20;VAT;2026-01-01;
+U02;Vaccination;Annual booster;38.00;GBP;1;1;1;20;VAT;2026-01-01;
+U03;Blood test;In-house panel;62.00;GBP;1;1;1;20;VAT;2026-01-01;
+U04;Dental scale and polish;Under anaesthetic;240.00;GBP;1;1;1;20;VAT;2026-01-01;
+U05;Out-of-hours fee;Emergency surcharge;75.00;GBP;1;1;1;20;VAT;2026-01-01;`}
+};
+const blNextVer=()=>{ const y=TODAY.getFullYear(); let m=0; S.cat.versions.forEach(v=>{ const x=/^v(\d{4})\.(\d+)$/.exec(v.ver); if(x&&+x[1]===y) m=Math.max(m,+x[2]); }); return `v${y}.${m+1}`; };
+const blVerUsed=v=>S.inv.filter(i=>i.catVer===v&&i.status!=='draft').length;
+
+/* ---- Daten ---- */
+const blSeedCat=blParse(BL_SAMPLES.DE.csv).items;
+S.cat={versions:[{ver:'v2026.1',name:BL_SAMPLES.DE.name,cur:'EUR',from:D(2026,1,1),to:null,items:blSeedCat}],imp:null,edit:null};
+S.bill={tab:'inv',filter:'all',view:null,oview:null,pick:null,draft:null,confirm:false,pay:null,q:''};
+S.invSeq=125; S.billHint=null; S.billCfg={allowFree:true};
+S.treat={pid:null,sel:[],free:[],q:'',auto:true,ap:null,freeOpen:false,sug:false};
+const blMkLine=(code,qty,factor,cat=S.cat.versions[0])=>{ const it=cat.items.find(x=>x.code===code); return {code:it.code,name:it.name,desc:it.desc,qty,price:it.price,factor:factor||it.factor,fMin:it.fMin,fMax:it.fMax,tax:it.tax,taxL:it.taxL}; };
+const blSeedInv=(no,pid,treatOff,payOff,lines,extra={})=>({id:'i'+no,no:`RE-2026-${String(no).padStart(5,'0')}`,p:'p1',pid,status:payOff!=null?'paid':'open',treat:addDays(treatOff),date:addDays(treatOff),due:addDays(treatOff+14),lines,cur:'EUR',catVer:'v2026.1',catName:BL_SAMPLES.DE.name,note:'',approvedBy:'Dr. Hartmann',paid:payOff!=null?{d:addDays(payOff),m:'payTransfer'}:null,...extra});
+S.inv=[
+  blSeedInv(125,'bello',-3,null,[blMkLine('G02',1,2),blMkLine('G07',1),blMkLine('G10',1,1.5),blMkLine('G06',1,1),blMkLine('G13',2)]),
+  blSeedInv(124,'luna',-12,null,[blMkLine('G01',1,1.5),blMkLine('G08',1,2),blMkLine('G14',1)]),
+  blSeedInv(123,'paul',-20,-17,[blMkLine('G02',1,1.5),blMkLine('G06',1),blMkLine('G07',1),blMkLine('G15',6)]),
+  blSeedInv(122,'kira',-40,null,[blMkLine('G01',1),blMkLine('G03',1),blMkLine('G04',1),blMkLine('G13',3)]),
+  blSeedInv(121,'mio',-35,-30,[blMkLine('G01',1,1.5),blMkLine('G06',1),blMkLine('G07',1)])
+];
+
+const blDefTax=()=>{ const m={}; blCat().items.forEach(i=>{ m[i.tax]=(m[i.tax]||0)+1; }); const k=Object.keys(m).sort((a,b)=>m[b]-m[a])[0]; return k==null?0:+k; };
+function blFreeForm(act,open){
+  const f=F(); if(f.freeTax==null) f.freeTax=String(blDefTax()); if(!f.freeQty) f.freeQty='1';
+  return `<details class="blfree" ${open?'open':''}><summary>${t('svcFreeAdd')}</summary><div class="grid g2">${fld('freeName',t('svcFreeName'))}${fld('freePrice',t('svcFreePrice'),'number','min="0" step="0.01"')}${fld('freeQty',t('svcFreeQty'),'number','min="1" step="1"')}${fld('freeTax',t('svcFreeTax'),'number','min="0" step="0.5"')}</div><button class="btn ghost" data-act="${act}" style="align-self:flex-start">${t('svcFreeAdd')}</button></details>`;
+}
+function blReadFree(){
+  const f=F(), name=(f.freeName||'').trim(), price=blNum(f.freePrice), qty=Math.round(blNum(f.freeQty||'1')), tax=blNum(f.freeTax==null?'0':f.freeTax);
+  const err={}; if(!name) err.freeName='err_required'; if(isNaN(price)||price<0) err.freePrice='err_required'; if(isNaN(tax)||tax<0) err.freeTax='err_required';
+  S.auth.errors=err; if(Object.keys(err).length) return null;
+  delete f.freeName; delete f.freePrice; f.freeQty='1';
+  return {name,price:blR2(price),qty:qty>=1?qty:1,tax};
+}
+/* ---- Rechnungsdokument ---- */
+const BL_DOC_CSS="body{font-family:system-ui,Segoe UI,Arial,sans-serif;color:#1d2a24;margin:32px;max-width:760px}h1{font-size:1.5rem;margin:0 0 4px}.dh{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px}.muted{color:#66736c;font-size:.85rem}table{width:100%;border-collapse:collapse;margin:14px 0}th,td{padding:7px 6px;border-bottom:1px solid #d9e0db;text-align:start;vertical-align:top}th{font-size:.78rem;color:#66736c}.num{text-align:end;white-space:nowrap}.mono{font-family:ui-monospace,Menlo,monospace}.tot{margin-inline-start:auto;width:min(320px,100%)}.tot div{display:flex;justify-content:space-between;padding:4px 0}.tot .g{font-weight:700;font-size:1.1rem;border-top:2px solid #1d2a24;margin-top:4px;padding-top:8px}.foot{margin-top:22px;font-size:.8rem;color:#66736c;border-top:1px solid #d9e0db;padding-top:10px}";
+function blDoc(i){
+  const tt=blTotals(i), c=i.cur, st=blStatus(i);
+  const rows=i.lines.map(l=>`<tr><td class="mono">${l.free?'–':esc(l.code)}</td><td>${esc(l.name)}${l.desc?`<div class="muted">${esc(l.desc)}</div>`:''}</td><td class="num">${blQ(l.qty)}</td><td class="num">${l.fMax>l.fMin?'× '+num(l.factor,1):'–'}</td><td class="num">${blMoney(l.price,c)}</td><td class="num">${num(l.tax,0)} %</td><td class="num">${blMoney(blLineNet(l),c)}</td></tr>`).join('');
+  const taxRows=tt.tax.map(x=>`<div><span>${t('invTaxL',{r:num(x.r,0)})}</span><span class="mono">${blMoney(x.tax,c)}</span></div>`).join('');
+  return `<div class="dh"><div><h1>${t('invTitle')} ${i.no?esc(i.no):`<span class="muted">(${t('stDraft')})</span>`}</h1><div class="muted">${esc(BL_PRAC.name)}<br>${esc(BL_PRAC.addr)}<br>${esc(BL_PRAC.vat)}</div></div>
+    <div class="muted"><b>${t('invTo')}</b><br>${esc(blWho(i))}<br>${t('invPetL')}: ${esc(blPetName(i))}<br>${t('invTreat')}: ${fmt(i.treat)}${i.date&&i.no?`<br>${t('invDate')}: ${fmt(i.date)}<br>${t('invDue')}: ${fmt(i.due)}`:''}</div></div>
+    <div class="bltablewrap"><table><thead><tr><th>${t('colCode')}</th><th>${t('colName')}</th><th class="num">${t('colQty')}</th><th class="num">${t('colFactor')}</th><th class="num">${t('colUnit')}</th><th class="num">${t('colTax')}</th><th class="num">${t('colNet')}</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="tot"><div><span>${t('invNet')}</span><span class="mono">${blMoney(tt.net,c)}</span></div>${taxRows}<div class="g"><span>${t('invGross')}</span><span class="mono">${blMoney(tt.gross,c)}</span></div></div>
+    ${i.note?`<p><b>${t('invNoteL')}:</b> ${esc(i.note)}</p>`:''}
+    <div class="foot">${st==='paid'&&i.paid?`<b>${t('paidOn',{d:fmt(i.paid.d),m:t(i.paid.m)})}</b><br>`:''}${t('invCatL',{c:esc(i.catName||''),v:esc(i.catVer||'')})}<br>IBAN ${esc(BL_PRAC.iban)}</div>`;
+}
+function blDownload(i){
+  try{
+    const html=`<!doctype html><html lang="${LANG}"><head><meta charset="utf-8"><title>${esc(i.no||'Entwurf')}</title><style>${BL_DOC_CSS}</style></head><body>${blDoc(i)}<p class="foot">${esc(t('invDocNote'))}</p></body></html>`;
+    const url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'})), a=document.createElement('a');
+    a.href=url; a.download=(i.no||'Rechnung-Entwurf')+'.html'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
+  }catch(e){ toast(t('invDocNote')); }
+}
+function blTotalsCard(i){ const tt=blTotals(i), c=i.cur; return `<div class="bltot"><div><span>${t('invNet')}</span><span class="mono">${blMoney(tt.net,c)}</span></div>${tt.tax.map(x=>`<div><span>${t('invTaxL',{r:num(x.r,0)})}</span><span class="mono">${blMoney(x.tax,c)}</span></div>`).join('')}<div class="g"><span>${t('invGross')}</span><span class="mono">${blMoney(tt.gross,c)}</span></div></div>`; }
+
+/* ---- Praxis: Übersicht ---- */
+function blInvTab(){
+  const b=S.bill, all=S.inv.filter(i=>i.p==='p1');
+  const sum=a=>blR2(a.reduce((s,i)=>s+blTotals(i).gross,0));
+  const open=all.filter(i=>i.status==='open'), over=open.filter(i=>blStatus(i)==='overdue'), paid=all.filter(i=>i.status==='paid'), dr=all.filter(i=>i.status==='draft');
+  const kp=(l,a,cls='')=>`<div class="card stat ${cls}"><span class="muted">${l}</span><b>${blMoney(sum(a),'EUR')}</b><span class="muted">${t('kCnt',{n:a.length})}</span></div>`;
+  const kpis=`<div class="grid g4">${kp(t('kOpen'),open)}${kp(t('kOverdue'),over,over.length?'crit':'')}${kp(t('kPaid'),paid)}<div class="card stat"><span class="muted">${t('kDraft')}</span><b>${dr.length}</b><span class="muted">&nbsp;</span></div></div>`;
+  const fl=[['all',t('f_all')],['draft',t('stDraft')],['open',t('stOpen')],['overdue',t('stOver')],['paid',t('stPaid')]];
+  const chips=`<div class="chips" role="group">${fl.map(([k,l])=>`<button class="chip" data-act="blFilter" data-v="${k}" aria-pressed="${b.filter===k}">${l}</button>`).join('')}</div>`;
+  const list=all.filter(i=>b.filter==='all'||blStatus(i)===b.filter).sort((x,y)=>(y.treat-x.treat));
+  const rows=list.map(i=>{
+    const st=blStatus(i), tt=blTotals(i), pay=b.pay===i.id;
+    const btns=i.status==='draft'?`<button class="btn" data-act="blEdit" data-id="${i.id}">${t('invEditDraft')}</button>`:`<button class="btn ghost" data-act="blView" data-id="${i.id}">${t('invOpenDoc')}</button>${i.status==='open'?`<button class="btn" data-act="blPay" data-id="${i.id}">${t('payBtn')}</button>`:''}`;
+    const payForm=pay?`<div class="subrow blpay"><b>${t('payTitle')}</b><div class="grid g2">${fld('payDate',t('payDate'),'date')}${sel('payMethod',t('payMethod'),[['payTransfer',t('payTransfer')],['payCash',t('payCash')],['payCard',t('payCard')]])}</div><div class="chips"><button class="btn" data-act="blPaySave" data-id="${i.id}">${t('paySave')}</button><button class="btn ghost" data-act="blPay" data-id="${i.id}">${t('catCancel')}</button></div><p class="note">${t('payNote')}</p></div>`:'';
+    return `<div class="blrow"><div class="row" style="flex-wrap:wrap;border-top:0"><div class="grow" style="min-width:180px"><div><b class="mono">${i.no?esc(i.no):t('stDraft')}</b> · ${esc(blPetName(i))} <span class="muted">· ${esc(blWho(i))}</span></div><div class="muted" style="font-size:.85rem">${fmt(i.treat)} · ${blWhat(i)}${i.status==='open'?` · ${t('invDue')} ${fmt(i.due)}`:''}${i.paid?` · ${t('paidOn',{d:fmt(i.paid.d),m:t(i.paid.m)})}`:''}</div></div><b class="mono">${blMoney(tt.gross,i.cur)}</b>${blPill(i)}<div class="chips">${btns}</div></div>${payForm}</div>`;
+  }).join('');
+  const road=`<div class="card"><h2>${t('roadTitle')}</h2><ul class="blroad">${t('roadList').split('|').map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+  return kpis+`<div class="card">${chips}<div class="list">${rows||`<p class="empty">${t('invNone')}</p>`}</div></div>`+road;
+}
+
+/* ---- Praxis: Katalog ---- */
+function blCatTab(){
+  const c=blCat(), q=(S.bill.q||'').toLowerCase(), ed=S.cat.edit;
+  const rows=c.items.map(it=>{ const ok=blValid(it), edit=ed===it.code;
+    const hid=q&&!(it.code+' '+it.name).toLowerCase().includes(q);
+    return `<tr class="${ok?'':'dim'}" ${hid?'hidden':''} data-search="${esc((it.code+' '+it.name).toLowerCase())}"><td class="mono">${esc(it.code)}</td><td><b>${esc(it.name)}</b>${it.desc?`<div class="muted">${esc(it.desc)}</div>`:''}</td><td class="num mono">${edit?`<input type="number" class="pin" data-f="catPrice" value="${esc(F().catPrice??it.price)}" step="0.01" min="0" aria-label="${t('catNewPrice')}">`:blMoney(it.price,it.cur||c.cur)}</td><td class="num mono">${it.fMax>it.fMin?`${num(it.fMin,1)}–${num(it.fMax,1)}`:'–'}</td><td class="num mono">${num(it.tax,0)} %</td><td class="muted mono" style="font-size:.78rem">${it.from?fmt(it.from):'–'}${it.to?' → '+fmt(it.to):''}${ok?'':' · '+t('invNotValid')}</td><td>${edit?`<button class="btn" data-act="catSavePrice" data-code="${esc(it.code)}">${t('catSavePrice')}</button> <button class="btn ghost" data-act="catEditCancel">${t('catCancel')}</button>`:`<button class="btn ghost" data-act="catEdit" data-code="${esc(it.code)}">${t('catEdit')}</button>`}</td></tr>`; }).join('');
+  const hist=S.cat.versions.map((v,k)=>`<div class="row"><div class="grow"><b class="mono">${esc(v.ver)}</b> · ${esc(v.name)}${v.note?` <span class="muted">· ${esc(v.note)}</span>`:''}<div class="muted" style="font-size:.82rem">${t('catFrom',{d:fmt(v.from)})}${v.to?' → '+fmt(v.to):''} · ${t('catItems',{n:v.items.length})} · ${t('catUsedBy',{n:blVerUsed(v.ver)})}</div></div><span class="pill ${v.to?'':'ok'}">${v.to?t('catOldPill'):t('catActivePill')}</span></div>`).join('');
+  const imp=S.cat.imp;
+  const prev=imp?`<div class="card blimp"><h2>${t('catPreview')}</h2>${imp.fatal?`<p class="err">${t(imp.fatal)}</p>`:`<p><b>${t('catPreviewN',{n:imp.items.length,m:imp.errors.length})}</b></p><div class="grid g2">${fld('impName',t('catNameL'))}${fld('impVer',t('catVerNew'))}</div><div class="bltablewrap"><table class="btable"><thead><tr><th>${t('colCode')}</th><th>${t('colName')}</th><th class="num">${t('colUnit')}</th><th class="num">${t('colTax')}</th></tr></thead><tbody>${imp.items.slice(0,6).map(it=>`<tr><td class="mono">${esc(it.code)}</td><td>${esc(it.name)}</td><td class="num mono">${blMoney(it.price,it.cur)}</td><td class="num mono">${num(it.tax,0)} %</td></tr>`).join('')}</tbody></table></div>${imp.items.length>6?`<p class="muted">… +${imp.items.length-6}</p>`:''}${imp.errors.slice(0,5).map(e=>`<p class="err">${t('catRowErr',{n:e.n,e:t(e.e)})}</p>`).join('')}<div class="chips">${imp.items.length?`<button class="btn" data-act="catAdopt">${t('catAdopt')}</button>`:''}<button class="btn ghost" data-act="catImpCancel">${t('catCancel')}</button></div>`}${imp.fatal?`<button class="btn ghost" data-act="catImpCancel">${t('catCancel')}</button>`:''}</div>`:'';
+  return `<div class="card"><div class="blcathead"><div><h2>${t('catActive')}</h2><div><b>${esc(c.name)}</b></div><div class="muted mono">${t('catVerL')} ${esc(c.ver)} · ${c.cur} · ${t('catFrom',{d:fmt(c.from)})} · ${t('catItems',{n:c.items.length})}</div></div></div><p class="note">${t('catOwn',{p:esc(BL_PRAC.name)})} ${t('catNet')}</p>
+    <input type="search" id="cat-search" value="${esc(S.bill.q||'')}" placeholder="${t('invSearch')}" aria-label="${t('invSearch')}" autocomplete="off">
+    <div class="bltablewrap"><table class="btable"><thead><tr><th>${t('colCode')}</th><th>${t('colName')}</th><th class="num">${t('colUnit')}</th><th class="num">${t('colFactor')}</th><th class="num">${t('colTax')}</th><th>${t('colValid')}</th><th></th></tr></thead><tbody id="cat-rows">${rows}</tbody></table></div></div>
+    <div class="card"><h2>${t('catImport')}</h2><p class="muted">${t('catImportSub')}</p><div class="chips"><label class="btn" for="cat-file" style="cursor:pointer">${t('catFile')}</label><input type="file" id="cat-file" accept=".csv,.txt,text/csv,text/plain" hidden><button class="btn ghost" data-act="catTpl">${t('catTemplate')}</button></div><p class="muted" style="margin:6px 0 0">${t('catSamples')}</p><div class="chips"><button class="chip" data-act="catSample" data-v="DE">${t('catSampleDE')}</button><button class="chip" data-act="catSample" data-v="FR">${t('catSampleFR')}</button><button class="chip" data-act="catSample" data-v="UK">${t('catSampleUK')}</button></div></div>${prev}
+    <div class="card"><h2>${t('catHistory')}</h2><div class="list">${hist}</div></div>`;
+}
+
+/* ---- Praxis: Auswahl, Entwurf ---- */
+function blPick(){
+  const k=S.bill.pick, c=blCat(), f=F(); if(!f.billPid) f.billPid=allPatients()[0]; if(!f.billDate) f.billDate=isoDate(TODAY);
+  const rows=c.items.map(it=>{ const ok=blValid(it), on=k.sel.includes(it.code);
+    return `<label class="check blpick${ok?'':' dim'}" data-search="${esc((it.code+' '+it.name).toLowerCase())}"><input type="checkbox" data-pick="${esc(it.code)}" ${on?'checked':''} ${ok?'':'disabled'}><span><b>${esc(it.name)}</b> <span class="muted mono">${esc(it.code)} · ${blMoney(it.price,it.cur||c.cur)}${it.fMax>it.fMin?' · '+t('draftRange',{a:num(it.fMin,1),b:num(it.fMax,1)}):''}${ok?'':' · '+t('invNotValid')}</span></span></label>`; }).join('');
+  return head(t('invPickTitle'),t('invPickSub'),`<button class="btn ghost" data-act="blPickCancel">${t('catCancel')}</button>`)+`<div class="card"><div class="grid g2">${sel('billPid',t('invPetL'),allPatients().map(id=>[id,`${getPet(id).name} · ${ownerOf(id)}`]))}${fld('billDate',t('invTreatDate'),'date')}</div>
+    <p class="muted" style="margin:0">${esc(c.name)} · ${t('catVerL')} ${esc(c.ver)}</p><input type="search" id="pick-search" placeholder="${t('invSearch')}" aria-label="${t('invSearch')}" autocomplete="off"><div class="blpicklist">${rows}</div>
+    <div class="chips"><button class="btn" data-act="blPickGo">${t('invCreate')}</button><span class="muted" id="pick-n">${t('invSelected',{n:k.sel.length})}</span></div></div>`;
+}
+function blDraft(){
+  const i=S.inv.find(x=>x.id===S.bill.draft); if(!i){ S.bill.draft=null; return vAbrechnung(); }
+  const f=F(); if(f.billNoteFor!==i.id){ f.billNote=i.note||''; f.billNoteFor=i.id; }
+  const c=i.cur, cat=blCat();
+  const rows=i.lines.map((l,n)=>`<tr><td class="mono">${l.free?`<span class="pill warn">${t('svcFreeLabel')}</span>`:esc(l.code)}</td><td><b>${esc(l.name)}</b>${l.free?`<div><button class="link" data-act="blFreeToCat" data-i="${n}">${t('freeToCat')}</button></div>`:''}</td><td class="num"><input type="number" class="qin" data-iq="${n}" value="${l.qty}" min="1" step="1" aria-label="${t('colQty')}"></td><td class="num">${l.fMax>l.fMin?`<input type="number" class="qin" data-if="${n}" value="${l.factor}" min="${l.fMin}" max="${l.fMax}" step="0.1" aria-label="${t('colFactor')}" title="${t('draftRange',{a:num(l.fMin,1),b:num(l.fMax,1)})}">`:'<span class="muted">× 1</span>'}</td><td class="num mono">${blMoney(l.price,c)}</td><td class="num mono">${num(l.tax,0)} %</td><td class="num mono">${blMoney(blLineNet(l),c)}</td><td><button class="btn ghost" data-act="blRm" data-i="${n}" aria-label="${t('draftRemove')}">✕</button></td></tr>`).join('');
+  const opts=cat.items.filter(it=>blValid(it)).map(it=>[it.code,`${it.code} · ${it.name}`]);
+  const confirm=S.bill.confirm?`<div class="alertbox blappr" role="alert"><b>${t('apprTitle')}</b><span>${t('apprText',{v:esc(i.catVer),who:esc(blWho(i))})}</span><div class="chips"><button class="btn" data-act="blApprove">${t('apprYes')}</button><button class="btn ghost" data-act="blNoAppr">${t('apprBack')}</button></div></div>`:'';
+  return head(t('draftTitle'),`${esc(blPetName(i))} · ${esc(blWho(i))} · ${t('invTreat')} ${fmt(i.treat)}`,`<button class="btn ghost" data-act="blSave">${t('draftSave')}</button>`)+`<div class="card"><p class="note">${t('draftHint',{who:esc(blWho(i))})}</p>${confirm}
+    <div class="bltablewrap"><table class="btable"><thead><tr><th>${t('colCode')}</th><th>${t('colName')}</th><th class="num">${t('colQty')}</th><th class="num">${t('colFactor')}</th><th class="num">${t('colUnit')}</th><th class="num">${t('colTax')}</th><th class="num">${t('colNet')}</th><th></th></tr></thead><tbody>${rows||`<tr><td colspan="8" class="empty">${t('draftEmpty')}</td></tr>`}</tbody></table></div>
+    <div class="bladd">${sel('billAdd',t('draftAdd'),opts)}<button class="btn ghost" data-act="blAddLine">${t('draftAddBtn')}</button></div>${S.billCfg.allowFree?blFreeForm('blFreeAdd',S.bill.freeOpen):''}${i.lines.some(l=>l.free)?`<p class="note"><b>${t('draftFreeWarn')}</b></p>`:''}
+    ${blTotalsCard(i)}${fld('billNote',t('draftNote'))}
+    <div class="chips"><button class="btn" data-act="blAsk">${t('draftApprove')}</button><button class="btn ghost" data-act="blDiscard">${t('draftDiscard')}</button></div><p class="muted" style="margin:0">${t('invCatL',{c:esc(i.catName),v:esc(i.catVer)})}</p></div>`;
+}
+function blDocView(id,role){
+  const i=S.inv.find(x=>x.id===id); if(!i){ S.bill.view=S.bill.oview=null; return role==='vet'?vAbrechnung():vRechnungen(); }
+  const st=blStatus(i), back=role==='vet'?'blBack':'blOBack';
+  const acts=`<button class="btn ghost" data-act="${back}">${t('invBack')}</button>`;
+  const side=role==='vet'
+    ? (i.status==='open'?`<button class="btn" data-act="blPay" data-id="${i.id}" data-doc="1">${t('payBtn')}</button>`:'')
+    : (i.status==='open'?`<p class="note">${t('ownPayInfo')}</p><p class="muted mono" style="margin:0">${t('ownBank')}: ${esc(BL_PRAC.iban)}</p>`:'');
+  const payForm=(role==='vet'&&S.bill.pay===i.id)?`<div class="subrow blpay"><b>${t('payTitle')}</b><div class="grid g2">${fld('payDate',t('payDate'),'date')}${sel('payMethod',t('payMethod'),[['payTransfer',t('payTransfer')],['payCash',t('payCash')],['payCard',t('payCard')]])}</div><div class="chips"><button class="btn" data-act="blPaySave" data-id="${i.id}" data-doc="1">${t('paySave')}</button><button class="btn ghost" data-act="blPay" data-id="${i.id}" data-doc="1">${t('catCancel')}</button></div><p class="note">${t('payNote')}</p></div>`:'';
+  return head(`${t('invTitle')} ${esc(i.no||'')}`,`${blPill(i)}`,acts)+`<div class="card invdoc">${blDoc(i)}</div><div class="card"><div class="chips"><button class="btn ghost" data-act="blDl" data-id="${i.id}">${t('invDownload')}</button>${side&&role==='vet'?side:''}</div>${role==='owner'?side:''}${payForm}<p class="note">${t('invDocNote')}</p>${role==='owner'?`<p class="note">${t('ownSync')}</p>`:''}</div>`;
+}
+function vAbrechnung(){
+  const b=S.bill;
+  if(b.view) return blDocView(b.view,'vet');
+  if(b.pick) return blPick();
+  if(b.draft) return blDraft();
+  const tabs=`<div class="chips" role="group">${[['inv',t('tabInv')],['cat',t('tabCat')]].map(([k,l])=>`<button class="chip" data-act="blTab" data-v="${k}" aria-pressed="${b.tab===k}">${l}</button>`).join('')}</div>`;
+  return head(t('blTitle'),t('blSub'),`<button class="btn" data-act="blNew">${t('invNew')}</button>`)+tabs+(b.tab==='cat'?blCatTab():blInvTab());
+}
+
+/* ---- Halterportal ---- */
+const blMine=()=>S.inv.filter(i=>S.pets[i.pid]&&i.status!=='draft').sort((a,b)=>b.date-a.date);
+function vRechnungen(){
+  const b=S.bill;
+  if(b.oview) return blDocView(b.oview,'owner');
+  const mine=blMine(), openSum=blR2(mine.filter(i=>i.status==='open').reduce((s,i)=>s+blTotals(i).gross,0));
+  const rows=mine.map(i=>`<div class="row" style="flex-wrap:wrap;align-items:flex-start"><div class="grow" style="min-width:200px"><div><b class="mono">${esc(i.no)}</b></div><div>${t('ownVisit',{pet:esc(blPetName(i)),what:blWhat(i)})}</div><div class="muted" style="font-size:.85rem">${t('invDate')} ${fmt(i.date)} · ${t('invTreat')} ${fmt(i.treat)}${i.status==='open'?` · ${t('invDue')} ${fmt(i.due)}`:''}${i.paid?` · ${t('paidOn',{d:fmt(i.paid.d),m:t(i.paid.m)})}`:''}</div></div><b class="mono">${blMoney(blTotals(i).gross,i.cur)}</b>${blPill(i)}<div class="chips"><button class="btn" data-act="blOView" data-id="${i.id}">${t('ownView')}</button><button class="btn ghost" data-act="blDl" data-id="${i.id}">${t('invDownload')}</button></div></div>`).join('');
+  return head(t('ownTitle'),t('ownSub'))+`<div class="card stat"><span class="muted">${t('ownOpenSum')}</span><b>${blMoney(openSum,'EUR')}</b></div><div class="card"><div class="list">${rows||`<p class="empty">${t('ownNone')}</p>`}</div><p class="note">${t('ownSync')}</p></div>`;
+}
+
+/* ---- Aktionen ---- */
+const vetActionBill=vetAction;
+vetAction=function(a,d){
+  const b=S.bill, cur=()=>S.inv.find(x=>x.id===b.draft);
+  switch(a){
+    case 'blTab': b.tab=d.v; b.pay=null; render(); return true;
+    case 'blFilter': b.filter=d.v; b.pay=null; render(); return true;
+    case 'blNew': F().billPid=allPatients()[0]; b.pick={sel:[]}; render(); window.scrollTo(0,0); return true;
+    case 'patBill': F().billPid=d.pid; S.billHint=null; b.pick={sel:[]}; b.view=b.draft=null; S.view='vabrechnung'; render(); window.scrollTo(0,0); return true;
+    case 'blPickCancel': b.pick=null; render(); return true;
+    case 'blPickGo': {
+      const k=b.pick, f=F(); if(!k.sel.length){ toast(t('invNeedSel')); return true; }
+      const c=blCat(), lines=k.sel.map(code=>c.items.find(x=>x.code===code)).filter(Boolean).map(it=>({code:it.code,name:it.name,desc:it.desc,qty:1,price:it.price,factor:it.factor,fMin:it.fMin,fMax:it.fMax,tax:it.tax,taxL:it.taxL}));
+      const tr=blDate(f.billDate)||new Date(TODAY);
+      const inv={id:'i'+Date.now(),no:null,p:'p1',pid:f.billPid,status:'draft',treat:tr,date:null,due:null,lines,cur:c.cur,catVer:c.ver,catName:c.name,note:'',paid:null};
+      S.inv.unshift(inv); b.pick=null; b.draft=inv.id; b.confirm=false; f.billNoteFor=null; render(); window.scrollTo(0,0); return true; }
+    case 'blEdit': b.draft=d.id; b.confirm=false; F().billNoteFor=null; render(); window.scrollTo(0,0); return true;
+    case 'blAddLine': { const i=cur(); if(!i) return true; const code=F().billAdd||blCat().items.find(x=>blValid(x)).code; const ex=i.lines.find(l=>l.code===code);
+      if(ex) ex.qty++; else { const it=blCat().items.find(x=>x.code===code); if(it) i.lines.push({code:it.code,name:it.name,desc:it.desc,qty:1,price:it.price,factor:it.factor,fMin:it.fMin,fMax:it.fMax,tax:it.tax,taxL:it.taxL}); }
+      i.note=F().billNote||''; render(); return true; }
+    case 'blRm': { const i=cur(); if(i){ i.lines.splice(+d.i,1); i.note=F().billNote||''; } render(); return true; }
+    case 'blSave': { const i=cur(); if(i) i.note=F().billNote||''; b.draft=null; b.confirm=false; render(); toast(t('draftSaved')); return true; }
+    case 'blDiscard': { const i=cur(); if(!i) return true; const pos=S.inv.indexOf(i); S.inv.splice(pos,1); b.draft=null; b.confirm=false; S.undo=()=>{ S.inv.splice(pos,0,i); }; render(); toastUndo(t('draftGone')); return true; }
+    case 'blAsk': { const i=cur(); if(!i) return true; i.note=F().billNote||''; if(!i.lines.length){ toast(t('draftNoLines')); return true; } b.confirm=true; render(); return true; }
+    case 'blNoAppr': b.confirm=false; render(); return true;
+    case 'blApprove': { const i=cur(); if(!i||!i.lines.length) return true; i.note=F().billNote||''; const cat=blCat();
+      i.status='open'; i.no=`RE-${TODAY.getFullYear()}-${String(++S.invSeq).padStart(5,'0')}`; i.date=new Date(TODAY); i.due=addDays(14); i.approvedBy=actor(); i.catVer=i.catVer||cat.ver;
+      b.draft=null; b.confirm=false; b.view=i.id; render(); window.scrollTo(0,0); celebrate(t('apprDone',{no:i.no,who:blWho(i)})); return true; }
+    case 'blView': b.view=d.id; b.pay=null; render(); window.scrollTo(0,0); return true;
+    case 'blBack': b.view=null; b.pay=null; render(); return true;
+    case 'blOView': b.oview=d.id; render(); window.scrollTo(0,0); return true;
+    case 'blOBack': b.oview=null; render(); return true;
+    case 'blDl': { const i=S.inv.find(x=>x.id===d.id); if(i) blDownload(i); return true; }
+    case 'blPay': { b.pay=(b.pay===d.id)?null:d.id; if(b.pay){ F().payDate=isoDate(TODAY); F().payMethod='payTransfer'; } render(); return true; }
+    case 'blPaySave': { const i=S.inv.find(x=>x.id===d.id); if(!i||i.status!=='open') return true; const pd=blDate(F().payDate)||new Date(TODAY);
+      i.status='paid'; i.paid={d:pd,m:F().payMethod||'payTransfer'}; b.pay=null; S.undo=()=>{ i.status='open'; i.paid=null; }; render(); toastUndo(t('payDone',{no:i.no,who:blWho(i)})); return true; }
+    case 'catSample': { const s=BL_SAMPLES[d.v], r=blParse(s.csv); S.cat.imp={...r,name:s.name,ver:blNextVer()}; F().impName=s.name; F().impVer=S.cat.imp.ver; render(); return true; }
+    case 'catTpl': { try{ const csv='﻿'+BL_SAMPLES.DE.csv.split('\n').slice(0,4).join('\n'); const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})), x=document.createElement('a'); x.href=u; x.download='leistungskatalog-vorlage.csv'; document.body.appendChild(x); x.click(); x.remove(); setTimeout(()=>URL.revokeObjectURL(u),2000); }catch(e){} return true; }
+    case 'catImpCancel': S.cat.imp=null; render(); return true;
+    case 'catAdopt': { const imp=S.cat.imp; if(!imp||!imp.items.length) return true; const f=F(), old=blCat(); const ver=(f.impVer||imp.ver).trim()||imp.ver;
+      old.to=addDays(-1); S.cat.versions.unshift({ver,name:(f.impName||imp.name||ver).trim(),cur:imp.items[0].cur,from:new Date(TODAY),to:null,items:imp.items});
+      S.cat.imp=null; render(); toast(t('catAdopted',{v:ver})); return true; }
+    case 'catEdit': S.cat.edit=d.code; F().catPrice=blCat().items.find(x=>x.code===d.code).price; render(); return true;
+    case 'catEditCancel': S.cat.edit=null; render(); return true;
+    case 'catSavePrice': { const old=blCat(), p=blNum(F().catPrice); if(isNaN(p)||p<0){ toast(t('catErrPrice')); return true; }
+      const items=old.items.map(it=>({...it,price:it.code===d.code?blR2(p):it.price})); const ver=blNextVer();
+      old.to=addDays(-1); S.cat.versions.unshift({ver,name:old.name,cur:old.cur,from:new Date(TODAY),to:null,items,note:`${d.code}: ${blMoney(old.items.find(x=>x.code===d.code).price,old.cur)} → ${blMoney(blR2(p),old.cur)}`});
+      S.cat.edit=null; render(); toast(t('catPriceDone',{v:ver})); return true; }
+    case 'saveFinding': { const n0=getPet(d.pid)?getPet(d.pid).befunde.length:0; const r=vetActionBill(a,d); if(getPet(d.pid)&&getPet(d.pid).befunde.length>n0){ S.billHint=d.pid; render(); } return r; }
+  }
+  return vetActionBill(a,d);
+};
+
+/* ---- Eingaben ---- */
+document.addEventListener('change',e=>{
+  const el=e.target; if(!el||!el.dataset) return;
+  const i=S.inv.find(x=>x.id===S.bill.draft);
+  if('iq' in el.dataset&&i){ const l=i.lines[+el.dataset.iq]; if(l){ const v=Math.round(blNum(el.value)); l.qty=(v>=1&&v<1e4)?v:1; } render(); }
+  else if('if' in el.dataset&&i){ const l=i.lines[+el.dataset.if]; if(l){ const v=blNum(el.value); l.factor=isNaN(v)?l.factor:Math.min(Math.max(blR2(v),l.fMin),l.fMax); } render(); }
+  else if('pick' in el.dataset){ const k=S.bill.pick; if(k){ const x=k.sel.indexOf(el.dataset.pick); if(el.checked&&x<0) k.sel.push(el.dataset.pick); else if(!el.checked&&x>=0) k.sel.splice(x,1); const n=document.getElementById('pick-n'); if(n) n.textContent=t('invSelected',{n:k.sel.length}); } }
+  else if(el.id==='cat-file'&&el.files&&el.files[0]){ const file=el.files[0], fr=new FileReader(); fr.onload=()=>{ const r=blParse(fr.result); S.cat.imp={...r,name:file.name.replace(/\.[^.]+$/,''),ver:blNextVer()}; F().impName=S.cat.imp.name; F().impVer=S.cat.imp.ver; render(); }; fr.onerror=()=>toast(t('catErrEmpty')); fr.readAsText(file); }
+});
+document.addEventListener('input',e=>{
+  const el=e.target; if(!el) return;
+  if(el.id==='pick-search'||el.id==='cat-search'){ const q=el.value.toLowerCase(); if(el.id==='cat-search') S.bill.q=el.value; document.querySelectorAll('#cat-rows tr,.blpick').forEach(r=>{ r.hidden=!!q&&!(r.dataset.search||'').includes(q); }); }
+});
+
+/* ---- Navigation, Badges, Patientenakte ---- */
+I.card='<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>';
+NAV.vet.splice(NAV.vet.findIndex(x=>x[0]==='vpatienten')+1,0,['vabrechnung','card']);
+NAV.owner.splice(NAV.owner.findIndex(x=>x[0]==='akte')+1,0,['rechnungen','card']);
+const renderNavBill=renderNav;
+renderNav=function(){
+  renderNavBill();
+  const n=S.role==='vet'?S.inv.filter(i=>i.p==='p1'&&(blStatus(i)==='overdue'||i.status==='draft')).length:S.inv.filter(i=>S.pets[i.pid]&&i.status==='open').length;
+  const btn=document.querySelector(`#nav [data-view="${S.role==='vet'?'vabrechnung':'rechnungen'}"]`);
+  if(btn&&n){ const sp=document.createElement('span'); sp.className='badge'; sp.textContent=n; btn.appendChild(sp); }
+};
+const vPatDetailBill=vPatDetail;
+vPatDetail=function(id){
+  const h=vPatDetailBill(id), hint=S.billHint===id, k=`<div class="card"><h2>${t('findings')}</h2>`;
+  const card=`<div class="card${hint?' hl':''}"><h2>${t('billCardTitle')}</h2><p ${hint?'':'class="muted"'} style="margin:0">${hint?`<b>${t('billHint')}</b>`:t('billCardText')}</p><button class="btn" data-act="patBill" data-pid="${id}" style="align-self:flex-start">${t('billBtn')}</button></div>`;
+  return h.includes(k)?h.replace(k,card+k):h;
+};
+
+const goBill=go;
+go=function(v){ if(v==='vabrechnung'||v==='rechnungen'){ const b=S.bill; b.view=b.oview=b.pick=b.draft=null; b.pay=null; b.confirm=false; S.cat.imp=null; S.cat.edit=null; } return goBill(v); };
+
+/* ---------- Behandlung dokumentieren: Leistungen im Befundformular, Pakete, freie Positionen, Auto-Entwurf ---------- */
+S.pkgs=[
+  {id:'k1',name:'Jahresimpfung (Hund)',items:[['G01',1],['G03',1],['G05',1],['G04',1]]},
+  {id:'k2',name:'Gesundheitscheck',items:[['G01',1],['G06',1],['G07',1]]},
+  {id:'k3',name:'Ohrenbehandlung',items:[['G01',1],['G08',1],['G14',1]]}
+];
+const treatReset=pid=>{ S.treat={pid,sel:[],free:[],q:'',auto:true,ap:null,freeOpen:false,sug:false}; };
+const apPid=a=>!a?null:a.owner==='me'?a.pet:Object.keys(S.others).find(k=>apPet(a).toLowerCase().includes(S.others[k].name.toLowerCase()))||null;
+const treatLines=()=>{
+  const c=blCat(), T=S.treat;
+  return [...T.sel.map(s=>{ const it=c.items.find(x=>x.code===s.code); return it&&{code:it.code,name:it.name,desc:it.desc,qty:s.qty,price:it.price,factor:it.factor,fMin:it.fMin,fMax:it.fMax,tax:it.tax,taxL:it.taxL}; }).filter(Boolean),
+          ...T.free.map(fr=>({code:'',name:fr.name,desc:'',qty:fr.qty,price:fr.price,factor:1,fMin:1,fMax:1,tax:fr.tax,taxL:'',free:true}))];
+};
+function toastAct(msg,label,act,id){
+  const el=document.getElementById('toast');
+  el.innerHTML=`<span>${esc(msg)}</span> <button class="link toast-undo" data-act="${act}" data-id="${id}">${esc(label)}</button>`;
+  el.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>{ el.hidden=true; },9000);
+}
+const VAC_KEYS={vRabies:/tollwut|rabies|rage/i,vSHPPi:/shppi|dhppi/i,vL4:/lepto/i,vRCP:/rcp|katz/i,vRHD:/rhd|myxo/i};
+function treatSuggest(vacName){
+  const c=blCat(), T=S.treat, add=it=>{ if(it&&blValid(it)&&!T.sel.some(s=>s.code===it.code)) T.sel.push({code:it.code,qty:1,sug:true}); };
+  add(c.items.find(i=>/impfung|vaccination|vaccinat/i.test(i.name)&&!/impfstoff|vaccine|vaccin\b/i.test(i.name)));
+  const re=VAC_KEYS[vacName]; if(re) add(c.items.find(i=>re.test(i.name)&&/impfstoff|vaccine|vaccin/i.test((i.name+' '+i.desc))));
+  T.sug=T.sel.some(s=>s.sug);
+}
+function svcBlock(id){
+  const T=S.treat, c=blCat(), q=(T.q||'').toLowerCase(), cu=c.cur;
+  const sel=T.sel.map((s,i)=>{ const it=c.items.find(x=>x.code===s.code); if(!it) return '';
+    return `<div class="svcsel"><span class="grow"><b>${esc(it.name)}</b>${s.sug?` <span class="pill info">${t('svcSug')}</span>`:''}<span class="muted mono" style="display:block;font-size:.78rem">${esc(it.code)} · ${blMoney(it.price,it.cur||cu)}</span></span><span class="svcqty"><button class="btn ghost" data-act="svcQty" data-i="${i}" data-d="-1" aria-label="−">−</button><span class="mono">${s.qty}</span><button class="btn ghost" data-act="svcQty" data-i="${i}" data-d="1" aria-label="+">+</button></span><button class="btn ghost" data-act="svcRm" data-i="${i}" aria-label="${t('draftRemove')}">✕</button></div>`; }).join('');
+  const free=T.free.map((fr,i)=>`<div class="svcsel"><span class="grow"><b>${esc(fr.name)}</b> <span class="pill warn">${t('svcFreeLabel')}</span><span class="muted mono" style="display:block;font-size:.78rem">${blMoney(fr.price,cu)} × ${fr.qty} · ${num(fr.tax,0)} %</span></span><button class="btn ghost" data-act="svcFreeRm" data-i="${i}" aria-label="${t('draftRemove')}">✕</button></div>`).join('');
+  const list=c.items.map(it=>{ const ok=blValid(it), hay=(it.code+' '+it.name).toLowerCase(), hid=q&&!hay.includes(q);
+    return `<button class="svcrow" data-act="svcAdd" data-code="${esc(it.code)}" ${ok?'':'disabled'} ${hid?'hidden':''} data-search="${esc(hay)}"><span>+ <b>${esc(it.name)}</b></span><span class="muted mono">${esc(it.code)} · ${blMoney(it.price,it.cur||cu)}</span></button>`; }).join('');
+  const pk=S.pkgs.map(p=>`<button class="chip" data-act="svcPkg" data-id="${p.id}">${esc(p.name)}</button>`).join('');
+  const lines=treatLines(), est=lines.length?blTotals({lines}).gross:0, ap=T.ap?findAp(T.ap):null;
+  return `<hr class="sep"><h2>${t('svcTitle')}</h2>
+    ${ap?`<p class="note">${t('svcAp',{d:`${wd(ap.d)} ${dm(ap.d)}`,t:ap.t})}</p>`:''}
+    <p class="muted" style="margin:0;font-size:.82rem">${esc(c.name)} · ${t('catVerL')} ${esc(c.ver)}</p>
+    <input type="search" id="svc-search" value="${esc(T.q||'')}" placeholder="${t('svcSearch')}" aria-label="${t('svcSearch')}" autocomplete="off">
+    <div class="svclist">${list}</div>
+    <div class="svcselwrap">${sel||free?sel+free:`<p class="empty" style="margin:4px 0">${t('svcNone')}</p>`}</div>
+    ${T.sug?`<p class="note">${t('svcSugHint')}</p>`:''}
+    ${lines.length?`<p class="mono" style="margin:0"><b>${t('svcEst',{a:blMoney(est,cu)})}</b></p>`:''}
+    <div><div class="muted" style="font-size:.82rem;margin-bottom:6px">${t('svcPk')}</div><div class="chips">${pk}</div></div>
+    ${T.sel.length>=2?`<div class="bladd">${fld('pkgName',t('svcPkName'))}<button class="btn ghost" data-act="svcPkSave">${t('svcPkSave')}</button></div>`:''}
+    ${S.billCfg.allowFree?blFreeForm('svcFreeAdd',T.freeOpen):''}
+    <label class="check"><input type="checkbox" data-treatauto ${T.auto?'checked':''}><span>${t('svcAuto')}</span></label>`;
+}
+const apDocBtn=a=>{
+  if(!a||a.status==='cancelled') return '';
+  if(a.inv){ return `<button class="btn ghost" data-act="invGo" data-id="${a.inv}">${t('svcReview')}</button>`; }
+  const pid=apPid(a); if(!pid||(a.status!=='confirmed'&&a.out!=='show')) return '';
+  return `<button class="btn${a.out==='show'?'':' ghost'}" data-act="apDoc" data-id="${a.id}">${t('apBill')}</button>`;
+};
+
+/* ---- Patientenakte: Formular erweitern ---- */
+const vPatDetailTreat=vPatDetail;
+vPatDetail=function(id){
+  if(S.treat.pid!==id) treatReset(id);
+  const h=vPatDetailTreat(id), b=`<button class="btn" data-act="saveFinding" data-pid="${id}" style="align-self:flex-start">${t('saveBtn')}</button>`;
+  return h.includes(b)?h.replace(b,svcBlock(id)+`<button class="btn" data-act="saveFinding" data-pid="${id}" style="align-self:flex-start">${t('svcSave')}</button>`):h;
+};
+
+/* ---- Aktionen ---- */
+const vetActionTreat=vetAction;
+vetAction=function(a,d){
+  const T=S.treat;
+  switch(a){
+    case 'svcAdd': { const x=T.sel.find(s=>s.code===d.code); if(x){ x.qty++; x.sug=false; } else T.sel.push({code:d.code,qty:1}); render(); return true; }
+    case 'svcQty': { const x=T.sel[+d.i]; if(x){ x.qty=Math.max(1,x.qty+(+d.d)); } render(); return true; }
+    case 'svcRm': T.sel.splice(+d.i,1); T.sug=T.sel.some(s=>s.sug); render(); return true;
+    case 'svcFreeRm': T.free.splice(+d.i,1); render(); return true;
+    case 'svcFreeAdd': { const r=blReadFree(); if(!r){ T.freeOpen=true; render(); return true; } T.free.push(r); T.freeOpen=true; S.auth.errors={}; render(); return true; }
+    case 'svcPkg': { const p=S.pkgs.find(x=>x.id===d.id), c=blCat(); if(p) p.items.forEach(([code,q])=>{ const it=c.items.find(x=>x.code===code); if(!it||!blValid(it)) return; const x=T.sel.find(s=>s.code===code); if(x) x.qty+=q; else T.sel.push({code,qty:q}); }); render(); return true; }
+    case 'svcPkSave': { const name=(F().pkgName||'').trim(); if(!name){ S.auth.errors={pkgName:'err_required'}; render(); return true; } S.auth.errors={}; S.pkgs.push({id:'k'+Date.now(),name,items:T.sel.map(s=>[s.code,s.qty])}); delete F().pkgName; render(); toast(t('svcPkSaved',{n:name})); return true; }
+    case 'apDoc': { const ap=findAp(d.id), pid=apPid(ap); if(!pid) return true; treatReset(pid); S.treat.ap=ap.id; const f=F(); f.finTitle=t(ap.grund); delete f.finText; S.vpat=pid; S.view='vpatienten'; S.billHint=null; render(); window.scrollTo(0,0); return true; }
+    case 'invGo': { const i=S.inv.find(x=>x.id===d.id); if(!i) return true; const b=S.bill; b.view=b.draft=b.pick=null; b.pay=null; b.tab='inv'; if(i.status==='draft') b.draft=i.id; else b.view=i.id; S.view='vabrechnung'; render(); window.scrollTo(0,0); return true; }
+    case 'blFreeAdd': { const i=S.inv.find(x=>x.id===S.bill.draft); if(!i) return true; const r=blReadFree(); if(!r){ S.bill.freeOpen=true; i.note=F().billNote||''; render(); return true; }
+      i.lines.push({code:'',name:r.name,desc:'',qty:r.qty,price:r.price,factor:1,fMin:1,fMax:1,tax:r.tax,taxL:'',free:true}); S.bill.freeOpen=true; S.auth.errors={}; i.note=F().billNote||''; render(); return true; }
+    case 'blFreeToCat': { const i=S.inv.find(x=>x.id===S.bill.draft); const l=i&&i.lines[+d.i]; if(!l||!l.free) return true;
+      const old=blCat(); let n=old.items.filter(x=>/^E\d+$/.test(x.code)).length+1, code='E'+String(n).padStart(2,'0'); while(old.items.some(x=>x.code===code)){ n++; code='E'+String(n).padStart(2,'0'); }
+      const ver=blNextVer(), it={code,name:l.name,desc:'',price:l.price,cur:old.cur,factor:1,fMin:1,fMax:1,tax:l.tax,taxL:'',from:new Date(TODAY),to:null};
+      old.to=addDays(-1); S.cat.versions.unshift({ver,name:old.name,cur:old.cur,from:new Date(TODAY),to:null,items:[...old.items.map(x=>({...x})),it],note:'+ '+code});
+      l.free=false; l.code=code; i.catVer=ver; i.note=F().billNote||''; render(); toast(t('freeToCatDone',{n:l.name,c:code,v:ver})); return true; }
+    case 'saveVacc': { const p=getPet(d.pid), n0=p?p.impf.length:0, vn=F().vacName; const r=vetActionTreat(a,d); if(p&&p.impf.length>n0){ if(S.treat.pid!==d.pid) treatReset(d.pid); treatSuggest(vn); render(); } return r; }
+    case 'saveFinding': {
+      const p=getPet(d.pid), n0=p?p.befunde.length:0, lines=(S.treat.pid===d.pid)?treatLines():[], auto=S.treat.auto, ap=S.treat.ap?findAp(S.treat.ap):null;
+      const r=vetActionTreat(a,d);
+      if(p&&p.befunde.length>n0&&lines.length&&auto){
+        const c=blCat(), inv={id:'i'+Date.now(),no:null,p:'p1',pid:d.pid,status:'draft',treat:ap?new Date(ap.d):new Date(TODAY),date:null,due:null,lines,cur:c.cur,catVer:c.ver,catName:c.name,note:'',paid:null};
+        S.inv.unshift(inv); if(ap){ if(!ap.out){ ap.out='show'; ap.outBy=actor(); } ap.inv=inv.id; }
+        S.billHint=null; treatReset(d.pid); F().billNoteFor=null; render(); toastAct(t('svcSaved',{n:lines.length}),t('svcReview'),'invGo',inv.id);
+      } else if(p&&p.befunde.length>n0){ if(ap&&!ap.out){ ap.out='show'; ap.outBy=actor(); } treatReset(d.pid); render(); }
+      return r; }
+  }
+  return vetActionTreat(a,d);
+};
+
+/* ---- Eingaben ---- */
+document.addEventListener('input',e=>{ const el=e.target; if(el&&el.id==='svc-search'){ const q=el.value.toLowerCase(); S.treat.q=el.value; document.querySelectorAll('.svcrow').forEach(r=>{ r.hidden=!!q&&!(r.dataset.search||'').includes(q); }); } });
+document.addEventListener('change',e=>{
+  const el=e.target; if(!el||!el.dataset) return;
+  if('treatauto' in el.dataset) S.treat.auto=el.checked;
+  else if('cfg' in el.dataset){ S.billCfg.allowFree=el.checked; render(); }
+});
+
+/* ---- Katalog-Einstellungen, Buchungen ---- */
+const blCatTabTreat=blCatTab;
+blCatTab=function(){ return blCatTabTreat()+`<div class="card"><h2>${t('cfgTitle')}</h2><label class="check"><input type="checkbox" data-cfg="free" ${S.billCfg.allowFree?'checked':''}><span><b>${t('cfgFree')}</b><br><span class="muted">${t('cfgFreeSub')}</span></span></label></div>`; };
+
+const VIEWS={vabrechnung:vAbrechnung,rechnungen:vRechnungen,vhome:vVetHome,vkalender:vKalender,vbuchungen:vBuchungen,vpatienten:vPatienten,verinnerung:vRecall,vauswertung:vAuswertung,profil:vProfil,petform:vPetForm,home:vHome,termine:vTermine,akte:vAkte,symptom:vSymptom,tele:vTele,erinnerung:vErinnerung,notfall:vNotfall,vhome:vVetHome,vanfragen:vVetAnfragen};
 function render(){ applyLang(); const authed=S.auth.stage==='in'; document.querySelector('.app').classList.toggle('pre',!authed); if(!authed){ document.getElementById('main').innerHTML=vAuth(); return; } renderNav(); const ks=Object.keys(S.pets); if(ks.length){ if(!S.pets[S.book.pet]) S.book.pet=ks[0]; if(!S.pets[S.sym.pet]) S.sym.pet=ks[0]; if(!S.pets[S.pet]) S.pet=ks[0]; }
   const needsPet=S.role==='owner' && !ks.length && ['termine','symptom','akte'].includes(S.view);
   document.getElementById('main').innerHTML = needsPet ? head(t('nav_'+S.view),'')+`<div class="card" style="max-width:560px"><div class="empty-art">${petSvg('dog','#e3c08d')}${petSvg('cat','#e7a35a')}${petSvg('rabbit','#ece6dc')}</div><h2>${t('pet_title')}</h2><p class="muted">${t('pet_sub')}</p><button class="btn" data-act="newPet" style="align-self:flex-start">${t('addPet')}</button></div>` : VIEWS[S.view](); const c=document.getElementById('chat'); if(c) c.scrollTop=c.scrollHeight; }
