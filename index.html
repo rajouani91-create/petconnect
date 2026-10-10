@@ -2595,7 +2595,7 @@ renderNav=function(){
 const vPatDetailBill=vPatDetail;
 vPatDetail=function(id){
   const h=vPatDetailBill(id), hint=S.billHint===id, k=`<div class="card"><h2>${t('findings')}</h2>`;
-  const card=`<div class="card${hint?' hl':''}"><h2>${t('billCardTitle')}</h2><p ${hint?'':'class="muted"'} style="margin:0">${hint?`<b>${t('billHint')}</b>`:t('billCardText')}</p><button class="btn" data-act="patBill" data-pid="${id}" style="align-self:flex-start">${t('billBtn')}</button></div>`;
+  const card=`<div class="card${hint?' hl':''}"><h2>${t('billCardTitle')}</h2><p ${hint?'':'class="muted"'} style="margin:0">${hint?`<b>${t('billHint')}</b>`:billCardTxt(id)}</p><button class="btn" data-act="patBill" data-pid="${id}" style="align-self:flex-start">${t('billBtn')}</button></div>`;
   return h.includes(k)?h.replace(k,card+k):h;
 };
 
@@ -2789,6 +2789,38 @@ document.addEventListener('keydown',e=>{
   if(S.apE&&e.key==='Escape'){ apeClose(); return; }
   if((e.key==='Enter'||e.key===' ')&&S.role==='vet'&&!S.apE){ const el=e.target.closest&&e.target.closest('.ap[data-apid]'); if(el&&e.target===el){ e.preventDefault(); apeOpen(el.dataset.apid); } }
 });
+
+/* ===== Erbrachte Leistungen <-> Leistungen abrechnen verbinden ===== */
+Object.assign(STR.de,{brLines:'{n} erbrachte Leistung(en) ausgewählt (ca. {a}). „Leistungen abrechnen" erstellt daraus den Rechnungsentwurf.',brDone:'Rechnungsentwurf aus den erbrachten Leistungen erstellt.',brHave:'Für diesen Termin gibt es schon einen Rechnungsentwurf.'});
+Object.assign(STR.en,{brLines:'{n} service(s) selected (approx. {a}). “Bill services” creates the invoice draft from them.',brDone:'Invoice draft created from the services provided.',brHave:'There is already an invoice draft for this appointment.'});
+S.pendLines=S.pendLines||{};
+const brLinesFor=pid=>{ if(S.treat&&S.treat.pid===pid){ const l=treatLines(); if(l.length) return l; } return (S.pendLines[pid]||[]); };
+function billCardTxt(pid){
+  const l=brLinesFor(pid);
+  if(!l.length) return t('billCardText');
+  return t('brLines',{n:l.length,a:blMoney(blTotals({lines:l}).gross,blCat().cur)});
+}
+const vetActionBr=vetAction;
+vetAction=function(a,d){
+  if(a==='patBill'){
+    const pid=d.pid, lines=brLinesFor(pid);
+    if(lines.length){
+      const ap=(S.treat&&S.treat.pid===pid&&S.treat.ap)?findAp(S.treat.ap):null;
+      if(ap&&ap.inv&&S.inv.some(x=>x.id===ap.inv)){ toast(t('brHave')); return vetAction('invGo',{id:ap.inv}); }
+      const c=blCat(), inv={id:'i'+Date.now(),no:null,p:'p1',pid,status:'draft',treat:ap?new Date(ap.d):new Date(TODAY),date:null,due:null,lines:lines.map(x=>({...x})),cur:c.cur,catVer:c.ver,catName:c.name,note:'',paid:null};
+      S.inv.unshift(inv); if(ap){ if(!ap.out){ ap.out='show'; ap.outBy=actor(); } ap.inv=inv.id; }
+      delete S.pendLines[pid]; S.billHint=null; treatReset(pid); F().billNoteFor=null;
+      toast(t('brDone')); return vetAction('invGo',{id:inv.id});
+    }
+  }
+  if(a==='saveFinding'){
+    const pid=d.pid, lines=(S.treat.pid===pid)?treatLines():[], auto=S.treat.auto, n0=getPet(pid)?getPet(pid).befunde.length:0;
+    const r=vetActionBr(a,d);
+    if(lines.length&&!auto&&getPet(pid)&&getPet(pid).befunde.length>n0){ S.pendLines[pid]=lines; render(); }
+    return r;
+  }
+  return vetActionBr(a,d);
+};
 
 const VIEWS={vabrechnung:vAbrechnung,rechnungen:vRechnungen,vhome:vVetHome,vkalender:vKalender,vbuchungen:vBuchungen,vpatienten:vPatienten,verinnerung:vRecall,vauswertung:vAuswertung,profil:vProfil,petform:vPetForm,home:vHome,termine:vTermine,akte:vAkte,symptom:vSymptom,tele:vTele,erinnerung:vErinnerung,notfall:vNotfall,vhome:vVetHome,vanfragen:vVetAnfragen};
 function render(){ applyLang(); const authed=S.auth.stage==='in'; document.querySelector('.app').classList.toggle('pre',!authed); if(!authed){ document.getElementById('main').innerHTML=vAuth(); return; } renderNav(); const ks=Object.keys(S.pets); if(ks.length){ if(!S.pets[S.book.pet]) S.book.pet=ks[0]; if(!S.pets[S.sym.pet]) S.sym.pet=ks[0]; if(!S.pets[S.pet]) S.pet=ks[0]; }
