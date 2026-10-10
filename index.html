@@ -2728,7 +2728,7 @@ function vAdmin(){
       <div class="chips" style="margin-top:8px"><button class="btn" data-act="admPrev" data-p="${p.id}" data-r="vet">${t('admPreviewVet')}</button><button class="btn ghost" data-act="admPrev" data-p="${p.id}" data-r="owner">${t('admPreviewOwner')}</button></div></div>`; }).join('');
   return head(t('admTitle'),t('admSub'),`<button class="btn ghost" data-act="admLogout">${t('admLogout')}</button>`)+rows+`<p class="note">${t('admNote')}</p>`;
 }
-const vLoginMod=vLogin; vLogin=function(){ return vLoginMod().replace('<p class="note">',`<p class="linkrow" style="margin-top:0"><button class="link" data-act="toAdmin">${t('admLink')}</button></p><p class="note">`); };
+const vLoginMod=vLogin; vLogin=function(){ const h=vLoginMod(); if(location.hash!=='#betreiber') return h; return h.replace('<p class="note">',`<p class="linkrow" style="margin-top:0"><button class="link" data-act="toAdmin">${t('admLink')}</button></p><p class="note">`); };
 const vAuthMod=vAuth; vAuth=function(){ if(S.auth.stage==='adminLogin') return authShell(`<div><h1>${t('admTitle')}</h1></div>${fld('admPw',t('admPw'),'password')}<button class="btn" data-act="admLoginGo">${t('admLogin')}</button><button class="link" data-act="toLogin">${t('toLogin')}</button>`); return vAuthMod(); };
 const vetActionMod=vetAction;
 vetAction=function(a,d){
