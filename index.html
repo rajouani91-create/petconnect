@@ -2633,6 +2633,39 @@ vetAction=function(a,d){
   return vetActionNw(a,d);
 };
 
+/* ---- Dokumente zum Tier (Prototyp) ---- */
+S.docs=S.docs||{}; S.docView=null; S.docFilter='all';
+const DOC_CATS=['docPass','docChip','docIns','docFind','docOther'];
+Object.assign(STR.de,{docBtn:"Dokumente",docTitle:"Dokumente",docSub:"Wichtige Unterlagen für {n} an einem Ort",docAll:"Alle",docPass:"Impfpass / Heimtierausweis",docChip:"Chip & Register",docIns:"Versicherung",docFind:"Befunde",docOther:"Sonstiges",docAdd:"Dokument hinzufügen",docName:"Bezeichnung",docCat:"Kategorie",docAddBtn:"Hinzufügen",docSrcPrac:"Von der Praxis",docSrcMe:"Von dir",docOpen:"Öffnen",docDel:"Löschen",docNone:"Noch keine Dokumente in dieser Kategorie.",docAdded:"Dokument gespeichert.",docOpenToast:"Prototyp: Hier würde das Dokument geöffnet.",docNeed:"Bitte eine Bezeichnung eingeben.",docPick:"Foto oder PDF auswählen",docNote:"Prototyp: Es wird keine Datei wirklich gespeichert.",docTips:"Tipp: Foto vom Impfpass, Chip-Bescheinigung, Versicherungspolice und Befunde hier ablegen."});
+Object.assign(STR.en,{docBtn:"Documents",docTitle:"Documents",docSub:"Important papers for {n} in one place",docAll:"All",docPass:"Vaccination / pet passport",docChip:"Chip & registry",docIns:"Insurance",docFind:"Findings",docOther:"Other",docAdd:"Add document",docName:"Title",docCat:"Category",docAddBtn:"Add",docSrcPrac:"From the practice",docSrcMe:"From you",docOpen:"Open",docDel:"Delete",docNone:"No documents in this category yet.",docAdded:"Document saved.",docOpenToast:"Prototype: the document would open here.",docNeed:"Please enter a title.",docPick:"Choose photo or PDF",docNote:"Prototype: no file is really stored.",docTips:"Tip: keep a photo of the vaccination passport, chip certificate, insurance policy and findings here."});
+function docList(id){ if(!S.docs[id]) S.docs[id]=[
+  {id:1,cat:'docPass',name:'Impfpass (Foto)',d:D(2026,4,12),by:'me'},
+  {id:2,cat:'docChip',name:'Chip-Bescheinigung',d:D(2022,5,2),by:'me'},
+  {id:3,cat:'docIns',name:'Versicherungspolice',d:D(2025,1,15),by:'me'},
+  {id:4,cat:'docFind',name:'Blutbild und Organwerte',d:D(2026,3,8),by:'prac'}]; return S.docs[id]; }
+function vDokumente(id){
+  const p=getPet(id), all=docList(id), fl=S.docFilter, list=all.filter(x=>fl==='all'||x.cat===fl).sort((a,b)=>b.d-a.d);
+  const chips=['all',...DOC_CATS].map(k=>`<button class="chip" data-act="docFilter" data-v="${k}" aria-pressed="${fl===k}">${k==='all'?t('docAll'):t(k)}${k==='all'?` (${all.length})`:''}</button>`).join('');
+  const rows=list.map(x=>`<div class="row" style="align-items:flex-start"><div class="grow" style="min-width:0"><div style="font-weight:600">${esc(x.name)}</div><div class="muted" style="font-size:.85rem;margin:2px 0 6px">${fmt(x.d)} · ${x.by==='prac'?t('docSrcPrac'):t('docSrcMe')}</div><span class="pill info">${t(x.cat)}</span></div><div class="chips" style="flex-wrap:nowrap"><button class="btn ghost" data-act="docOpen">${t('docOpen')}</button>${x.by==='me'?`<button class="btn ghost" data-act="docDel" data-pid="${id}" data-did="${x.id}" aria-label="${t('docDel')}">✕</button>`:''}</div></div>`).join('')||`<p class="empty">${t('docNone')}</p>`;
+  return head(t('docTitle'),t('docSub',{n:esc(p.name)}),`<button class="btn ghost" data-act="docBack">${t('nwBack')}</button>`)
+   +`<div class="card"><div class="chips" role="group">${chips}</div><div class="list" style="margin-top:8px">${rows}</div><p class="note">${t('docTips')}</p></div>`
+   +`<div class="card"><h2>${t('docAdd')}</h2><div class="grid g2">${sel('docCatSel',t('docCat'),DOC_CATS.map(k=>[k,t(k)]))}${fld('docNameIn',t('docName'))}</div><div class="chips"><button class="btn" data-act="docSave" data-pid="${id}">${t('docAddBtn')}</button></div><p class="note">${t('docNote')}</p></div>`;
+}
+const docBtn=id=>`<button class="btn ghost" data-act="docOpenView" data-pid="${id}">${t('docBtn')}</button>`;
+const vAkteNw=vAkte;
+vAkte=function(){ if(S.docView&&getPet(S.docView)) return vDokumente(S.docView); S.docView=null; const h=vAkteNw(); const k=`<button class="btn ghost" data-act="nwOpen" data-pid="${S.pet}">${t('nwOpen')}</button>`; return S.pets[S.pet]?h.replace(k,`<div class="chips">${k}${docBtn(S.pet)}</div>`):h; };
+const vetActionDoc=vetAction;
+vetAction=function(a,d){
+  if(a==='docOpenView'){ S.docView=d.pid; S.docFilter='all'; render(); window.scrollTo(0,0); return true; }
+  if(a==='docBack'){ S.docView=null; render(); window.scrollTo(0,0); return true; }
+  if(a==='docFilter'){ S.docFilter=d.v; render(); return true; }
+  if(a==='docOpen'){ toast(t('docOpenToast')); return true; }
+  if(a==='docDel'){ S.docs[d.pid]=docList(d.pid).filter(x=>String(x.id)!==d.did); render(); return true; }
+  if(a==='docSave'){ const f=F(), nm=(f.docNameIn||'').trim(); if(!nm){ toast(t('docNeed')); return true; }
+    docList(d.pid).push({id:Date.now(),cat:f.docCatSel||DOC_CATS[0],name:nm,d:new Date(TODAY),by:'me'}); delete f.docNameIn; render(); toast(t('docAdded')); return true; }
+  return vetActionDoc(a,d);
+};
+
 /* ---- Eingaben ---- */
 document.addEventListener('change',e=>{
   const el=e.target; if(!el||!el.dataset) return;
