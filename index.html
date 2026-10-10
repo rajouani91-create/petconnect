@@ -195,7 +195,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .dlink:hover b{text-decoration:underline}
 .dslot{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
 .dslot .mono{width:48px;flex:none;padding-top:6px}
-.dslot .grow{display:flex;flex-direction:column;gap:6px;min-width:0}
+.dslot .grow{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
 .ap.ns{border-color:var(--crit)}
 .month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 .mh{font-size:.75rem;color:var(--muted);text-align:center;padding-bottom:2px}
@@ -251,6 +251,8 @@ body.dnd-on{user-select:none;-webkit-user-select:none;cursor:grabbing}
 @media(min-width:700px){.apeback{align-items:center}.apedlg{border-radius:16px}}
 .ap[data-apid]{cursor:pointer}
 .ap[data-drag="1"]{cursor:grab}
+.apclashgrp{display:flex;gap:6px;align-items:stretch;padding:4px;border-radius:8px;background:var(--crit-soft,rgba(200,60,50,.08));outline:1px dashed var(--crit)}
+.apclashgrp>.ap{flex:1 1 0;min-width:0}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:8px;font-weight:500;z-index:50;max-width:calc(100% - 32px)}
 .empty{color:var(--muted);font-size:.9rem;padding:8px 0}
 
@@ -1906,6 +1908,14 @@ const dayState=d=>{ const h=S.hours[d.getDay()], blk=S.blocks.find(b=>sameDay(b.
 const dayStatusTxt=d=>{ const {h,blk}=dayState(d); return blk?t(blk.reason):!h.open?t('closed'):`${h.from}–${h.to}`; };
 const apLine=a=>`<div class="ap ${a.status}${a.out==='noshow'?' ns':''}${clashOf(a).length?' clash':''}" data-apid="${a.id}"${dndOK(a)?' data-drag="1" tabindex="0"':''}><span class="mono">${a.t}</span><b>${esc(apPet(a))}</b><small>${esc(t(a.grund))}${a.art==='Video'?' · '+t('videoShort'):''}${a.status==='pending'?' · '+t('st_pending'):''}${a.out?' · '+t(a.out==='show'?'pillShow':'pillNo'):''}${a.newCust?' · '+t('newCust'):''}${clashOf(a).length?' · '+t('clashShort'):''}</small></div>`;
 
+/* Gleichzeitige Termine nebeneinander */
+function apClusters(aps){
+  const L=[...aps].sort((a,b)=>a.t<b.t?-1:a.t>b.t?1:0), out=[]; let cur=null, end=0;
+  for(const a of L){ const s=toMin(a.t), e=s+durOf(a); if(cur&&s<end){ cur.push(a); end=Math.max(end,e); } else { cur=[a]; out.push(cur); end=e; } }
+  return out;
+}
+const apGroups=aps=>apClusters(aps).map(g=>g.length>1?`<div class="apclashgrp" style="--n:${g.length}">${g.map(apLine).join('')}</div>`:apLine(g[0])).join('');
+const apHasClash=aps=>apClusters(aps).some(g=>g.length>1);
 function calTitle(){
   const c=S.cal, o=L();
   if(c.v==='day') return c.date.toLocaleDateString(o,{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
@@ -1919,8 +1929,8 @@ function calBody(){
     const d=c.date, {off}=dayState(d), aps=appsOn(d);
     const {h}=dayState(d);
     const slots=off?[]:ALL_SLOTS.filter(x=>x>=h.from&&x<h.to);
-    const rows=slots.map(sl=>{ const a=aps.filter(x=>x.t===sl); return `<div class="dslot" data-day="${isoDate(d)}" data-slot="${sl}"><span class="mono muted">${sl}</span><div class="grow">${a.length?a.map(apLine).join(''):`<span class="muted">${t('vFree')}</span>`}</div></div>`; }).join('');
-    const stray=aps.filter(a=>!slots.includes(a.t)).map(apLine).join('');
+    const rows=slots.map(sl=>{ const a=aps.filter(x=>x.t===sl); return `<div class="dslot" data-day="${isoDate(d)}" data-slot="${sl}"><span class="mono muted">${sl}</span><div class="grow">${a.length?apGroups(a):`<span class="muted">${t('vFree')}</span>`}</div></div>`; }).join('');
+    const stray=apGroups(aps.filter(a=>!slots.includes(a.t)));
     return `<p class="muted" style="margin:0 0 6px">${esc(dayStatusTxt(d))} · ${t('vCnt',{n:aps.length})}</p>${rows||`<p class="empty">${off?esc(dayStatusTxt(d)):t('vNoApp')}</p>`}${stray}`;
   }
   if(c.v==='month'){
@@ -1933,8 +1943,9 @@ function calBody(){
   }
   const m=mondayOf(c.date);
   const cols=Array.from({length:7},(_,i)=>{ const d=plusDays(m,i), {off}=dayState(d), aps=appsOn(d);
-    return `<div class="daycol${off?' off':''}" data-day="${isoDate(d)}"><button class="dh dlink" data-act="calDay" data-d="${isoDate(d)}"><b>${sameDay(d,TODAY)?t('todayCap'):wd(d)}</b><span class="mono muted">${dm(d)}</span></button><span class="muted mono">${esc(dayStatusTxt(d))}</span>${aps.map(apLine).join('')}</div>`; }).join('');
-  return `<div class="week-scroll"><div class="week">${cols}</div></div>`;
+    return `<div class="daycol${off?' off':''}" data-day="${isoDate(d)}"><button class="dh dlink" data-act="calDay" data-d="${isoDate(d)}"><b>${sameDay(d,TODAY)?t('todayCap'):wd(d)}</b><span class="mono muted">${dm(d)}</span></button><span class="muted mono">${esc(dayStatusTxt(d))}</span>${apGroups(aps)}</div>`; }).join('');
+  const tpl=Array.from({length:7},(_,i)=>apHasClash(appsOn(plusDays(m,i)))?'minmax(250px,2.2fr)':'minmax(118px,1fr)').join(' ');
+  return `<div class="week-scroll"><div class="week" style="grid-template-columns:${tpl}">${cols}</div></div>`;
 }
 function calCard(){
   const c=S.cal;
