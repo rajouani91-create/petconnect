@@ -952,7 +952,7 @@ function petFormFields(){
     <div class="grid g2">${sel('species',t('speciesOnly'),[['dog',t('dog')],['cat',t('cat')],['otherAnimal',t('otherAnimal')]])}${sel('sexP',t('sex'),[['sexF',t('sexF')],['sexM',t('sexM')]])}</div>
     <div class="grid g2">${fld('breed',t('breed'))}${fld('birth',t('birth'),'date')}</div>
     <div class="grid g2">${fld('chipNo',t('chipOpt'),'text','inputmode="numeric" placeholder="276 …"')}${fld('weightIn',t('weightKg'),'number','min="0" step="0.1"')}</div>
-    <div class="grid g2">${sel('insSel',t('insRegSel'),[['',t('insNoneYet')]].concat(INS_DIR.map(x=>[x.id,x.name])).concat([['other',t('insOther')]]))}${fld('insNo',t('insNo'))}</div>${F().insSel==='other'?fld('insMail',t('insOtherMail'),'email'):''}<p class="note">${t('insRegNote')}</p>`;
+    <div class="grid g2">${sel('insSel',t('insRegSel'),[['',t('insNoneYet')]].concat(INS_DIR.map(x=>[x.id,x.name])).concat([['other',t('insOther')]]))}${fld('insNo',t('insNo'))}</div>${F().insSel?fld('insHolder',t('insHolder')):''}${F().insSel==='other'?fld('insMail',t('insOtherMail'),'email'):''}<p class="note">${t('insRegNote')}</p>`;
 }
 function practiceFormFields(){
   const foc=F().focus||[];
@@ -1031,9 +1031,9 @@ function authAction(a){
     S.pets[id]={photo:f.photo||null,name:f.petName.trim(),art:f.species||'dog',rasse:(f.breed||'').trim()||'—',sex:f.sexP||'sexF',geb:f.birth?new Date(f.birth+'T00:00'):null,
       chip:d?d.replace(/(\d{3})(\d{3})(\d{3})(\d{3})(\d{3})/,'$1 $2 $3 $4 $5'):'—',pass:'—',gewicht:isNaN(w)?[]:[w],allergien:'allergyNone',impf:[],befunde:[],medi:[]};
     S.pet=id; S.book.pet=id; S.sym.pet=id;
-    if(f.insSel||f.insNo){ S.ins[id]={sel:f.insSel||INS_DIR[0].id,no:(f.insNo||'').trim(),mail:(f.insMail||'').trim()}; }
+    if(f.insSel||f.insNo){ S.ins[id]={sel:f.insSel||INS_DIR[0].id,no:(f.insNo||'').trim(),mail:(f.insMail||'').trim(),holder:(f.insHolder||'').trim()}; }
     celebrate(t('toastPetAdded',{name:S.pets[id].name}));
-    ['petName','breed','birth','chipNo','weightIn','photo','insSel','insNo','insMail'].forEach(k=>delete f[k]);
+    ['petName','breed','birth','chipNo','weightIn','photo','insSel','insNo','insMail','insHolder'].forEach(k=>delete f[k]);
     if(S.auth.stage==='onboard') return enterApp();
     S.view='akte'; return render();
   }
@@ -2576,27 +2576,61 @@ const INS_DIR=[
  {id:'i3',name:'Demo OP-Schutz',portal:'https://portal.demo-op-schutz.example',mode:'portal'}
 ];
 S.ins=S.ins||{}; S.insConfirm=null;
-Object.assign(STR.de,{insTitle:"An Tierversicherung weiterleiten",insSel:"Versicherung",insNo:"Versicherungsnummer",insOther:"Andere Versicherung",insOtherMail:"E-Mail der Versicherung",insFwd:"Weiterleiten",insWho:"Empfänger: {n}",insSure:"Rechnung {no} jetzt an {n} senden? Sie enthält Angaben zur Behandlung von {pet}. Es wird nichts gesendet, bevor du bestätigst.",insSend:"Jetzt senden",insCancel:"Abbrechen",insNeed:"Bitte Versicherung und Versicherungsnummer angeben.",insSent:"Eingereicht am {d} an {n}",insDone:"Rechnung wurde an {n} gesendet.",insPortal:"Diese Versicherung nimmt Rechnungen über ein Portal an. Lade die Rechnung herunter und lade sie dort hoch.",insToPortal:"Zum Portal",insNote:"Prototyp: Es wird nichts wirklich versendet. Die Daten der Versicherungen sind Beispiele.",insRegSel:"Tierversicherung (optional)",insNoneYet:"Keine / später",insRegNote:"Mit Versicherung und Nummer kannst du Rechnungen später mit einem Klick weiterleiten. Die Kontaktdaten der Versicherung musst du nicht eingeben."});
-Object.assign(STR.en,{insTitle:"Forward to pet insurance",insSel:"Insurer",insNo:"Policy number",insOther:"Other insurer",insOtherMail:"Insurer email",insFwd:"Forward",insWho:"Recipient: {n}",insSure:"Send invoice {no} to {n} now? It contains treatment details for {pet}. Nothing is sent before you confirm.",insSend:"Send now",insCancel:"Cancel",insNeed:"Please enter insurer and policy number.",insSent:"Submitted on {d} to {n}",insDone:"Invoice was sent to {n}.",insPortal:"This insurer takes invoices through a portal. Download the invoice and upload it there.",insToPortal:"Open portal",insNote:"Prototype: nothing is really sent. Insurer data are examples.",insRegSel:"Pet insurance (optional)",insNoneYet:"None / later",insRegNote:"With insurer and number you can forward invoices in one click later. You do not need to enter the insurer's contact details."});
-function insCur(i){ const f=F(), s=S.ins[i.pid]||{}; const sel_=f.insSel??s.sel??INS_DIR[0].id, no=f.insNo??s.no??'', mail=f.insMail??s.mail??'';
-  const d=INS_DIR.find(x=>x.id===sel_); return {sel:sel_,no,mail,d,name:d?d.name:t('insOther'),to:d?(d.mail||d.portal):mail}; }
+Object.assign(STR.de,{insTitle:"An Tierversicherung weiterleiten",insSel:"Versicherung",insNo:"Versicherungsnummer",insHolder:"Versicherungsnehmer (Name auf der Police)",insOther:"Andere Versicherung",insOtherMail:"E-Mail der Versicherung",insFwd:"Weiterleiten",insWho:"Empfänger: {n}",insSure:"Rechnung {no} jetzt an {n} senden? Sie enthält Angaben zur Behandlung von {pet}. Es wird nichts gesendet, bevor du bestätigst.",insSend:"Jetzt senden",insCancel:"Abbrechen",insNeed:"Bitte Versicherung und Versicherungsnummer angeben.",insSent:"Eingereicht am {d} an {n}",insDone:"Rechnung wurde an {n} gesendet.",insPortal:"Diese Versicherung nimmt Rechnungen über ein Portal an. Lade die Rechnung herunter und lade sie dort hoch.",insToPortal:"Zum Portal",insNote:"Prototyp: Es wird nichts wirklich versendet. Die Daten der Versicherungen sind Beispiele.",insRegSel:"Tierversicherung (optional)",insNoneYet:"Keine / später",insRegNote:"Mit Versicherung und Nummer kannst du Rechnungen später mit einem Klick weiterleiten. Die Kontaktdaten der Versicherung musst du nicht eingeben."});
+Object.assign(STR.en,{insTitle:"Forward to pet insurance",insSel:"Insurer",insNo:"Policy number",insHolder:"Policyholder (name on the policy)",insOther:"Other insurer",insOtherMail:"Insurer email",insFwd:"Forward",insWho:"Recipient: {n}",insSure:"Send invoice {no} to {n} now? It contains treatment details for {pet}. Nothing is sent before you confirm.",insSend:"Send now",insCancel:"Cancel",insNeed:"Please enter insurer and policy number.",insSent:"Submitted on {d} to {n}",insDone:"Invoice was sent to {n}.",insPortal:"This insurer takes invoices through a portal. Download the invoice and upload it there.",insToPortal:"Open portal",insNote:"Prototype: nothing is really sent. Insurer data are examples.",insRegSel:"Pet insurance (optional)",insNoneYet:"None / later",insRegNote:"With insurer and number you can forward invoices in one click later. You do not need to enter the insurer's contact details."});
+function insCur(i){ const f=F(), s=S.ins[i.pid]||{}; const sel_=f.insSel??s.sel??INS_DIR[0].id, no=f.insNo??s.no??'', mail=f.insMail??s.mail??'', holder=(f.insHolder??s.holder)||(S.auth.full||S.auth.name||'');
+  const d=INS_DIR.find(x=>x.id===sel_); return {sel:sel_,no,mail,holder,d,name:d?d.name:t('insOther'),to:d?(d.mail||d.portal):mail}; }
 function insCard(i){
   const c=insCur(i), pet=esc(blPetName(i));
   if(i.fwd) return `<div class="card"><h2>${t('insTitle')}</h2><p><span class="pill ok">${t('insSent',{d:fmt(i.fwd.d),n:esc(i.fwd.n)})}</span></p></div>`;
   const opts=INS_DIR.map(x=>[x.id,x.name]).concat([['other',t('insOther')]]);
   const portal=c.d&&c.d.mode==='portal';
   const conf=S.insConfirm===i.id?`<div class="subrow"><p>${t('insSure',{no:esc(i.no),n:esc(c.name),pet})}</p><p class="muted mono">${esc(c.to)}</p><div class="chips"><button class="btn" data-act="insSend" data-id="${i.id}">${t('insSend')}</button><button class="btn ghost" data-act="insNo">${t('insCancel')}</button></div></div>`:'';
-  return `<div class="card"><h2>${t('insTitle')}</h2><div class="grid g2">${sel('insSel',t('insSel'),opts)}${fld('insNo',t('insNo'))}</div>${c.sel==='other'?fld('insMail',t('insOtherMail'),'email'):''}${portal?`<p class="note">${t('insPortal')}</p>`:''}<div class="chips">${portal?`<button class="btn" data-act="blDl" data-id="${i.id}">${t('invDownload')}</button>`:`<button class="btn" data-act="insAsk" data-id="${i.id}">${t('insFwd')}</button>`}</div>${conf}<p class="note">${t('insNote')}</p></div>`;
+  return `<div class="card"><h2>${t('insTitle')}</h2><div class="grid g2">${sel('insSel',t('insSel'),opts)}${fld('insNo',t('insNo'))}</div>${fld('insHolder',t('insHolder'))}${c.sel==='other'?fld('insMail',t('insOtherMail'),'email'):''}${portal?`<p class="note">${t('insPortal')}</p>`:''}<div class="chips">${portal?`<button class="btn" data-act="blDl" data-id="${i.id}">${t('invDownload')}</button>`:`<button class="btn" data-act="insAsk" data-id="${i.id}">${t('insFwd')}</button>`}</div>${conf}<p class="note">${t('insNote')}</p></div>`;
 }
 const vetActionIns=vetAction;
 vetAction=function(a,d){
   if(a==='insAsk'){ const i=S.inv.find(x=>x.id===d.id); if(!i) return true; const c=insCur(i);
-    if(!c.no.trim()||(c.sel==='other'&&!/^\S+@\S+\.\S+$/.test(c.mail))){ toast(t('insNeed')); return true; }
-    S.ins[i.pid]={sel:c.sel,no:c.no,mail:c.mail}; S.insConfirm=i.id; render(); return true; }
+    if(!c.no.trim()||!c.holder.trim()||(c.sel==='other'&&!/^\S+@\S+\.\S+$/.test(c.mail))){ toast(t('insNeed')); return true; }
+    S.ins[i.pid]={sel:c.sel,no:c.no,mail:c.mail,holder:c.holder}; S.insConfirm=i.id; render(); return true; }
   if(a==='insNo'){ S.insConfirm=null; render(); return true; }
   if(a==='insSend'){ const i=S.inv.find(x=>x.id===d.id); if(!i||S.insConfirm!==i.id) return true; const c=insCur(i);
-    i.fwd={d:new Date(TODAY),n:c.name,to:c.to,no:c.no}; S.insConfirm=null; render(); toast(t('insDone',{n:c.name})); return true; }
+    i.fwd={d:new Date(TODAY),n:c.name,to:c.to,no:c.no,h:c.holder}; S.insConfirm=null; render(); toast(t('insDone',{n:c.name})); return true; }
   return vetActionIns(a,d);
+};
+
+/* ---- Digitaler Impfnachweis (Prototyp) ---- */
+S.nachweis=S.nachweis||{}; S.impfView=null;
+Object.assign(STR.de,{nwTitle:"Digitaler Impfnachweis",nwSub:"Alle von der Praxis bestätigten Impfungen",nwOpen:"Impfnachweis",nwBack:"Zurück zur Tierakte",nwDl:"Als PDF speichern / drucken",nwConf:"Bestätigt von {p}",nwNone:"Noch keine bestätigten Impfungen.",nwNext:"Nächste Impfung",nwIssued:"Ausgestellt am {d} · {who}",nwAuto:"Automatisch aus den Einträgen der Praxis erstellt",nwNote:"Dieser Nachweis ersetzt nicht den offiziellen EU-Heimtierausweis, den nur ein Tierarzt ausstellen darf.",nwIssue:"Impfnachweis ausstellen",nwIssueDone:"Impfnachweis für {n} ausgestellt.",nwVetHint:"Der Besitzer sieht alle eingetragenen Impfungen automatisch. Mit „Ausstellen“ bestätigst du den Nachweis mit deinem Namen und Datum.",nwCardHint:"Die Impfungen deiner Praxis als Nachweis, z. B. für Pension, Hundeschule oder Reisen.",nwTierarzt:"Tierarzt der Praxis",nwSig:"Elektronisch bestätigt",nwChip:"Chip",nwBorn:"Geboren"});
+Object.assign(STR.en,{nwTitle:"Digital vaccination record",nwSub:"All vaccinations confirmed by the practice",nwOpen:"Vaccination record",nwBack:"Back to pet record",nwDl:"Save as PDF / print",nwConf:"Confirmed by {p}",nwNone:"No confirmed vaccinations yet.",nwNext:"Next vaccination",nwIssued:"Issued on {d} · {who}",nwAuto:"Created automatically from the practice's entries",nwNote:"This record does not replace the official EU pet passport, which only a vet may issue.",nwIssue:"Issue vaccination record",nwIssueDone:"Vaccination record issued for {n}.",nwVetHint:"The owner sees all entered vaccinations automatically. “Issue” confirms the record with your name and date.",nwCardHint:"Your practice's vaccinations as a record, e.g. for boarding, dog school or travel.",nwTierarzt:"Vet of the practice",nwSig:"Electronically confirmed",nwChip:"Chip",nwBorn:"Born"});
+const NW_CSS="body{font-family:system-ui,Segoe UI,Arial,sans-serif;color:#1d2a24;margin:32px;max-width:720px}h1{font-size:1.5rem;margin:0 0 4px}.sub{color:#5b6b63;margin:0 0 18px}dl{display:grid;grid-template-columns:140px 1fr;gap:6px 12px;margin:0 0 18px}dt{color:#5b6b63}dd{margin:0;font-weight:600}.v{border-top:1px solid #d8e0db;padding:10px 0}.v b{display:block}.m{color:#5b6b63;font-size:.9rem}.ok{color:#1c7a4b;font-size:.85rem}.foot{margin-top:22px;color:#5b6b63;font-size:.85rem;border-top:1px solid #d8e0db;padding-top:10px}";
+function nwDoc(id){
+  const p=getPet(id), iss=S.nachweis[id];
+  const rows=[...p.impf].sort((a,b)=>b.d-a.d).map(i=>`<div class="v"><b>${esc(t(i.n))}</b><div class="m">${t('vaccinated',{d:fmt(i.d),f:fmt(i.f)})}</div><div class="ok">✓ ${t('nwConf',{p:esc(BL_PRAC.name)})}</div></div>`).join('')||`<p class="m">${t('nwNone')}</p>`;
+  return `<h1>${t('nwTitle')}</h1><p class="sub">${esc(p.name)} · ${t(p.art)}, ${esc(t(p.rasse))}</p>
+  <dl><dt>${t('nwBorn')}</dt><dd>${p.geb?fmt(p.geb):'—'}</dd><dt>${t('nwChip')}</dt><dd>${esc(p.chip)}</dd><dt>${t('ownerCol')}</dt><dd>${esc(ownerOf(id))}</dd></dl>${rows}
+  <div class="foot">${iss?`<b>${t('nwIssued',{d:fmt(iss.d),who:esc(iss.by)})}</b><br>${t('nwSig')}<br>`:`${t('nwAuto')}<br>`}${esc(BL_PRAC.name)} · ${esc(BL_PRAC.addr)}<br>${t('nwNote')}</div>`;
+}
+function vImpfnachweis(id){
+  return head(t('nwTitle'),t('nwSub'),`<button class="btn ghost" data-act="nwBack">${t('nwBack')}</button>`)+`<div class="card invdoc"><style>.nwd .v{border-top:1px solid var(--line,#d8e0db);padding:10px 0}.nwd .ok{color:var(--ok,#1c7a4b);font-size:.85rem}.nwd .foot{margin-top:16px;font-size:.85rem;color:var(--muted,#5b6b63)}.nwd dl{display:grid;grid-template-columns:110px 1fr;gap:6px 12px}.nwd dd{margin:0;font-weight:600}.nwd h1{font-size:1.2rem}</style><div class="nwd">${nwDoc(id)}</div></div><div class="card"><div class="chips"><button class="btn" data-act="nwDl" data-pid="${id}">${t('nwDl')}</button>${S.role==='vet'?`<button class="btn ghost" data-act="nwIssue" data-pid="${id}">${t('nwIssue')}</button>`:''}</div><p class="note">${t('nwNote')}</p></div>`;
+}
+const nwOwnerCard=id=>`<div class="card" style="margin-top:16px"><h2>${t('nwTitle')}</h2><p class="muted">${t('nwCardHint')}</p><div class="chips"><button class="btn" data-act="nwOpen" data-pid="${id}">${t('nwOpen')}</button></div></div>`;
+const nwVetCard=id=>{ const iss=S.nachweis[id]; return `<div class="card" style="margin-top:16px"><h2>${t('nwTitle')}</h2><p class="muted">${t('nwVetHint')}</p>${iss?`<p><span class="pill ok">${t('nwIssued',{d:fmt(iss.d),who:esc(iss.by)})}</span></p>`:''}<div class="chips"><button class="btn" data-act="nwIssue" data-pid="${id}">${t('nwIssue')}</button><button class="btn ghost" data-act="nwOpen" data-pid="${id}">${t('nwOpen')}</button></div></div>`; };
+const vAktePrev=vAkte;
+const nwBtn=id=>`<button class="btn ghost" data-act="nwOpen" data-pid="${id}">${t('nwOpen')}</button>`;
+const nwHead=(h,id)=>{ const k=`<div class="card"><h2>${t('vaccs')}</h2>`; const i=h.indexOf(k); return i<0?h:h.slice(0,i)+`<div class="card"><div class="card-h"><h2>${t('vaccs')}</h2>${nwBtn(id)}</div>`+h.slice(i+k.length); };
+vAkte=function(){ if(S.impfView&&getPet(S.impfView)) return vImpfnachweis(S.impfView); S.impfView=null; const h=vAktePrev(); return S.pets[S.pet]?nwHead(h,S.pet):h; };
+const vPatPrev=vPatDetail;
+vPatDetail=function(id){ if(S.impfView===id) return vImpfnachweis(id); S.impfView=null; return nwHead(vPatPrev(id),id); };
+const vetActionNw=vetAction;
+vetAction=function(a,d){
+  if(a==='nwOpen'){ S.impfView=d.pid; render(); window.scrollTo(0,0); return true; }
+  if(a==='nwBack'){ S.impfView=null; render(); window.scrollTo(0,0); return true; }
+  if(a==='nwIssue'){ S.nachweis[d.pid]={d:new Date(TODAY),by:t('nwTierarzt')}; toast(t('nwIssueDone',{n:getPet(d.pid).name})); render(); return true; }
+  if(a==='nwDl'){ try{ const p=getPet(d.pid); const html=`<!doctype html><html lang="${LANG}"><head><meta charset="utf-8"><title>${esc(t('nwTitle'))} ${esc(p.name)}</title><style>${NW_CSS}</style></head><body>${nwDoc(d.pid)}</body></html>`;
+      const fr=document.createElement('iframe'); fr.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(fr);
+      fr.onload=()=>{ try{ fr.contentWindow.focus(); fr.contentWindow.print(); }catch(e){ toast(t('nwNote')); } setTimeout(()=>fr.remove(),60000); }; fr.srcdoc=html; }catch(e){ toast(t('nwNote')); } return true; }
+  return vetActionNw(a,d);
 };
 
 /* ---- Eingaben ---- */
