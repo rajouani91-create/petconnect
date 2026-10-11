@@ -2035,7 +2035,7 @@ S.book.newCust=false;
 const durOf=a=>{ const x=S.types.find(y=>y.k===a.grund); return x?x.min:20; };
 const toMin=s=>{ const [h,m]=s.split(':').map(Number); return h*60+m; };
 const clashOf=a=>a.status==='cancelled'?[]:practiceAppts().filter(o=>o!==a&&o.status!=='cancelled'&&sameDay(o.d,a.d)&&toMin(o.t)<toMin(a.t)+durOf(a)&&toMin(a.t)<toMin(o.t)+durOf(o));
-const extraPills=(a,canc,done)=>(a.newCust&&!canc)?` <span class="pill info">${t('newCust')}</span>`:'';
+const extraPills=(a,canc,done)=>((a.newCust&&!canc)?` <span class="pill info">${t('newCust')}</span>`:'')+((canc&&a.cancel&&a.cancel.by==='owner'&&a.cancel.late)?` <span class="pill warn">${t('apLateCancel')}</span>`:'');
 const clashLine=(a,canc,done)=>{ if(canc||done) return ''; const c=clashOf(a); return c.length?`<div class="clashline">${t('clashWith',{who:`${apPet(c[0])} (${apOwner(c[0])})`,t:c[0].t})}</div>`:''; };
 const waitWho=w=>w.owner==='me'?myName():w.owner;
 const waitPet=w=>w.owner==='me'?(S.pets[w.pet]?S.pets[w.pet].name:'—'):t(w.petName);
@@ -3857,6 +3857,147 @@ vetAction=function(a,d){
   }
   return vetActionE6(a,d);
 };
+
+/* ---- Etappe 7: Design-Pass (HealthTech): Fotos/Initialen statt Comic-Avatare, keine Gimmick-Animationen, Halter vs. Praxis ---- */
+(function(){
+  const css=`
+/* Avatare: Foto, sonst ruhige Initialen */
+.ava.ini{background:var(--brand-soft);color:var(--brand);border:1px solid color-mix(in srgb,var(--brand) 22%,transparent);font-family:var(--f-display);font-weight:600;letter-spacing:0;line-height:1;font-size:13px;user-select:none}
+.ava.photo{border:1px solid var(--line)}
+.ava.photo img{border-radius:50%}
+.photo-prev.sil{background:var(--brand-soft)}
+.sil-svg{color:var(--brand)}
+/* Gimmicks raus */
+.lively .eyes,.d2 .eyes{animation:none!important}
+.peek,.float,.pp{animation:none!important}
+.cp{display:none!important}
+.scene{display:none!important}
+.enter > *:not(.mob-top),.enter .grid > *{animation:fadein .18s ease-out both!important;animation-delay:0s!important}
+/* funktionale Rückmeldung: dezenter Puls am Notfall-Button */
+[data-act=sosGo]{animation:sospulse 3.4s ease-out infinite}
+@keyframes sospulse{0%{box-shadow:0 0 0 0 rgb(179 54 47 / .28)}70%,100%{box-shadow:0 0 0 12px rgb(179 54 47 / 0)}}
+.ring{animation-duration:2.6s!important}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* gemeinsame HealthTech-Basis */
+.card{box-shadow:none}
+.label{text-transform:none;letter-spacing:0;font-size:.8rem;font-weight:600;color:var(--muted)}
+.card-h{padding-bottom:2px}
+h1{letter-spacing:-.015em}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.auth-card{border-radius:16px;padding:24px}
+.auth{padding-top:20px}
+/* Halter: warm, ruhig, große Touch-Ziele */
+html[data-role=owner]{--r:16px}
+html[data-role=owner] body{font-size:15.5px}
+html[data-role=owner] main{padding-block:32px 104px}
+html[data-role=owner] h1{font-size:2rem}
+html[data-role=owner] .head{margin-bottom:26px}
+html[data-role=owner] .card{padding:22px;gap:14px;border-radius:16px}
+html[data-role=owner] .btn{min-height:46px;padding:11px 20px;border-radius:12px}
+html[data-role=owner] .chip{padding:9px 16px;min-height:40px}
+html[data-role=owner] .row{padding:14px 0}
+html[data-role=owner] select,html[data-role=owner] input[type=text],html[data-role=owner] input[type=email],html[data-role=owner] input[type=password],html[data-role=owner] input[type=date],html[data-role=owner] input[type=number],html[data-role=owner] input[type=tel],html[data-role=owner] textarea{min-height:46px;border-radius:12px}
+html[data-role=owner] .ava.ini,html[data-role=owner] .ava.photo{box-shadow:0 0 0 3px var(--surface)}
+/* Praxis: datenzentriert, kompakt, nüchtern */
+html[data-role=vet]{--r:8px}
+html[data-role=vet] body{font-size:14px}
+html[data-role=vet] main{padding-block:20px 88px}
+html[data-role=vet] h1{font-size:1.5rem}
+html[data-role=vet] h2{font-size:1.02rem}
+html[data-role=vet] .head{margin-bottom:14px}
+html[data-role=vet] .card{padding:14px;gap:10px;border-radius:8px}
+html[data-role=vet] .grid{gap:12px}
+html[data-role=vet] .btn{padding:6px 12px;border-radius:6px;font-size:.88rem}
+html[data-role=vet] .chip{padding:4px 11px;font-size:.82rem}
+html[data-role=vet] .row{padding:7px 0}
+html[data-role=vet] .pill{border-radius:5px;padding:1px 7px;font-size:.72rem}
+html[data-role=vet] .kv{font-size:.85rem;gap:4px 14px}
+html[data-role=vet] select,html[data-role=vet] input[type=text],html[data-role=vet] input[type=email],html[data-role=vet] input[type=date],html[data-role=vet] input[type=number],html[data-role=vet] input[type=tel],html[data-role=vet] input[type=search],html[data-role=vet] textarea{padding:6px 9px;border-radius:6px}
+html[data-role=vet] .nav-btn{padding:7px 10px}
+html[data-role=vet] .side{gap:14px}
+html[data-role=vet] .ava{box-shadow:none}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme=dark])[data-role=owner]{--bg:#f8f6f1;--surface-2:#eeeae1;--line:#e3ded2}
+  :root:not([data-theme=dark])[data-role=vet]{--bg:#eff3f2;--surface-2:#e3e9e7;--line:#d2dbd8}
+}
+:root[data-theme=light][data-role=owner]{--bg:#f8f6f1;--surface-2:#eeeae1;--line:#e3ded2}
+:root[data-theme=light][data-role=vet]{--bg:#eff3f2;--surface-2:#e3e9e7;--line:#d2dbd8}
+`;
+  const el=document.createElement('style'); el.id='design-pass'; el.textContent=css; document.head.appendChild(el);
+})();
+
+/* neutrale Silhouetten statt Comic-Figuren (nur noch für Platzhalter/Leerzustände) */
+petSvg=function(art){
+  const sh={dog:'<ellipse cx="32" cy="36" rx="13" ry="14"/><path d="M19 24c-6 2-9 10-6 18 5-1 8-6 8-12zM45 24c6 2 9 10 6 18-5-1-8-6-8-12z"/>',
+            cat:'<ellipse cx="32" cy="38" rx="14" ry="12.5"/><path d="M19 32l1-17 12 9zM45 32l-1-17-12 9z"/>',
+            rabbit:'<ellipse cx="32" cy="42" rx="12" ry="11"/><ellipse cx="25" cy="21" rx="4.2" ry="12"/><ellipse cx="39" cy="21" rx="4.2" ry="12"/>'}[art]
+    ||'<ellipse cx="32" cy="40" rx="9" ry="8"/><circle cx="22" cy="30" r="4"/><circle cx="28" cy="23.5" r="4"/><circle cx="36" cy="23.5" r="4"/><circle cx="42" cy="30" r="4"/>';
+  return `<svg class="sil-svg" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><g fill="currentColor" opacity=".55">${sh}</g></svg>`;
+};
+/* Avatar: Foto, sonst Initiale */
+petAva=function(p,size){
+  const s=size||30, st=` style="width:${s}px;height:${s}px;font-size:${Math.round(s*.42)}px"`;
+  if(p.photo) return `<span class="ava photo"${st}><img src="${p.photo}" alt=""></span>`;
+  const ini=((p.name||'?').trim().charAt(0)||'?').toUpperCase();
+  return `<span class="ava ini"${st} aria-hidden="true">${esc(ini)}</span>`;
+};
+/* Login ohne Comic-Szene */
+authScene=function(){ return ''; };
+/* Rolle als Stil-Schalter */
+const renderE7=render;
+render=function(){ document.documentElement.setAttribute('data-role',S.role==='vet'?'vet':'owner'); return renderE7.apply(this,arguments); };
+
+/* Etappe 8 Texte */
+Object.assign(STR.de,{"pcResetT": "Testdaten", "pcResetX": "Deine Eingaben bleiben am selben Tag in diesem Browser erhalten, auch nach dem Neuladen der Seite. Du kannst jederzeit neu starten.", "pcResetBtn": "Testdaten zurücksetzen"});
+Object.assign(STR.en,{"pcResetT": "Test data", "pcResetX": "Your entries are kept in this browser on the same day, even after reloading the page. You can start over at any time.", "pcResetBtn": "Reset test data"});
+Object.assign(STR.fr,{"pcResetT": "Données de test", "pcResetX": "Vos saisies sont conservées dans ce navigateur le même jour, même après un rechargement de la page. Vous pouvez repartir de zéro à tout moment.", "pcResetBtn": "Réinitialiser les données de test"});
+Object.assign(STR.ar,{"pcResetT": "بيانات الاختبار", "pcResetX": "تبقى إدخالاتك محفوظة في هذا المتصفح خلال اليوم نفسه حتى بعد إعادة تحميل الصفحة. يمكنك البدء من جديد في أي وقت.", "pcResetBtn": "إعادة تعيين بيانات الاختبار"});
+Object.assign(STR.nl,{"pcResetT": "Testgegevens", "pcResetX": "Je invoer blijft op dezelfde dag in deze browser bewaard, ook na het opnieuw laden van de pagina. Je kunt altijd opnieuw beginnen.", "pcResetBtn": "Testgegevens resetten"});
+/* ---- Etappe 8: Härtung (Symptom-Gewichtung, Eingaben bleiben beim Neuladen) ---- */
+/* Symptomcheck: Dauer + Allgemeinbefinden + Anzahl Symptome fließen in einen Punktwert ein */
+triage=function(){
+  const s=S.sym, c=s.chips;
+  if(c.some(x=>SYM.rot.includes(x))||s.ruhig==='apathisch') return {lvl:'crit',t:'rCritT',x:'rCritX',cta:['notfall','findER']};
+  if(!c.length) return null;
+  const score=c.length+(s.dauer==='>3d'?2:s.dauer==='1-3d'?1:0)+(s.ruhig==='matt'?1:0);
+  const ernst=score>=3 || s.dauer==='>3d' || (c.includes('s_noeat')&&S.pets[s.pet].art==='cat'&&s.dauer!=='<24h') || (c.includes('s_vomit')&&c.includes('s_diarrhea'));
+  if(ernst) return {lvl:'warn',t:'rWarnT',x:'rWarnX',cta:['termine','bookAppt']};
+  return {lvl:'ok',t:'rOkT',x:'rOkX',cta:['tele','startVideo']};
+};
+
+/* Eingaben bleiben im Browser erhalten (gleicher Tag, gleiche Programmversion) */
+const PC_KEY='pc_state_v1', PC_BUILD='2026-10-11-e8';
+const PC_KEYS=['practiceName','practice','pets','practices','appts','chat','rem','er','inq','hours','types','blocks','others','notes','wait','cat','bill','invSeq','billCfg','inv','ins','nachweis','docs','pkgs','pendLines','extraMin','rset','areas','shares','pracShare','insList','claims','favs','stamm','invited','shareAreas','nearby','sitters','care','coHold','wlog','wTarget','invites','sent','sentN','autoRem','apptRem','pet','demo','actPrac','hhRef','vltIns','hhMode'];
+let pcOff=false;
+function pcSave(){
+  if(pcOff) return;
+  try{
+    const data={}; PC_KEYS.forEach(k=>{ if(k in S) data[k]=S[k]; });
+    const au={}; ['stage','name','full','email','regRole'].forEach(k=>{ au[k]=S.auth[k]; });
+    const json=JSON.stringify({b:PC_BUILD,day:isoD(new Date()),role:S.role,view:S.view,auth:au,data},function(k,v){
+      const o=this[k]; if(o instanceof Date) return isNaN(o)?null:{$d:o.toISOString()}; if(o instanceof Set) return {$s:[...o]}; return v; });
+    if(json.length>4500000) return;
+    localStorage.setItem(PC_KEY,json);
+  }catch(e){}
+}
+(function(){
+  try{
+    const raw=localStorage.getItem(PC_KEY); if(!raw) return;
+    const o=JSON.parse(raw,(k,v)=>{ if(v&&typeof v==='object'&&!Array.isArray(v)){ const ks=Object.keys(v); if(ks.length===1&&ks[0]==='$d') return new Date(v.$d); if(ks.length===1&&ks[0]==='$s') return new Set(v.$s); } return v; });
+    if(!o||o.b!==PC_BUILD||o.day!==isoD(new Date())){ localStorage.removeItem(PC_KEY); return; }
+    Object.keys(o.data).forEach(k=>{ if(PC_KEYS.includes(k)) S[k]=o.data[k]; });
+    Object.assign(S.auth,o.auth||{}); if(o.role) S.role=o.role; if(o.view&&VIEWS[o.view]) S.view=o.view;
+  }catch(e){ try{ localStorage.removeItem(PC_KEY); }catch(_){} }
+})();
+const renderE8=render;
+render=function(){ const r=renderE8.apply(this,arguments); clearTimeout(pcSave._t); pcSave._t=setTimeout(pcSave,400); return r; };
+window.addEventListener('pagehide',pcSave);
+
+const vProfilE8=vProfil;
+vProfil=function(){ return vProfilE8()+`<div class="card" style="margin-top:16px;max-width:560px"><h2>${t('pcResetT')}</h2><p class="muted">${t('pcResetX')}</p><button class="btn ghost" data-act="pcReset" style="align-self:flex-start">${t('pcResetBtn')}</button></div>`; };
+VIEWS.profil=vProfil;
+const vetActionE8=vetAction;
+vetAction=function(a,d){ if(a==='pcReset'){ pcOff=true; try{ localStorage.removeItem(PC_KEY); }catch(e){} location.reload(); return true; } return vetActionE8(a,d); };
 
 render();
 </script>
