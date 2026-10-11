@@ -3530,6 +3530,171 @@ vetAction=function(a,d){
   }
   return vetActionE4(a,d);
 };
+/* Etappe 5 Texte */
+Object.assign(STR.de,{"wkOpen": "Gewicht & Verlauf", "lbOpen": "Laborwerte", "wkBack": "Zurück zur Akte", "wkTitle": "Gewichtsverlauf: {n}", "wkSub": "Gewicht regelmäßig eintragen – Veränderungen werden sichtbar", "wkNow": "Aktuell", "wkR3": "3 Monate", "wkR12": "1 Jahr", "wkRAll": "Alles", "wkChg": "Veränderung im Zeitraum: {d} kg ({p} %)", "wkNoData": "Noch nicht genug Messwerte im Zeitraum für eine Kurve. Trage mindestens zwei Gewichte ein.", "wkWarn": "Das Gewicht hat sich im Zeitraum deutlich verändert (mehr als 10 %). Sprich bei Gelegenheit mit deiner Praxis.", "wkTarget": "Wunschbereich", "wkTargetSub": "Optional: Zielbereich laut Praxis. Er wird als Band in der Kurve angezeigt.", "wkFrom": "Von (kg)", "wkTo": "Bis (kg)", "wkTSave": "Bereich speichern", "wkTClear": "Bereich entfernen", "wkIn": "Aktuelles Gewicht liegt im Wunschbereich", "wkOut": "Aktuelles Gewicht liegt außerhalb des Wunschbereichs", "wkAdd": "Gewicht eintragen", "wkDate": "Datum", "wkKg": "Gewicht (kg)", "wkSave": "Speichern", "wkHist": "Alle Messungen", "wkDel": "Löschen", "wkNeed": "Bitte Datum und Gewicht (größer 0) angeben.", "wkSaved": "Gewicht gespeichert", "wkDeleted": "Messung gelöscht", "wkFuture": "Das Datum liegt in der Zukunft.", "wkTBad": "Bitte einen gültigen Bereich angeben (von kleiner als bis).", "wkAria": "Gewichtskurve mit Datum", "lbTitle": "Laborwerte: {n}", "lbSub": "Befunde sammeln, mit Referenzbereichen vergleichen und Verläufe sehen", "lbNew": "Neuen Laborbefund eintragen", "lbDate": "Datum der Probe", "lbPanel": "Untersuchung", "lpBlood": "Blutbild", "lpOrgan": "Organprofil (Niere, Leber, Zucker)", "lpThy": "Schilddrüse", "lbVal": "Wert", "lbRef": "Referenzbereich (von–bis)", "lbRefNote": "Die Referenzbereiche sind mit gängigen Richtwerten vorbelegt. Bitte mit dem Laborbericht abgleichen und anpassen – jedes Labor hat eigene Bereiche.", "lbSave": "Befund speichern", "lbNeed": "Bitte Datum und mindestens einen Wert eintragen.", "lbSaved": "Laborbefund gespeichert", "lbDel": "Befund löschen", "lbDeleted": "Befund gelöscht", "lbNone": "Noch keine Laborwerte vorhanden.", "lbSumOk": "Alle Werte des letzten Befunds liegen im Referenzbereich.", "lbSumOut": "{n} Wert(e) des letzten Befunds außerhalb des Referenzbereichs.", "lbHigh": "erhöht", "lbLow": "erniedrigt", "lbOkL": "im Bereich", "lbTrend": "Verlauf", "lbTrendSub": "Wähle einen Wert, um den Verlauf zu sehen.", "lbOnly1": "Für diesen Wert gibt es nur eine Messung.", "lbSrcMe": "Von mir eingetragen", "lbSrcPrac": "Von der Praxis", "lbDisc": "Laborwerte dienen der Übersicht und ersetzen keine tierärztliche Beurteilung. Auffällige Werte bespricht deine Praxis mit dir.", "lbCancel": "Abbrechen", "lbRefS": "Referenz {r}", "lkWBC": "Leukozyten", "lkRBC": "Erythrozyten", "lkHCT": "Hämatokrit", "lkHGB": "Hämoglobin", "lkPLT": "Thrombozyten", "lkCREA": "Kreatinin", "lkBUN": "Harnstoff", "lkALT": "ALT (Leber)", "lkALP": "ALP (Leber/Galle)", "lkGLU": "Glukose", "lkT4": "T4 (Schilddrüsenhormon)", "vltWk": "Gewichtsverlauf (mit Datum)", "vltLb": "Laborwerte"});
+Object.assign(STR.en,{"wkOpen": "Weight & trend", "lbOpen": "Lab results", "wkBack": "Back to record", "wkTitle": "Weight trend: {n}", "wkSub": "Log weight regularly – changes become visible", "wkNow": "Current", "wkR3": "3 months", "wkR12": "1 year", "wkRAll": "All", "wkChg": "Change in period: {d} kg ({p} %)", "wkNoData": "Not enough measurements in this period for a curve. Enter at least two weights.", "wkWarn": "Weight changed noticeably in this period (more than 10 %). Mention it to your practice soon.", "wkTarget": "Target range", "wkTargetSub": "Optional: target range from your practice, shown as a band in the curve.", "wkFrom": "From (kg)", "wkTo": "To (kg)", "wkTSave": "Save range", "wkTClear": "Remove range", "wkIn": "Current weight is within the target range", "wkOut": "Current weight is outside the target range", "wkAdd": "Add weight", "wkDate": "Date", "wkKg": "Weight (kg)", "wkSave": "Save", "wkHist": "All measurements", "wkDel": "Delete", "wkNeed": "Please enter a date and a weight (above 0).", "wkSaved": "Weight saved", "wkDeleted": "Measurement deleted", "wkFuture": "The date is in the future.", "wkTBad": "Please enter a valid range (from lower than to).", "wkAria": "Weight curve with dates", "lbTitle": "Lab results: {n}", "lbSub": "Collect results, compare with reference ranges and follow trends", "lbNew": "Add a new lab result", "lbDate": "Sample date", "lbPanel": "Panel", "lpBlood": "Blood count", "lpOrgan": "Organ profile (kidney, liver, glucose)", "lpThy": "Thyroid", "lbVal": "Value", "lbRef": "Reference range (from–to)", "lbRefNote": "Reference ranges are prefilled with common guide values. Please compare them with the lab report and adjust – every lab has its own ranges.", "lbSave": "Save result", "lbNeed": "Please enter a date and at least one value.", "lbSaved": "Lab result saved", "lbDel": "Delete result", "lbDeleted": "Result deleted", "lbNone": "No lab results yet.", "lbSumOk": "All values of the latest result are within the reference range.", "lbSumOut": "{n} value(s) of the latest result outside the reference range.", "lbHigh": "high", "lbLow": "low", "lbOkL": "in range", "lbTrend": "Trend", "lbTrendSub": "Pick a value to see its trend.", "lbOnly1": "There is only one measurement for this value.", "lbSrcMe": "Entered by me", "lbSrcPrac": "From the practice", "lbDisc": "Lab values give an overview and do not replace a veterinary assessment. Your practice will discuss unusual values with you.", "lbCancel": "Cancel", "lbRefS": "Reference {r}", "lkWBC": "White blood cells", "lkRBC": "Red blood cells", "lkHCT": "Hematocrit", "lkHGB": "Hemoglobin", "lkPLT": "Platelets", "lkCREA": "Creatinine", "lkBUN": "Urea", "lkALT": "ALT (liver)", "lkALP": "ALP (liver/bile)", "lkGLU": "Glucose", "lkT4": "T4 (thyroid hormone)", "vltWk": "Weight history (with dates)", "vltLb": "Lab results"});
+Object.assign(STR.fr,{"wkOpen": "Poids & courbe", "lbOpen": "Analyses", "wkBack": "Retour au dossier", "wkTitle": "Courbe de poids : {n}", "wkSub": "Notez le poids régulièrement – les variations deviennent visibles", "wkNow": "Actuel", "wkR3": "3 mois", "wkR12": "1 an", "wkRAll": "Tout", "wkChg": "Variation sur la période : {d} kg ({p} %)", "wkNoData": "Pas assez de mesures sur la période pour une courbe. Saisissez au moins deux poids.", "wkWarn": "Le poids a nettement varié sur la période (plus de 10 %). Parlez-en à votre cabinet dès que possible.", "wkTarget": "Plage souhaitée", "wkTargetSub": "Facultatif : plage cible indiquée par le cabinet, affichée en bande sur la courbe.", "wkFrom": "De (kg)", "wkTo": "À (kg)", "wkTSave": "Enregistrer la plage", "wkTClear": "Supprimer la plage", "wkIn": "Le poids actuel est dans la plage souhaitée", "wkOut": "Le poids actuel est hors de la plage souhaitée", "wkAdd": "Saisir le poids", "wkDate": "Date", "wkKg": "Poids (kg)", "wkSave": "Enregistrer", "wkHist": "Toutes les mesures", "wkDel": "Supprimer", "wkNeed": "Indiquez une date et un poids (supérieur à 0).", "wkSaved": "Poids enregistré", "wkDeleted": "Mesure supprimée", "wkFuture": "La date est dans le futur.", "wkTBad": "Indiquez une plage valide (de inférieur à à).", "wkAria": "Courbe de poids avec dates", "lbTitle": "Analyses : {n}", "lbSub": "Rassemblez les résultats, comparez aux valeurs de référence et suivez l’évolution", "lbNew": "Saisir un nouveau résultat d’analyse", "lbDate": "Date du prélèvement", "lbPanel": "Examen", "lpBlood": "Numération sanguine", "lpOrgan": "Bilan organique (reins, foie, glycémie)", "lpThy": "Thyroïde", "lbVal": "Valeur", "lbRef": "Valeurs de référence (de–à)", "lbRefNote": "Les valeurs de référence sont préremplies avec des repères courants. Comparez-les avec le rapport du laboratoire et corrigez-les – chaque laboratoire a ses propres valeurs.", "lbSave": "Enregistrer le résultat", "lbNeed": "Indiquez une date et au moins une valeur.", "lbSaved": "Résultat enregistré", "lbDel": "Supprimer le résultat", "lbDeleted": "Résultat supprimé", "lbNone": "Aucun résultat d’analyse pour l’instant.", "lbSumOk": "Toutes les valeurs du dernier résultat sont dans la plage de référence.", "lbSumOut": "{n} valeur(s) du dernier résultat hors de la plage de référence.", "lbHigh": "élevé", "lbLow": "bas", "lbOkL": "normal", "lbTrend": "Évolution", "lbTrendSub": "Choisissez une valeur pour voir son évolution.", "lbOnly1": "Une seule mesure pour cette valeur.", "lbSrcMe": "Saisi par moi", "lbSrcPrac": "Par le cabinet", "lbDisc": "Les analyses servent d’aperçu et ne remplacent pas l’avis du vétérinaire. Votre cabinet discute avec vous des valeurs anormales.", "lbCancel": "Annuler", "lbRefS": "Réf. {r}", "lkWBC": "Leucocytes", "lkRBC": "Érythrocytes", "lkHCT": "Hématocrite", "lkHGB": "Hémoglobine", "lkPLT": "Plaquettes", "lkCREA": "Créatinine", "lkBUN": "Urée", "lkALT": "ALAT (foie)", "lkALP": "PAL (foie/bile)", "lkGLU": "Glucose", "lkT4": "T4 (hormone thyroïdienne)", "vltWk": "Courbe de poids (avec dates)", "vltLb": "Analyses"});
+Object.assign(STR.ar,{"wkOpen": "الوزن والمنحنى", "lbOpen": "نتائج المختبر", "wkBack": "العودة إلى السجل", "wkTitle": "منحنى الوزن: {n}", "wkSub": "سجّل الوزن بانتظام لتظهر التغيّرات", "wkNow": "الحالي", "wkR3": "3 أشهر", "wkR12": "سنة", "wkRAll": "الكل", "wkChg": "التغيّر خلال الفترة: {d} كغ ({p} %)", "wkNoData": "لا توجد قياسات كافية في هذه الفترة لرسم منحنى. أدخل وزنين على الأقل.", "wkWarn": "تغيّر الوزن بشكل ملحوظ خلال الفترة (أكثر من 10 %). تحدّث مع عيادتك عند أقرب فرصة.", "wkTarget": "النطاق المطلوب", "wkTargetSub": "اختياري: النطاق المستهدف حسب العيادة، يظهر كشريط في المنحنى.", "wkFrom": "من (كغ)", "wkTo": "إلى (كغ)", "wkTSave": "حفظ النطاق", "wkTClear": "إزالة النطاق", "wkIn": "الوزن الحالي ضمن النطاق المطلوب", "wkOut": "الوزن الحالي خارج النطاق المطلوب", "wkAdd": "إدخال الوزن", "wkDate": "التاريخ", "wkKg": "الوزن (كغ)", "wkSave": "حفظ", "wkHist": "كل القياسات", "wkDel": "حذف", "wkNeed": "يرجى إدخال التاريخ ووزن أكبر من 0.", "wkSaved": "تم حفظ الوزن", "wkDeleted": "تم حذف القياس", "wkFuture": "التاريخ في المستقبل.", "wkTBad": "يرجى إدخال نطاق صحيح (من أصغر من إلى).", "wkAria": "منحنى الوزن مع التواريخ", "lbTitle": "نتائج المختبر: {n}", "lbSub": "اجمع النتائج وقارنها بالقيم المرجعية وتابع تطوّرها", "lbNew": "إدخال نتيجة مختبر جديدة", "lbDate": "تاريخ أخذ العيّنة", "lbPanel": "الفحص", "lpBlood": "تعداد الدم", "lpOrgan": "ملف الأعضاء (الكلى، الكبد، السكر)", "lpThy": "الغدة الدرقية", "lbVal": "القيمة", "lbRef": "المدى المرجعي (من–إلى)", "lbRefNote": "المدى المرجعي معبّأ مسبقًا بقيم إرشادية شائعة. قارنه بتقرير المختبر وعدّله عند الحاجة – لكل مختبر مداه الخاص.", "lbSave": "حفظ النتيجة", "lbNeed": "يرجى إدخال التاريخ وقيمة واحدة على الأقل.", "lbSaved": "تم حفظ النتيجة", "lbDel": "حذف النتيجة", "lbDeleted": "تم حذف النتيجة", "lbNone": "لا توجد نتائج مختبر بعد.", "lbSumOk": "جميع قيم آخر نتيجة ضمن المدى المرجعي.", "lbSumOut": "{n} قيمة في آخر نتيجة خارج المدى المرجعي.", "lbHigh": "مرتفع", "lbLow": "منخفض", "lbOkL": "طبيعي", "lbTrend": "التطوّر", "lbTrendSub": "اختر قيمة لعرض تطوّرها.", "lbOnly1": "يوجد قياس واحد فقط لهذه القيمة.", "lbSrcMe": "أدخلتها أنا", "lbSrcPrac": "من العيادة", "lbDisc": "نتائج المختبر للاطلاع فقط ولا تغني عن تقييم الطبيب البيطري. ستناقش عيادتك معك القيم غير الطبيعية.", "lbCancel": "إلغاء", "lbRefS": "المرجع {r}", "lkWBC": "كريات الدم البيضاء", "lkRBC": "كريات الدم الحمراء", "lkHCT": "الهيماتوكريت", "lkHGB": "الهيموغلوبين", "lkPLT": "الصفائح الدموية", "lkCREA": "الكرياتينين", "lkBUN": "اليوريا", "lkALT": "ALT (الكبد)", "lkALP": "ALP (الكبد/الصفراء)", "lkGLU": "الغلوكوز", "lkT4": "T4 (هرمون الغدة الدرقية)", "vltWk": "منحنى الوزن (مع التواريخ)", "vltLb": "نتائج المختبر"});
+Object.assign(STR.nl,{"wkOpen": "Gewicht & verloop", "lbOpen": "Laboratoriumwaarden", "wkBack": "Terug naar dossier", "wkTitle": "Gewichtsverloop: {n}", "wkSub": "Noteer het gewicht regelmatig – veranderingen worden zichtbaar", "wkNow": "Actueel", "wkR3": "3 maanden", "wkR12": "1 jaar", "wkRAll": "Alles", "wkChg": "Verandering in de periode: {d} kg ({p} %)", "wkNoData": "Nog niet genoeg metingen in de periode voor een grafiek. Voer minstens twee gewichten in.", "wkWarn": "Het gewicht is in de periode duidelijk veranderd (meer dan 10 %). Bespreek dit binnenkort met je praktijk.", "wkTarget": "Gewenst bereik", "wkTargetSub": "Optioneel: streefbereik volgens de praktijk, wordt als band in de grafiek getoond.", "wkFrom": "Van (kg)", "wkTo": "Tot (kg)", "wkTSave": "Bereik opslaan", "wkTClear": "Bereik verwijderen", "wkIn": "Huidig gewicht ligt binnen het gewenste bereik", "wkOut": "Huidig gewicht ligt buiten het gewenste bereik", "wkAdd": "Gewicht invoeren", "wkDate": "Datum", "wkKg": "Gewicht (kg)", "wkSave": "Opslaan", "wkHist": "Alle metingen", "wkDel": "Verwijderen", "wkNeed": "Geef een datum en een gewicht (groter dan 0) op.", "wkSaved": "Gewicht opgeslagen", "wkDeleted": "Meting verwijderd", "wkFuture": "De datum ligt in de toekomst.", "wkTBad": "Geef een geldig bereik op (van kleiner dan tot).", "wkAria": "Gewichtsgrafiek met data", "lbTitle": "Laboratoriumwaarden: {n}", "lbSub": "Verzamel uitslagen, vergelijk met referentiebereiken en bekijk het verloop", "lbNew": "Nieuwe laboratoriumuitslag invoeren", "lbDate": "Datum van het monster", "lbPanel": "Onderzoek", "lpBlood": "Bloedbeeld", "lpOrgan": "Orgaanprofiel (nier, lever, suiker)", "lpThy": "Schildklier", "lbVal": "Waarde", "lbRef": "Referentiebereik (van–tot)", "lbRefNote": "De referentiebereiken zijn vooraf ingevuld met gangbare richtwaarden. Vergelijk ze met het laboratoriumrapport en pas ze aan – elk laboratorium heeft eigen bereiken.", "lbSave": "Uitslag opslaan", "lbNeed": "Geef een datum en minstens één waarde op.", "lbSaved": "Laboratoriumuitslag opgeslagen", "lbDel": "Uitslag verwijderen", "lbDeleted": "Uitslag verwijderd", "lbNone": "Nog geen laboratoriumwaarden.", "lbSumOk": "Alle waarden van de laatste uitslag liggen binnen het referentiebereik.", "lbSumOut": "{n} waarde(n) van de laatste uitslag buiten het referentiebereik.", "lbHigh": "verhoogd", "lbLow": "verlaagd", "lbOkL": "normaal", "lbTrend": "Verloop", "lbTrendSub": "Kies een waarde om het verloop te zien.", "lbOnly1": "Voor deze waarde is er maar één meting.", "lbSrcMe": "Door mij ingevoerd", "lbSrcPrac": "Door de praktijk", "lbDisc": "Laboratoriumwaarden geven een overzicht en vervangen geen beoordeling door de dierenarts. Je praktijk bespreekt opvallende waarden met je.", "lbCancel": "Annuleren", "lbRefS": "Ref. {r}", "lkWBC": "Leukocyten", "lkRBC": "Erytrocyten", "lkHCT": "Hematocriet", "lkHGB": "Hemoglobine", "lkPLT": "Trombocyten", "lkCREA": "Creatinine", "lkBUN": "Ureum", "lkALT": "ALT (lever)", "lkALP": "ALP (lever/gal)", "lkGLU": "Glucose", "lkT4": "T4 (schildklierhormoon)", "vltWk": "Gewichtsverloop (met data)", "vltLb": "Laboratoriumwaarden"});
+/* ---- Etappe 5: Gewichtskurve mit Datum + Laborwerte in der Tierakte ---- */
+S.wlog={}; S.wTarget={}; S.wRange='1y'; S.labAdd=false; S.labPanel='lpBlood'; S.labParam=null;
+let WID=0;
+const pad2=n=>String(n).padStart(2,'0');
+const isoD=d=>d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+const parseD=s=>{ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||''); return m?new Date(+m[1],+m[2]-1,+m[3]):null; };
+const num2=v=>String(v).replace(',','.');
+const shortD=d=>pad2(d.getDate())+'.'+pad2(d.getMonth()+1)+'.'+String(d.getFullYear()).slice(2);
+
+/* Gewichts-Log: dated entries, synchronisiert mit p.gewicht (das andere Ansichten weiter nutzen) */
+function wLog(id){
+  const p=getPet(id); if(!p) return [];
+  const a=S.wlog[id]=S.wlog[id]||[], g=p.gewicht||[];
+  if(!a.length&&g.length){ const n=g.length, last=n>1?5:0; g.forEach((kg,i)=>a.push({id:++WID,d:addDays(-last-(n-1-i)*42),kg})); }
+  while(a.length<g.length) a.push({id:++WID,d:new Date(TODAY),kg:g[a.length]});
+  a.sort((x,y)=>x.d-y.d);
+  return a;
+}
+function wSync(id){ const p=getPet(id), a=S.wlog[id]||[]; a.sort((x,y)=>x.d-y.d); p.gewicht=a.map(e=>e.kg); }
+
+/* Liniendiagramm mit Datumsachse und optionalem Band */
+function lineChart(pts,o={}){
+  const w=320,h=150,pl=40,pr=12,pt=12,pb=26, band=o.band||null;
+  const vals=pts.map(p=>p.v).concat(band?[band[0],band[1]]:[]).filter(v=>v!=null);
+  let min=Math.min(...vals), max=Math.max(...vals); const span=(max-min)||Math.max(Math.abs(max)*.2,1); min-=span*.15; max+=span*.15;
+  const t0=pts[0].t, t1=pts.at(-1).t, tw=(t1-t0)||1;
+  const x=tt=>pl+(pts.length>1?(tt-t0)/tw:.5)*(w-pl-pr), y=v=>pt+(max-v)*(h-pt-pb)/(max-min);
+  const ticks=[min+(max-min)*.1,(min+max)/2,max-(max-min)*.1];
+  const path=pts.map(p=>`${x(p.t)},${y(p.v)}`).join(' ');
+  const dp=o.dp==null?1:o.dp;
+  return `<svg class="ltr" viewBox="0 0 ${w} ${h}" style="width:100%;height:auto" role="img" aria-label="${esc(o.aria||'')}">
+  ${band?`<rect x="${pl}" y="${y(band[1])}" width="${w-pl-pr}" height="${Math.max(2,y(band[0])-y(band[1]))}" fill="var(--ok, #2f8f5b)" opacity=".14"/>`:''}
+  ${ticks.map(v=>`<line x1="${pl}" x2="${w-pr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${pl-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="JetBrains Mono, monospace">${num(v,dp)}</text>`).join('')}
+  ${pts.length>1?`<polyline points="${path}" fill="none" stroke="var(--brand)" stroke-width="2" stroke-linejoin="round"/>`:''}
+  ${pts.map((p,i)=>`<circle cx="${x(p.t)}" cy="${y(p.v)}" r="${i===pts.length-1?4.5:3}" fill="${i===pts.length-1?'var(--accent)':'var(--brand)'}"><title>${esc(shortD(new Date(p.t)))}: ${num(p.v,dp)}${o.unit?' '+esc(o.unit):''}</title></circle>`).join('')}
+  <text x="${x(pts.at(-1).t)-(pts.length>1?8:0)}" y="${y(pts.at(-1).v)-12}" text-anchor="${pts.length>1?'end':'middle'}" font-size="11" font-weight="700" fill="var(--text, currentColor)" font-family="JetBrains Mono, monospace">${num(pts.at(-1).v,dp)}</text>
+  <text x="${pl}" y="${h-7}" text-anchor="start" font-size="10" fill="var(--muted)">${esc(shortD(new Date(t0)))}</text>
+  ${pts.length>1?`<text x="${w-pr}" y="${h-7}" text-anchor="end" font-size="10" fill="var(--muted)">${esc(shortD(new Date(t1)))}</text>`:''}</svg>`;
+}
+
+/* ---------- Gewicht ---------- */
+function vWeight(id){
+  const p=getPet(id), all=wLog(id), cut=S.wRange==='3m'?90:S.wRange==='1y'?365:99999;
+  const rows=all.filter(r=>(TODAY-r.d)/864e5<=cut), tg=S.wTarget[id]||null, last=all.at(-1);
+  let body='';
+  if(rows.length>=2){
+    const first=rows[0], d=rows.at(-1).kg-first.kg, pc=first.kg?d/first.kg*100:0, sg=d>=0?'+':'−';
+    body=lineChart(rows.map(r=>({t:+r.d,v:r.kg})),{band:tg?[tg.lo,tg.hi]:null,unit:'kg',aria:t('wkAria')})
+      +`<p class="muted" style="font-size:.85rem;margin:6px 0 0">${t('wkChg',{d:sg+num(Math.abs(d)),p:sg+num(Math.abs(pc))})}</p>`
+      +(Math.abs(pc)>=10?`<p class="note" style="border-inline-start:3px solid var(--warn, #c98a00);padding-inline-start:10px">${t('wkWarn')}</p>`:'');
+  } else body=`<p class="empty">${t('wkNoData')}</p>`;
+  const status=tg&&last?(last.kg>=tg.lo&&last.kg<=tg.hi?`<span class="pill ok">${t('wkIn')}</span>`:`<span class="pill warn">${t('wkOut')}</span>`):'';
+  return head(t('wkTitle',{n:esc(p.name)}),t('wkSub'),`<button class="btn ghost" data-act="subBack">${t('wkBack')}</button>`)
+  +`<div class="card"><div class="card-h"><h2>${t('wkNow')}</h2><span class="mono" dir="ltr">${last?num(last.kg)+' kg':'—'}</span></div>
+    <div class="chips">${[['3m','wkR3'],['1y','wkR12'],['all','wkRAll']].map(([k,l])=>`<button class="chip" data-act="wkRange" data-v="${k}" aria-pressed="${S.wRange===k}">${t(l)}</button>`).join('')}</div>
+    ${body}${status?`<div>${status}</div>`:''}</div>`
+  +`<div class="grid g2"><div class="card"><h2>${t('wkAdd')}</h2><div class="grid g2">${fld('wkDate',t('wkDate'),'date','max="'+isoD(TODAY)+'"')}${fld('wkKg',t('wkKg'),'number','min="0" step="0.1" inputmode="decimal"')}</div><div class="chips"><button class="btn" data-act="wkAdd" data-pid="${id}">${t('wkSave')}</button></div></div>
+    <div class="card"><h2>${t('wkTarget')}</h2><p class="note">${t('wkTargetSub')}</p><div class="grid g2">${fld('wkLo',t('wkFrom'),'number','min="0" step="0.1" inputmode="decimal"')}${fld('wkHi',t('wkTo'),'number','min="0" step="0.1" inputmode="decimal"')}</div><div class="chips"><button class="btn" data-act="wkTSave" data-pid="${id}">${t('wkTSave')}</button>${tg?`<button class="btn ghost" data-act="wkTClear" data-pid="${id}">${t('wkTClear')}</button>`:''}</div>${tg?`<p class="muted mono" dir="ltr" style="font-size:.85rem;text-align:start">${num(tg.lo)}–${num(tg.hi)} kg</p>`:''}</div></div>`
+  +`<div class="card"><h2>${t('wkHist')}</h2><div class="list">${all.slice().reverse().map(r=>`<div class="row"><span class="when">${fmt(r.d)}</span><div class="grow mono" dir="ltr" style="text-align:start">${num(r.kg)} kg</div><button class="btn ghost" data-act="wkDel" data-pid="${id}" data-v="${r.id}">${t('wkDel')}</button></div>`).join('')||`<p class="empty">${t('wkNoData')}</p>`}</div></div>`;
+}
+
+/* ---------- Labor ---------- */
+const LPANELS={lpBlood:['WBC','RBC','HCT','HGB','PLT'],lpOrgan:['CREA','BUN','ALT','ALP','GLU'],lpThy:['T4']};
+const LUNIT={WBC:'10⁹/l',RBC:'10¹²/l',HCT:'%',HGB:'g/dl',PLT:'10⁹/l',CREA:'mg/dl',BUN:'mg/dl',ALT:'U/l',ALP:'U/l',GLU:'mg/dl',T4:'µg/dl'};
+const LREF={
+  cat:{WBC:[5.5,19.5],RBC:[5,10],HCT:[30,45],HGB:[9.3,15.3],PLT:[300,800],CREA:[0.8,1.8],BUN:[17,33],ALT:[12,130],ALP:[14,111],GLU:[71,148],T4:[1,4]},
+  dog:{WBC:[6,17],RBC:[5.5,8.5],HCT:[37,55],HGB:[12,18],PLT:[200,500],CREA:[0.5,1.5],BUN:[7,27],ALT:[10,100],ALP:[20,150],GLU:[74,143],T4:[1.5,4]}
+};
+const lbPets=id=>{ const p=getPet(id); p.labs=p.labs||[]; return p.labs; };
+const refTxt=(lo,hi)=>lo==null&&hi==null?'':(lo==null?'':num(lo,lo%1?2:0))+'–'+(hi==null?'':num(hi,hi%1?2:0));
+const parseRef=s=>{ const m=/^\s*([\d.,]+)?\s*[–—-]\s*([\d.,]+)?\s*$/.exec(String(s||'')); if(!m) return [null,null]; const f=x=>x?parseFloat(num2(x)):null; const a=f(m[1]),b=f(m[2]); return [isNaN(a)?null:a,isNaN(b)?null:b]; };
+const lbFlag=(v,lo,hi)=>lo!=null&&v<lo?'low':hi!=null&&v>hi?'high':(lo==null&&hi==null?null:'ok');
+const flagPill=f=>f==='high'?`<span class="pill crit">${t('lbHigh')} ↑</span>`:f==='low'?`<span class="pill warn">${t('lbLow')} ↓</span>`:f==='ok'?`<span class="pill ok">${t('lbOkL')}</span>`:'';
+const lbDefaults=(id)=>{ const f=F(), sp=(getPet(id).art==='cat'||getPet(id).art==='dog')?getPet(id).art:null; if(!f.lbDate) f.lbDate=isoD(TODAY);
+  LPANELS[S.labPanel].forEach(k=>{ if(f['lr_'+k]===undefined) f['lr_'+k]=sp?refTxt(...LREF[sp][k]):''; }); };
+
+function vLabs(id){
+  const p=getPet(id), recs=lbPets(id).slice().sort((a,b)=>b.d-a.d);
+  const keys=[]; recs.slice().reverse().forEach(r=>r.vals.forEach(v=>{ if(!keys.includes(v.k)) keys.push(v.k); }));
+  const cnt=k=>recs.filter(r=>r.vals.some(v=>v.k===k)).length;
+  if(!S.labParam||!keys.includes(S.labParam)) S.labParam=keys.find(k=>cnt(k)>=2)||keys[0]||null;
+  let sum='';
+  if(recs.length){ const out=recs[0].vals.filter(v=>{ const f=lbFlag(v.v,v.lo,v.hi); return f==='low'||f==='high'; }).length;
+    sum=out?`<p class="note" style="border-inline-start:3px solid var(--warn, #c98a00);padding-inline-start:10px">${t('lbSumOut',{n:out})}</p>`:`<p class="note">${t('lbSumOk')}</p>`; }
+  let form='';
+  if(S.labAdd){ lbDefaults(id);
+    form=`<div class="card"><h2>${t('lbNew')}</h2>${fld('lbDate',t('lbDate'),'date','max="'+isoD(TODAY)+'"')}
+    <div class="chips" role="group" aria-label="${t('lbPanel')}">${Object.keys(LPANELS).map(k=>`<button class="chip" data-act="lbPanel" data-v="${k}" aria-pressed="${S.labPanel===k}">${t(k)}</button>`).join('')}</div>
+    <div class="list">${LPANELS[S.labPanel].map(k=>`<div class="row" style="align-items:flex-end;gap:8px;flex-wrap:wrap"><div class="grow" style="min-width:140px"><div style="font-weight:600">${t('lk'+k)}</div><div class="muted mono" style="font-size:.78rem">${LUNIT[k]}</div></div>
+      <div style="width:96px">${fld('lv_'+k,t('lbVal'),'text','inputmode="decimal"')}</div><div style="width:120px">${fld('lr_'+k,t('lbRef'),'text','dir="ltr"')}</div></div>`).join('')}</div>
+    <p class="note">${t('lbRefNote')}</p>
+    <div class="chips"><button class="btn" data-act="lbSave" data-pid="${id}">${t('lbSave')}</button><button class="btn ghost" data-act="lbToggle">${t('lbCancel')}</button></div></div>`; }
+  let trend='';
+  if(S.labParam){ const k=S.labParam, ms=recs.slice().reverse().map(r=>{ const v=r.vals.find(x=>x.k===k); return v?{d:r.d,...v}:null; }).filter(Boolean), lt=ms.at(-1);
+    trend=`<div class="card"><div class="card-h"><h2>${t('lbTrend')}</h2><span class="mono" dir="ltr">${num(lt.v,lt.v%1?2:0)} ${LUNIT[k]}</span></div>
+    <div class="chips">${keys.map(x=>`<button class="chip" data-act="lbParam" data-v="${x}" aria-pressed="${S.labParam===x}">${t('lk'+x)}</button>`).join('')}</div>
+    ${ms.length>=2?lineChart(ms.map(m=>({t:+m.d,v:m.v})),{band:lt.lo!=null&&lt.hi!=null?[lt.lo,lt.hi]:null,unit:LUNIT[k],dp:lt.v%1?2:1,aria:t('lk'+k)}):`<p class="empty">${t('lbOnly1')}</p>`}
+    ${lt.lo!=null||lt.hi!=null?`<p class="muted mono" style="font-size:.85rem;margin:0">${t('lbRefS',{r:'<bdi dir="ltr">'+refTxt(lt.lo,lt.hi)+' '+LUNIT[k]+'</bdi>'})}</p>`:''}</div>`; }
+  const list=recs.map(r=>`<div class="card"><div class="card-h"><div><h2>${t(r.panel)}</h2><span class="muted mono" style="font-size:.85rem">${fmt(r.d)}</span></div><span class="pill info">${r.src==='me'?t('lbSrcMe'):t('lbSrcPrac')}</span></div>
+    <div class="list">${r.vals.map(v=>`<div class="row"><div class="grow"><div style="font-weight:600">${t('lk'+v.k)}</div>${v.lo!=null||v.hi!=null?`<div class="muted mono" style="font-size:.78rem">${t('lbRefS',{r:'<bdi dir="ltr">'+refTxt(v.lo,v.hi)+'</bdi>'})}</div>`:''}</div><span class="mono" dir="ltr">${num(v.v,v.v%1?2:0)} ${LUNIT[v.k]}</span>${flagPill(lbFlag(v.v,v.lo,v.hi))}</div>`).join('')}</div>
+    ${r.src==='me'?`<div class="chips"><button class="btn ghost" data-act="lbDel" data-pid="${id}" data-v="${r.id}">${t('lbDel')}</button></div>`:''}</div>`).join('');
+  return head(t('lbTitle',{n:esc(p.name)}),t('lbSub'),`<button class="btn ghost" data-act="subBack">${t('wkBack')}</button>`)
+   +`<div class="card">${sum}${S.labAdd?'':`<div class="chips"><button class="btn" data-act="lbToggle">${t('lbNew')}</button></div>`}${recs.length?'':`<p class="empty">${t('lbNone')}</p>`}</div>`
+   +form+trend+list+`<p class="note">${t('lbDisc')}</p>`;
+}
+SUBS.weight=vWeight; SUBS.labs=vLabs;
+
+/* Demo-Befunde */
+(function(){
+  const mk=(d,panel,vals,ref,src)=>({id:++WID,d,panel,src:src||'prac',vals:Object.keys(vals).map(k=>({k,v:vals[k],lo:ref[k][0],hi:ref[k][1]}))});
+  if(S.pets.mio){ const r=LREF.cat; S.pets.mio.labs=[
+    mk(D(2026,9,10),'lpOrgan',{CREA:2.1,BUN:41,ALT:72,ALP:50,GLU:102},r),
+    mk(D(2026,9,10),'lpBlood',{WBC:12.4,RBC:7.1,HCT:33,HGB:11.2,PLT:410},r),
+    mk(D(2026,9,10),'lpThy',{T4:3.1},r),
+    mk(D(2025,8,20),'lpOrgan',{CREA:1.6,BUN:28,ALT:60,ALP:45,GLU:95},r)]; }
+  if(S.pets.luna){ const r=LREF.dog; S.pets.luna.labs=[
+    mk(D(2026,6,3),'lpOrgan',{CREA:1.0,BUN:15,ALT:48,ALP:80,GLU:98},r),
+    mk(D(2025,9,12),'lpOrgan',{CREA:0.9,BUN:14,ALT:44,ALP:76,GLU:96},r)]; }
+})();
+
+/* Akte: Buttons + Gesundheitsakte */
+const vAkteE5=vAkte;
+vAkte=function(){ let h=vAkteE5(); if(S.akteSub||S.impfView||S.docView||!S.pets[S.pet]) return h;
+  const k='<button class="btn ghost" data-act="subOpen" data-v="more">', i=h.indexOf(k);
+  const add=`<button class="btn ghost" data-act="subOpen" data-v="weight">${t('wkOpen')}</button><button class="btn ghost" data-act="subOpen" data-v="labs">${t('lbOpen')}</button>`;
+  return i>=0?h.slice(0,i)+add+h.slice(i):h; };
+VIEWS.akte=vAkte;
+
+const vltDocE5=vltDoc;
+vltDoc=function(id){ let h=vltDocE5(id); const p=getPet(id), w=wLog(id).slice(-8).reverse(), L2=lbPets(id).slice().sort((a,b)=>b.d-a.d).slice(0,3);
+  const ex=`<h2>${t('vltWk')}</h2>${w.length?`<table><tr><th>${t('wkDate')}</th><th>${t('wkKg')}</th></tr>${w.map(r=>`<tr><td>${fmt(r.d)}</td><td>${num(r.kg)}</td></tr>`).join('')}</table>`:`<p class="m">${t('vltNone')}</p>`}
+  <h2>${t('vltLb')}</h2>${L2.length?L2.map(r=>`<h3 style="font-size:13px;margin:10px 0 3px">${fmt(r.d)} · ${esc(t(r.panel))}</h3><table><tr><th></th><th>${t('lbVal')}</th><th>${t('lbRef')}</th><th></th></tr>${r.vals.map(v=>{ const f=lbFlag(v.v,v.lo,v.hi); return `<tr><td>${esc(t('lk'+v.k))}</td><td>${num(v.v,v.v%1?2:0)} ${LUNIT[v.k]}</td><td>${refTxt(v.lo,v.hi)}</td><td>${f==='high'?esc(t('lbHigh'))+' ↑':f==='low'?esc(t('lbLow'))+' ↓':''}</td></tr>`; }).join('')}</table>`).join(''):`<p class="m">${t('vltNone')}</p>`}`;
+  const j=h.lastIndexOf('<p class="m" style="margin-top:16px">'); return j>=0?h.slice(0,j)+ex+h.slice(j):h+ex; };
+
+/* Aktionen */
+const vetActionE5=vetAction;
+vetAction=function(a,d){
+  const f=F();
+  switch(a){
+  case 'wkRange': S.wRange=d.v; render(); return true;
+  case 'wkAdd': { const dt=parseD(f.wkDate||isoD(TODAY)), kg=parseFloat(num2(f.wkKg||''));
+    if(!dt||isNaN(kg)||kg<=0){ toast(t('wkNeed')); return true; }
+    if(dt>TODAY){ toast(t('wkFuture')); return true; }
+    wLog(d.pid).push({id:++WID,d:dt,kg}); wSync(d.pid); delete f.wkKg; delete f.wkDate; render(); toast(t('wkSaved')); return true; }
+  case 'wkDel': { const a2=wLog(d.pid), i=a2.findIndex(e=>String(e.id)===d.v); if(i>=0){ a2.splice(i,1); wSync(d.pid); render(); toast(t('wkDeleted')); } return true; }
+  case 'wkTSave': { const lo=parseFloat(num2(f.wkLo||'')), hi=parseFloat(num2(f.wkHi||'')); if(isNaN(lo)||isNaN(hi)||lo<=0||hi<=lo){ toast(t('wkTBad')); return true; } S.wTarget[d.pid]={lo,hi}; delete f.wkLo; delete f.wkHi; render(); return true; }
+  case 'wkTClear': delete S.wTarget[d.pid]; render(); return true;
+  case 'lbToggle': S.labAdd=!S.labAdd; if(!S.labAdd) Object.keys(f).filter(k=>/^l[vr]_/.test(k)).forEach(k=>delete f[k]); render(); return true;
+  case 'lbPanel': S.labPanel=d.v; render(); return true;
+  case 'lbParam': S.labParam=d.v; render(); return true;
+  case 'lbSave': { const dt=parseD(f.lbDate||isoD(TODAY)); const vals=LPANELS[S.labPanel].map(k=>{ const v=parseFloat(num2(f['lv_'+k]||'')); const [lo,hi]=parseRef(f['lr_'+k]); return isNaN(v)?null:{k,v,lo,hi}; }).filter(Boolean);
+    if(!dt||!vals.length){ toast(t('lbNeed')); return true; } if(dt>TODAY){ toast(t('wkFuture')); return true; }
+    lbPets(d.pid).push({id:++WID,d:dt,panel:S.labPanel,src:'me',vals}); S.labAdd=false; S.labParam=vals[0].k;
+    Object.keys(f).filter(k=>/^l[vr]_/.test(k)||k==='lbDate').forEach(k=>delete f[k]); render(); toast(t('lbSaved')); return true; }
+  case 'lbDel': { const L3=lbPets(d.pid), i=L3.findIndex(e=>String(e.id)===d.v&&e.src==='me'); if(i>=0){ L3.splice(i,1); render(); toast(t('lbDeleted')); } return true; }
+  }
+  return vetActionE5(a,d);
+};
+
 
 render();
 </script>
