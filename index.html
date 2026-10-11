@@ -770,7 +770,7 @@ function vTermine(){
     <div class="card">
       <span class="label">${t('step1')}</span>${petTabs('book',b.pet)}
       <span class="label">${t('step2')}</span>
-      <div class="prac">${S.practices.map(p=>`<label><input type="radio" name="prac" id="prac-${p.id}" value="${p.id}" ${b.p===p.id?'checked':''}><span><b>${esc(p.n)}</b><br><span class="muted" style="font-size:.85rem">${p.ort} · ${num(p.km)} ${t('kmU')} · ${t(p.typ)}</span></span></label>`).join('')}</div>
+      <div class="prac">${S.practices.filter(p=>(p.status||'active')!=='suspended').map(p=>`<label><input type="radio" name="prac" id="prac-${p.id}" value="${p.id}" ${b.p===p.id?'checked':''}><span><b>${esc(p.n)}</b><br><span class="muted" style="font-size:.85rem">${p.ort} · ${num(p.km)} ${t('kmU')} · ${t(p.typ)}</span></span></label>`).join('')}</div>
       <div class="grid g2"><div class="field"><label class="label" for="grund">${t('reason')}</label><select id="grund">${opts.map(o=>`<option value="${o}" ${o===b.grund?'selected':''}>${t(o)}</option>`).join('')}</select></div>
       <div class="field"><label class="label" for="art">${t('type')}</label><select id="art"><option ${b.art==='Praxis'?'selected':''} value="Praxis">${t('onSite')}</option><option ${b.art==='Video'?'selected':''} value="Video">${t('videoConsult')}</option></select></div></div>
       <span class="label">${t('step3')}</span>
@@ -851,7 +851,7 @@ function vSymptom(){
       <button class="btn" id="checkbtn">${t('checkBtn')}</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:12px">
-      ${r?`<div class="result ${r.lvl}" aria-live="polite"><span class="label">${t('resultFor',{pet:S.pets[s.pet].name})}</span><h2>${t(r.t)}</h2><p>${t(r.x)}</p><button class="btn${r.lvl==='crit'?' crit':''}" data-go="${r.cta[0]}" style="align-self:flex-start">${t(r.cta[1])}</button></div>`
+      ${r?`<div class="result ${r.lvl}" aria-live="polite"><span class="label">${t('resultFor',{pet:S.pets[s.pet].name})}</span><h2>${t(r.t)}</h2><p>${t(r.x)}</p><button class="btn${r.lvl==='crit'?' crit':''}" data-go="${r.cta[0]}" style="align-self:flex-start">${t(r.cta[1])}</button>${S.symSent===symSig()?`<p class="note">${t('symSentOk')}</p>`:`<button class="btn ghost" data-act="symSend" style="align-self:flex-start">${t('symSendBtn')}</button>`}</div>`
         :`<div class="card"><h2>${t('howTitle')}</h2><p class="muted">${t('howText')}</p><div class="list"><div class="row"><span class="pill crit">${t('lvlCrit')}</span><span class="muted">${t('lvlCritD')}</span></div><div class="row"><span class="pill warn">${t('lvlWarn')}</span><span class="muted">${t('lvlWarnD')}</span></div><div class="row"><span class="pill ok">${t('lvlOk')}</span><span class="muted">${t('lvlOkD')}</span></div></div></div>`}
       <p class="note">${t('symNote')}</p>
     </div>
@@ -902,7 +902,7 @@ function vNotfall(){
 /* ---------- Ansichten Praxis ---------- */
 function vVetAnfragen(){
   return head(t('nav_vanfragen'),t('inqSub')) + `
-  <div class="card"><div class="list">${S.inq.length?S.inq.map((q,i)=>`<div class="row" style="flex-wrap:wrap;align-items:flex-start"><span class="pill ${q.prio}">${q.prio==='warn'?t('soon'):t('normal')}</span><div class="grow"><div style="font-weight:600">${esc(inqWho(q))} · ${t(q.pet)}</div><div class="muted" style="font-size:.9rem">${esc(t(q.q))}</div></div><button class="btn ghost" data-ans="${i}" data-kind="offer">${t('offerAppt')}</button><button class="btn" data-ans="${i}" data-kind="done">${t('done')}</button></div>`).join(''):`<p class="empty">${t('noInq')}</p>`}</div></div>
+  <div class="card"><div class="list">${S.inq.length?S.inq.map((q,i)=>`<div class="row" style="flex-wrap:wrap;align-items:flex-start"><span class="pill ${q.prio}">${q.prio==='crit'?t('lvlCrit'):q.prio==='warn'?t('soon'):t('normal')}</span><div class="grow"><div style="font-weight:600">${esc(inqWho(q))} · ${q.sym?esc(q.petName):t(q.pet)}</div><div class="muted" style="font-size:.9rem">${q.sym?esc(symSummary(q.sym)):esc(t(q.q))}</div></div><button class="btn ghost" data-ans="${i}" data-kind="offer">${t('offerAppt')}</button><button class="btn" data-ans="${i}" data-kind="done">${t('done')}</button></div>`).join(''):`<p class="empty">${t('noInq')}</p>`}</div></div>
   <p class="note" style="margin-top:14px">${t('inqNote')}</p>`;
 }
 
@@ -1117,7 +1117,7 @@ function vVetHome(){
   const today=practiceAppts().filter(a=>a.status!=='cancelled'&&sameDay(a.d,TODAY)).sort((a,b)=>a.t<b.t?-1:1);
   const pend=practiceAppts().filter(a=>a.status==='pending').length;
   const mondayOffset=(TODAY.getDay()+6)%7;
-  const load=[92,78,64,88,71,40].map((v,i)=>[wd(addDays(i-mondayOffset)),v]);
+  const load=[0,1,2,3,4,5].map(i=>{ const dd=addDays(i-mondayOffset); const n=practiceAppts().filter(a=>a.status!=='cancelled'&&sameDay(a.d,dd)).length; return [wd(dd),Math.min(100,Math.round(n/8*100))]; });
   const nvid=today.filter(a=>a.art==='Video').length;
   return head(t('vetTitle',{p:esc(S.practiceName)}),t('vetSub'),`<span class="demo">${t('demo')}</span>`) +
   (pend?`<div class="callout"><span>${t('pendingBanner',{n:pend})}</span><button class="btn" data-act="goBookings">${t('view')}</button></div>`:'') + `
@@ -2512,7 +2512,7 @@ function vRechnungen(){
   const b=S.bill;
   if(b.oview) return blDocView(b.oview,'owner');
   const mine=blMine(), openSum=blR2(mine.filter(i=>i.status==='open').reduce((s,i)=>s+blTotals(i).gross,0));
-  const rows=mine.map(i=>`<div class="row" style="flex-wrap:wrap;align-items:flex-start"><div class="grow" style="min-width:200px"><div><b class="mono">${esc(i.no)}</b></div><div>${t('ownVisit',{pet:esc(blPetName(i)),what:blWhat(i)})}</div><div class="muted" style="font-size:.85rem">${t('invDate')} ${fmt(i.date)} · ${t('invTreat')} ${fmt(i.treat)}${i.status==='open'?` · ${t('invDue')} ${fmt(i.due)}`:''}${i.paid?` · ${t('paidOn',{d:fmt(i.paid.d),m:t(i.paid.m)})}`:''}</div></div><b class="mono">${blMoney(blTotals(i).gross,i.cur)}</b>${blPill(i)}<div class="chips"><button class="btn" data-act="blOView" data-id="${i.id}">${t('ownView')}</button><button class="btn ghost" data-act="blDl" data-id="${i.id}">${t('invDownload')}</button></div></div>`).join('');
+  const rows=mine.map(i=>`<div class="row" style="flex-wrap:wrap;align-items:flex-start"><div class="grow" style="min-width:200px"><div><b class="mono">${esc(i.no)}</b></div><div>${t('ownVisit',{pet:esc(blPetName(i)),what:blWhat(i)})}</div><div class="muted" style="font-size:.85rem">${t('invDate')} ${fmt(i.date)} · ${t('invTreat')} ${fmt(i.treat)}${i.status==='open'?` · ${t('invDue')} ${fmt(i.due)}`:''}${i.paid?` · ${t('paidOn',{d:fmt(i.paid.d),m:t(i.paid.m)})}`:''}</div></div><b class="mono">${blMoney(blTotals(i).gross,i.cur)}</b>${blPill(i)}<div class="chips">${blClaimBtn(i)}<button class="btn" data-act="blOView" data-id="${i.id}">${t('ownView')}</button><button class="btn ghost" data-act="blDl" data-id="${i.id}">${t('invDownload')}</button></div></div>`).join('');
   return head(t('ownTitle'),t('ownSub'))+`<div class="card stat"><span class="muted">${t('ownOpenSum')}</span><b>${blMoney(openSum,'EUR')}</b></div><div class="card"><div class="list">${rows||`<p class="empty">${t('ownNone')}</p>`}</div><p class="note">${t('ownSync')}</p></div>`;
 }
 
@@ -3274,7 +3274,7 @@ function vInsur(id){
   const p=getPet(id), L=insL(id), C=claimList(id);
   const card=L.map(x=>{ const d=INS_DIR.find(y=>y.id===x.sel)||{name:'—'}; return `<div class="row" style="align-items:flex-start"><div class="grow"><div style="font-weight:600">${esc(d.name)}</div><div class="muted" style="font-size:.85rem">${esc(x.no)} · ${t('iSelf')} ${x.self} € · ${t('iQuote')} ${x.quote} %</div><div class="muted" style="font-size:.85rem">${d.mode==='portal'?t('iPortal'):t('iMail')}</div>${d.mode==='portal'?`<div class="chips" style="margin-top:6px"><button class="btn ghost" data-act="insPack">${t('iPackage')}</button><button class="btn ghost" data-act="insPortalGo">${t('iPortalDo')}</button></div>`:''}</div><button class="btn ghost" data-act="insDel" data-pid="${id}" data-did="${x.id}">${t('iDel')}</button></div>`; }).join('')||`<p class="empty">${t('iNone')}</p>`;
   const cl=C.map(c=>{ const ins=L.find(x=>x.id===c.ins)||L[0]; const est=ins?Math.max(0,Math.round((c.amt-ins.self)*ins.quote)/100):null;
-    return `<div class="row" style="align-items:flex-start;flex-wrap:wrap"><div class="grow"><div style="font-weight:600">${esc(c.title)} · ${c.amt.toFixed(2).replace('.',',')} €</div><div class="muted" style="font-size:.85rem">${fmt(c.d)}${est!==null?` · ${t('iEst',{v:est.toFixed(2).replace('.',',')})}`:''}</div></div><div class="chips">${['iSub1','iSub4','iSub2','iSub5','iSub3'].map(k=>`<button class="chip" data-act="clStatus" data-pid="${id}" data-did="${c.id}" data-v="${k}" aria-pressed="${c.st===k}">${t(k)}</button>`).join('')}</div></div>`; }).join('')||`<p class="empty">${t('iNoClaims')}</p>`;
+    return `<div class="row" style="align-items:flex-start;flex-wrap:wrap"><div class="grow"><div style="font-weight:600">${esc(c.title)} · ${c.amt.toFixed(2).replace('.',',')} €</div><div class="muted" style="font-size:.85rem">${fmt(c.d)}${est!==null?` · ${t('iEst',{v:est.toFixed(2).replace('.',',')})}`:''}</div></div><div class="chips">${['iSub1','iSub4','iSub2','iSub5','iSub3'].map(k=>`<button class="chip" data-act="clStatus" data-pid="${id}" data-did="${c.id}" data-v="${k}" aria-pressed="${c.st===k}">${t(k)}</button>`).join('')}</div>${clPaidBlock(id,c,est)}</div>`; }).join('')||`<p class="empty">${t('iNoClaims')}</p>`;
   return head(t('iTitle'),t('iSub'),`<button class="btn ghost" data-act="subBack">${t('mBack')}</button>`)
    +`<div class="card"><div class="list">${card}</div></div>`
    +`<div class="card"><h2>${t('iAdd')}</h2><div class="grid g2">${sel('insLSel',t('iSel'),INS_DIR.map(x=>[x.id,x.name]))}${fld('insLNo',t('iNo'))}${fld('insLSelf',t('iSelf'),'number')}${fld('insLQuote',t('iQuote'),'number')}</div><div class="chips"><button class="btn" data-act="insAdd" data-pid="${id}">${t('iSave')}</button></div></div>`
@@ -3998,6 +3998,121 @@ vProfil=function(){ return vProfilE8()+`<div class="card" style="margin-top:16px
 VIEWS.profil=vProfil;
 const vetActionE8=vetAction;
 vetAction=function(a,d){ if(a==='pcReset'){ pcOff=true; try{ localStorage.removeItem(PC_KEY); }catch(e){} location.reload(); return true; } return vetActionE8(a,d); };
+
+/* Etappe 9 Texte */
+Object.assign(STR.de,{"symSendBtn": "An Praxis senden", "symSentOk": "Gesendet – die Praxis sieht dein Ergebnis in den Anfragen.", "symInqLine": "Symptomcheck: {s} · Dauer: {d} · Allgemeinbefinden: {g}"});
+Object.assign(STR.en,{"symSendBtn": "Send to practice", "symSentOk": "Sent – the practice sees your result in its requests.", "symInqLine": "Symptom check: {s} · duration: {d} · general condition: {g}"});
+Object.assign(STR.fr,{"symSendBtn": "Envoyer au cabinet", "symSentOk": "Envoyé – le cabinet voit votre résultat dans ses demandes.", "symInqLine": "Vérification des symptômes : {s} · durée : {d} · état général : {g}"});
+Object.assign(STR.ar,{"symSendBtn": "إرسال إلى العيادة", "symSentOk": "تم الإرسال – ترى العيادة نتيجتك في الطلبات.", "symInqLine": "فحص الأعراض: {s} · المدة: {d} · الحالة العامة: {g}"});
+Object.assign(STR.nl,{"symSendBtn": "Naar praktijk sturen", "symSentOk": "Verstuurd – de praktijk ziet je uitslag bij de aanvragen.", "symInqLine": "Symptoomcheck: {s} · duur: {d} · algemeen: {g}"});
+
+const symSummary=q=>t('symInqLine',{s:q.chips.map(c=>t(c)).join(', '),d:t({'<24h':'d1','1-3d':'d2','>3d':'d3'}[q.dauer]),g:t({normal:'g1',matt:'g2',apathisch:'g3'}[q.ruhig])});
+const symSig=()=>S.sym.pet+'|'+S.sym.chips.join(',')+'|'+S.sym.dauer+'|'+S.sym.ruhig;
+const vetActionE9=vetAction;
+vetAction=function(a,d){
+  if(a==='symSend'){
+    const r=S.sym.res; if(!r) return true;
+    const p=S.pets[S.sym.pet];
+    const q={sym:{chips:S.sym.chips.slice(),dauer:S.sym.dauer,ruhig:S.sym.ruhig},petName:p.name,who:S.auth.full||S.auth.name||'',prio:r.lvl==='crit'?'crit':r.lvl==='warn'?'warn':'normal',pet:'',q:''};
+    if(q.prio==='crit') S.inq.unshift(q); else S.inq.push(q);
+    S.symSent=symSig(); toast(t('symSentOk')); render(); return true;
+  }
+  return vetActionE9(a,d);
+};
+
+/* Etappe 10 Texte */
+Object.assign(STR.de,{"clRefLbl": "Erstatteter Betrag (€)", "clRefSave": "Betrag speichern", "clRefLine": "Erstattet {r} · selbst getragen {s}", "clInvBtn": "Bei Versicherung einreichen", "clInvDone": "Eingereicht", "clInvToast": "Einreichung angelegt – Status unter Tierakte → Versicherungen pflegen.", "hhRefT": "Erstattung & Eigenanteil", "hhRefRow": "Kosten {c} · erstattet {r} · selbst getragen {s}", "hhRefNone": "Noch keine Erstattungen eingetragen."});
+Object.assign(STR.en,{"clRefLbl": "Amount reimbursed (€)", "clRefSave": "Save amount", "clRefLine": "Reimbursed {r} · paid by you {s}", "clInvBtn": "Submit to insurer", "clInvDone": "Submitted", "clInvToast": "Submission created – update its status under pet record → Insurance.", "hhRefT": "Reimbursement & your share", "hhRefRow": "Costs {c} · reimbursed {r} · paid by you {s}", "hhRefNone": "No reimbursements entered yet."});
+Object.assign(STR.fr,{"clRefLbl": "Montant remboursé (€)", "clRefSave": "Enregistrer le montant", "clRefLine": "Remboursé {r} · à votre charge {s}", "clInvBtn": "Soumettre à l’assurance", "clInvDone": "Soumis", "clInvToast": "Soumission créée – mettez à jour son statut sous dossier → Assurances.", "hhRefT": "Remboursement et reste à charge", "hhRefRow": "Coûts {c} · remboursé {r} · à votre charge {s}", "hhRefNone": "Aucun remboursement saisi."});
+Object.assign(STR.ar,{"clRefLbl": "المبلغ المسترد (€)", "clRefSave": "حفظ المبلغ", "clRefLine": "المسترد {r} · على نفقتك {s}", "clInvBtn": "تقديم إلى شركة التأمين", "clInvDone": "تم التقديم", "clInvToast": "تم إنشاء التقديم – حدّث حالته ضمن سجل الحيوان ← التأمين.", "hhRefT": "الاسترداد وحصتك", "hhRefRow": "التكلفة {c} · المسترد {r} · على نفقتك {s}", "hhRefNone": "لم يتم إدخال أي استردادات بعد."});
+Object.assign(STR.nl,{"clRefLbl": "Vergoed bedrag (€)", "clRefSave": "Bedrag opslaan", "clRefLine": "Vergoed {r} · zelf betaald {s}", "clInvBtn": "Indienen bij verzekering", "clInvDone": "Ingediend", "clInvToast": "Indiening aangemaakt – status bijwerken onder dierdossier → Verzekeringen.", "hhRefT": "Vergoeding & eigen bijdrage", "hhRefRow": "Kosten {c} · vergoed {r} · zelf betaald {s}", "hhRefNone": "Nog geen vergoedingen ingevoerd."});
+
+const clPaidBlock=(pid,c,est)=>{
+  if(c.st!=='iSub2'&&c.st!=='iSub5') return '';
+  const key='clRef'+c.id, f=F(); if(f[key]===undefined) f[key]=String(c.paid!=null?c.paid:(est!==null&&est!==undefined?est:c.amt)).replace('.',',');
+  const line=c.paid!=null?`<p class="note" style="width:100%">${t('clRefLine',{r:blMoney(c.paid,'EUR'),s:blMoney(Math.max(0,c.amt-c.paid),'EUR')})}</p>`:'';
+  return `<div style="width:100%"><div class="grid g2">${fld(key,t('clRefLbl'),'text')}</div><div class="chips"><button class="btn ghost" data-act="clRefund" data-pid="${pid}" data-did="${c.id}">${t('clRefSave')}</button></div>${line}</div>`;
+};
+const blClaimBtn=i=>{ const done=Object.values(S.claims).flat().some(c=>c.inv===i.id); return done?`<span class="pill info">${t('clInvDone')}</span>`:`<button class="btn ghost" data-act="blClaim" data-id="${i.id}">${t('clInvBtn')}</button>`; };
+const vetActionE10=vetAction;
+vetAction=function(a,d){
+  if(a==='clRefund'){ const c=claimList(d.pid).find(x=>String(x.id)===d.did); const v=parseFloat(String(F()['clRef'+d.did]||'').replace(',','.')); if(!c||isNaN(v)||v<0){ toast(t('iClNeed')); return true; } c.paid=v; render(); return true; }
+  if(a==='blClaim'){ const i=S.inv.find(x=>x.id===d.id); if(!i) return true; const L=insL(i.pid); claimList(i.pid).push({id:Date.now(),title:i.no+' · '+blPetName(i),amt:blTotals(i).gross&&blR2(blTotals(i).gross)||0,d:new Date(TODAY),ins:L[0]?L[0].id:null,st:'iSub1',inv:i.id}); toast(t('clInvToast')); render(); return true; }
+  if(a==='clStatus'){ const c=claimList(d.pid).find(x=>String(x.id)===d.did); if(c&&(d.v==='iSub1'||d.v==='iSub3'||d.v==='iSub4')) c.paid=null; }
+  return vetActionE10(a,d);
+};
+const vHaushaltE10=vHaushalt;
+vHaushalt=function(){
+  const h=vHaushaltE10(), [a,b]=hhRange();
+  const costBy={}; blMine().filter(i=>i.date>=a&&i.date<b).forEach(i=>{ costBy[i.pid]=blR2((costBy[i.pid]||0)+blTotals(i).gross); });
+  const rows=Object.keys(S.pets).map(pid=>{ const cl=(S.claims[pid]||[]).filter(c=>c.d>=a&&c.d<b&&c.paid!=null); const r=blR2(cl.reduce((s,c)=>s+c.paid,0)); const c=costBy[pid]||0; if(!c&&!cl.length) return ''; return `<div class="row"><div class="grow"><div style="font-weight:600">${esc(S.pets[pid].name)}</div><div class="muted" style="font-size:.85rem">${t('hhRefRow',{c:blMoney(c,'EUR'),r:blMoney(r,'EUR'),s:blMoney(Math.max(0,blR2(c-r)),'EUR')})}</div></div></div>`; }).join('');
+  const card=`<div class="card"><h2>${t('hhRefT')}</h2><div class="list">${rows||`<p class="empty">${t('hhRefNone')}</p>`}</div></div>`;
+  const m='<div class="card"><h2>'+t('hhProph')+'</h2>';
+  return h.includes(m)?h.replace(m,card+m):h+card;
+};
+VIEWS.haushalt=vHaushalt;
+
+/* Etappe 11 Texte */
+Object.assign(STR.de,{"admKpiPrac": "Praxen", "admActiveL": "Aktiv", "admTrialL": "Testphase", "admSuspL": "Gesperrt", "admApptsL": "Termine gesamt", "admInvsL": "Rechnungen gesamt", "admSearch": "Praxis suchen …", "admAddT": "Praxis anlegen", "admName": "Praxisname", "admCity": "Ort", "admAddBtn": "Anlegen (30 Tage Testphase)", "admNeedName": "Bitte einen Praxisnamen eingeben.", "admBlockBtn": "Sperren", "admUnblockBtn": "Entsperren", "admTrialBtn": "Testphase starten (30 Tage)", "admExtBtn": "Testphase +14 Tage", "admStTrial": "Testphase bis {d}", "admStExp": "Testphase abgelaufen", "admStat": "{a} Termine · {i} Rechnungen", "admBlockedT": "Dieser Zugang ist gesperrt", "admBlockedX": "Bitte wende dich an den Betreiber.", "admNone": "Keine Praxis gefunden.", "admFilterAll": "Alle"});
+Object.assign(STR.en,{"admKpiPrac": "Practices", "admActiveL": "Active", "admTrialL": "Trial", "admSuspL": "Suspended", "admApptsL": "Appointments total", "admInvsL": "Invoices total", "admSearch": "Search practice …", "admAddT": "Add practice", "admName": "Practice name", "admCity": "City", "admAddBtn": "Create (30-day trial)", "admNeedName": "Please enter a practice name.", "admBlockBtn": "Suspend", "admUnblockBtn": "Reactivate", "admTrialBtn": "Start trial (30 days)", "admExtBtn": "Trial +14 days", "admStTrial": "Trial until {d}", "admStExp": "Trial expired", "admStat": "{a} appointments · {i} invoices", "admBlockedT": "This account is suspended", "admBlockedX": "Please contact the operator.", "admNone": "No practice found.", "admFilterAll": "All"});
+Object.assign(STR.fr,{"admKpiPrac": "Cabinets", "admActiveL": "Actifs", "admTrialL": "Période d’essai", "admSuspL": "Bloqués", "admApptsL": "Rendez-vous au total", "admInvsL": "Factures au total", "admSearch": "Rechercher un cabinet …", "admAddT": "Ajouter un cabinet", "admName": "Nom du cabinet", "admCity": "Ville", "admAddBtn": "Créer (essai de 30 jours)", "admNeedName": "Veuillez saisir un nom de cabinet.", "admBlockBtn": "Bloquer", "admUnblockBtn": "Débloquer", "admTrialBtn": "Démarrer l’essai (30 jours)", "admExtBtn": "Essai +14 jours", "admStTrial": "Essai jusqu’au {d}", "admStExp": "Essai expiré", "admStat": "{a} rendez-vous · {i} factures", "admBlockedT": "Cet accès est bloqué", "admBlockedX": "Veuillez contacter l’exploitant.", "admNone": "Aucun cabinet trouvé.", "admFilterAll": "Tous"});
+Object.assign(STR.ar,{"admKpiPrac": "العيادات", "admActiveL": "نشطة", "admTrialL": "فترة تجريبية", "admSuspL": "موقوفة", "admApptsL": "إجمالي المواعيد", "admInvsL": "إجمالي الفواتير", "admSearch": "ابحث عن عيادة …", "admAddT": "إضافة عيادة", "admName": "اسم العيادة", "admCity": "المدينة", "admAddBtn": "إنشاء (تجربة 30 يومًا)", "admNeedName": "يرجى إدخال اسم العيادة.", "admBlockBtn": "إيقاف", "admUnblockBtn": "إعادة التفعيل", "admTrialBtn": "بدء التجربة (30 يومًا)", "admExtBtn": "تمديد التجربة 14 يومًا", "admStTrial": "تجربة حتى {d}", "admStExp": "انتهت التجربة", "admStat": "{a} مواعيد · {i} فواتير", "admBlockedT": "هذا الحساب موقوف", "admBlockedX": "يرجى التواصل مع المشغّل.", "admNone": "لم يتم العثور على عيادة.", "admFilterAll": "الكل"});
+Object.assign(STR.nl,{"admKpiPrac": "Praktijken", "admActiveL": "Actief", "admTrialL": "Proefperiode", "admSuspL": "Geblokkeerd", "admApptsL": "Afspraken totaal", "admInvsL": "Facturen totaal", "admSearch": "Praktijk zoeken …", "admAddT": "Praktijk toevoegen", "admName": "Naam praktijk", "admCity": "Plaats", "admAddBtn": "Aanmaken (30 dagen proef)", "admNeedName": "Vul een praktijknaam in.", "admBlockBtn": "Blokkeren", "admUnblockBtn": "Deblokkeren", "admTrialBtn": "Proefperiode starten (30 dagen)", "admExtBtn": "Proef +14 dagen", "admStTrial": "Proef tot {d}", "admStExp": "Proefperiode verlopen", "admStat": "{a} afspraken · {i} facturen", "admBlockedT": "Deze toegang is geblokkeerd", "admBlockedX": "Neem contact op met de beheerder.", "admNone": "Geen praktijk gevonden.", "admFilterAll": "Alle"});
+
+const pStat=p=>p.status||'active';
+const pExpired=p=>pStat(p)==='trial'&&p.trialEnd&&p.trialEnd<new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate());
+const admStPill=p=>{ const s=pStat(p); return s==='suspended'?`<span class="pill crit">${t('admSuspL')}</span>`:s==='trial'?(pExpired(p)?`<span class="pill warn">${t('admStExp')}</span>`:`<span class="pill info">${t('admStTrial',{d:p.trialEnd?fmt(p.trialEnd):'—'})}</span>`):`<span class="pill ok">${t('admActiveL')}</span>`; };
+vAdmin=function(){
+  const all=S.practices, f=S.admF||'all';
+  const cnt=k=>all.filter(p=>pStat(p)===k).length;
+  const nA=S.appts.length, nI=S.inv.filter(i=>i.status!=='draft').length;
+  const kpi=(l,v)=>`<div class="card stat"><span class="label">${l}</span><b class="mono">${v}</b></div>`;
+  const chips=[['all',t('admFilterAll')],['active',t('admActiveL')],['trial',t('admTrialL')],['suspended',t('admSuspL')]].map(([k,l])=>`<button class="chip" data-act="admF" data-v="${k}" aria-pressed="${f===k}">${l}</button>`).join('');
+  const list=all.filter(p=>f==='all'||pStat(p)===f);
+  const rows=list.map(p=>{ const pk=pkgOf(p), s=pStat(p);
+    const pk_=['basis','standard','premium'].map(k=>`<button class="chip" data-act="admPkg" data-p="${p.id}" data-k="${k}" aria-pressed="${pk===k}">${t('pk_'+k)}</button>`).join('')+(pk==='custom'?`<span class="pill info">${t('pk_custom')}</span>`:'');
+    const mods=MODS.map(m=>`<button class="chip" data-act="admTog" data-p="${p.id}" data-m="${m}" aria-pressed="${p.mods.includes(m)}">${p.mods.includes(m)?'✓ ':''}${t('m_'+m)}</button>`).join('');
+    const na=S.appts.filter(a=>a.p===p.id).length, ni=S.inv.filter(i=>i.p===p.id&&i.status!=='draft').length;
+    return `<div class="card admrow" data-search="${esc(((p.name||p.n||'')+' '+(p.ort||'')).toLowerCase())}"><div class="card-h"><h2>${esc(p.name||p.n)}</h2>${admStPill(p)}</div>
+      <div class="muted" style="font-size:.85rem">${esc(p.ort||'—')} · ${t('admStat',{a:na,i:ni})} · ${t('admOn',{n:p.mods.length,m:MODS.length})}</div>
+      <div class="field"><span class="label">${t('admPackage')}</span><div class="chips">${pk_}</div></div>
+      <div class="chips" role="group">${mods}</div>
+      <div class="chips" style="margin-top:8px"><button class="btn" data-act="admPrev" data-p="${p.id}" data-r="vet">${t('admPreviewVet')}</button><button class="btn ghost" data-act="admPrev" data-p="${p.id}" data-r="owner">${t('admPreviewOwner')}</button>
+        ${s==='suspended'?`<button class="btn ghost" data-act="admUnblock" data-p="${p.id}">${t('admUnblockBtn')}</button>`:`<button class="btn ghost" data-act="admBlock" data-p="${p.id}">${t('admBlockBtn')}</button>`}
+        ${s==='trial'?`<button class="btn ghost" data-act="admExt" data-p="${p.id}">${t('admExtBtn')}</button>`:`<button class="btn ghost" data-act="admTrial" data-p="${p.id}">${t('admTrialBtn')}</button>`}</div></div>`; }).join('');
+  return head(t('admTitle'),t('admSub'),`<button class="btn ghost" data-act="admLogout">${t('admLogout')}</button>`)
+   +`<div class="grid g2">${kpi(t('admKpiPrac'),all.length)}${kpi(t('admActiveL'),cnt('active'))}${kpi(t('admTrialL'),cnt('trial'))}${kpi(t('admSuspL'),cnt('suspended'))}${kpi(t('admApptsL'),nA)}${kpi(t('admInvsL'),nI)}</div>`
+   +`<div class="card"><div class="field"><input id="adm-search" type="search" placeholder="${esc(t('admSearch'))}" aria-label="${esc(t('admSearch'))}" autocomplete="off"></div><div class="chips">${chips}</div></div>`
+   +`<div id="adm-list">${rows||`<p class="empty">${t('admNone')}</p>`}</div>`
+   +`<div class="card"><h2>${t('admAddT')}</h2><div class="grid g2">${fld('admNewName',t('admName'))}${fld('admNewCity',t('admCity'))}</div><div class="chips"><button class="btn" data-act="admAdd">${t('admAddBtn')}</button></div></div>`
+   +`<p class="note">${t('admNote')}</p>`;
+};
+document.addEventListener('input',e=>{ const el=e.target; if(el&&el.id==='adm-search'){ const q=el.value.toLowerCase(); document.querySelectorAll('.admrow').forEach(r=>{ r.hidden=!!q&&!(r.dataset.search||'').includes(q); }); } });
+const vetActionE11=vetAction;
+vetAction=function(a,d){
+  const P=()=>pracOf(d.p), until=n=>{ const x=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()); x.setDate(x.getDate()+n); return x; };
+  switch(a){
+    case 'admF': S.admF=d.v; render(); return true;
+    case 'admBlock': P().status='suspended'; render(); return true;
+    case 'admUnblock': P().status=P().trialEnd?'trial':'active'; render(); return true;
+    case 'admTrial': { const p=P(); p.status='trial'; p.trialEnd=until(30); render(); return true; }
+    case 'admExt': { const p=P(); const base=(p.trialEnd&&p.trialEnd>until(0))?new Date(p.trialEnd):until(0); base.setDate(base.getDate()+14); p.trialEnd=base; render(); return true; }
+    case 'admAdd': { const f=F(), nm=(f.admNewName||'').trim(); if(!nm){ toast(t('admNeedName')); return true; } const id='a'+Date.now(); S.practices.push({id,name:nm,n:nm,ort:(f.admNewCity||'').trim()||'—',km:9.9,typ:'tSmall',mods:MOD_PKG.basis.slice(),status:'trial',trialEnd:until(30),created:new Date(TODAY)}); f.admNewName=f.admNewCity=''; render(); return true; }
+  }
+  return vetActionE11(a,d);
+};
+const renderE11=render;
+render=function(){
+  const r=renderE11.apply(this,arguments);
+  try{
+    const p=pracOf(S.actPrac);
+    if(S.role==='vet'&&!S.admin&&!S.admPrev&&S.auth.stage==='in'&&p&&pStat(p)==='suspended'){
+      document.getElementById('main').innerHTML=`<div class="card" style="max-width:520px;margin:40px auto"><h2>${t('admBlockedT')}</h2><p class="muted">${t('admBlockedX')}</p><button class="btn" data-act="admLogout">${t('admLogout')}</button></div>`;
+      const nv=document.getElementById('nav'); if(nv) nv.style.display='none';
+    }
+  }catch(e){}
+  return r;
+};
 
 render();
 </script>
