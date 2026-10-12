@@ -6704,6 +6704,61 @@ VIEWS.home=vHome;
   };
 })();
 
+/* ===== Etappe 10: Buchungsfenster über mehrere Wochen (Halter) + Einstellung in der Praxis ===== */
+(function(){
+  const add=(k,de,en)=>Object.keys(STR).forEach(l=>{ if(STR[l]&&typeof STR[l]==='object') STR[l][k]=(l==='de')?de:en; });
+  add('bkPrev','Früher','Earlier');
+  add('bkNext','Später','Later');
+  add('bkHorizonT','Online-Buchung im Voraus','Online booking horizon');
+  add('bkHorizonX','Wie weit im Voraus dürfen Halter:innen online Termine buchen?','How far ahead can pet owners book online?');
+  add('bkWeeksU','Wochen','weeks');
+  S.bookWeeks=S.bookWeeks||8; S.book.off=S.book.off||0;
+  const PAGE=14;
+  const weeksFor=p=>p==='p1'?(S.bookWeeks||8):8;
+
+  /* Slots nur innerhalb des Buchungsfensters der gewählten Praxis */
+  const _sf=slotsFor;
+  slotsFor=function(dayIdx,p){
+    if(p===undefined && dayIdx>=weeksFor(S.book.p)*7) return [];
+    return _sf.apply(this,arguments);
+  };
+
+  /* Tagesleiste mit Blättern */
+  const _vT=vTermine;
+  vTermine=function(){
+    const b=S.book, maxD=weeksFor(b.p)*7, pages=Math.ceil(maxD/PAGE);
+    if(b.off>=maxD||b.off<0||b.off%PAGE) b.off=0;
+    /* gewählter Tag liegt nicht im Fenster (z. B. nach Praxiswechsel): auf Beginn der Seite setzen */
+    if(b.day>=maxD){ b.day=0; b.off=0; b.slot=null; }
+    let h=_vT.apply(this,arguments);
+    const from=b.off, to=Math.min(from+PAGE,maxD), fd=addDays(from), ld=addDays(to-1);
+    const btns=Array.from({length:to-from},(_,k)=>{ const i=from+k, d=addDays(i), we=!slotsFor(i).length;
+      return `<button class="day" data-day="${i}" aria-pressed="${b.day===i}" ${we?'disabled style="opacity:.4"':''}><small>${i===0?t('todayCap'):wd(d)}</small><b class="mono">${dm(d)}</b></button>`; }).join('');
+    const nav=`<div class="chips" style="align-items:center;margin-bottom:6px"><button class="chip" data-act="bkPage" data-v="-1" ${from<=0?'disabled':''}>‹ ${t('bkPrev')}</button><span class="muted mono" style="font-size:.85rem">${dm(fd)} – ${dm(ld)}</span><button class="chip" data-act="bkPage" data-v="1" ${to>=maxD?'disabled':''}>${t('bkNext')} ›</button></div>`;
+    return h.replace(/<div class="days">[\s\S]*?<\/div>/,nav+`<div class="days">${btns}</div>`);
+  };
+  VIEWS.termine=vTermine;
+
+  /* Einstellung in der Praxis: Kalender */
+  const _vK=vKalender;
+  vKalender=function(){
+    const h=_vK.apply(this,arguments);
+    const card=`<div class="card" style="margin-top:16px"><h2>${t('bkHorizonT')}</h2><p class="muted">${t('bkHorizonX')}</p><div class="chips" role="group">${[4,8,12].map(w=>`<button class="chip" data-act="bkWeeks" data-v="${w}" aria-pressed="${S.bookWeeks===w}">${w} ${t('bkWeeksU')}</button>`).join('')}</div></div>`;
+    return h+card;
+  };
+  VIEWS.vkalender=vKalender;
+
+  const _va=vetAction;
+  vetAction=function(a,d){
+    if(a==='bkPage'){ const b=S.book, maxD=weeksFor(b.p)*7; const o=b.off+(+d.v)*PAGE; if(o<0||o>=maxD) return true; b.off=o;
+      const fi=Array.from({length:Math.min(PAGE,maxD-o)},(_,k)=>o+k).find(i=>slotsFor(i).some(s=>s.free)); b.day=fi!==undefined?fi:o; b.slot=null; render(); return true; }
+    if(a==='bkWeeks'){ S.bookWeeks=+d.v; if(S.book.p==='p1'&&S.book.off>=S.bookWeeks*7){ S.book.off=0; S.book.day=0; S.book.slot=null; } toast(t('toastHours')); render(); return true; }
+    return _va.call(this,a,d);
+  };
+  /* Tag anklicken bei Seitenwechsel der Praxis: zurück auf die erste Seite */
+  document.addEventListener('change',e=>{ if(e.target&&e.target.name==='prac'){ S.book.off=0; } },true);
+})();
+
 render();
 </script>
 
