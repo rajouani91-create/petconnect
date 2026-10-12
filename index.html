@@ -832,8 +832,12 @@ function triage(){
   const s=S.sym, c=s.chips;
   if(c.some(x=>SYM.rot.includes(x))||s.ruhig==='apathisch') return {lvl:'crit',t:'rCritT',x:'rCritX',cta:['notfall','findER']};
   if(!c.length) return null;
-  const ernst = s.dauer==='>3d' || (s.dauer==='1-3d' && c.length>=2) || (c.includes('s_noeat') && S.pets[s.pet].art==='cat' && s.dauer!=='<24h') || (c.includes('s_vomit')&&c.includes('s_diarrhea'));
-  if(ernst) return {lvl:'warn',t:'rWarnT',x:'rWarnX',cta:['termine','bookAppt']};
+  const mild = new Set(c.filter(x=>SYM.gelb.includes(x))).size;
+  const ernst = s.dauer==='>3d' || (s.dauer==='1-3d' && c.length>=2) || (c.includes('s_noeat') && S.pets[s.pet].art==='cat' && s.dauer!=='<24h') || (c.includes('s_vomit')&&c.includes('s_diarrhea')) || mild>=3;
+  // „matt" erhöht die Stufe um eins (GRÜN → GELB, GELB → ROT) – wie src/triage.ts
+  const lvl = ernst ? (s.ruhig==='matt'?'crit':'warn') : (s.ruhig==='matt'?'warn':'ok');
+  if(lvl==='crit') return {lvl:'crit',t:'rCritT',x:'rCritX',cta:['notfall','findER']};
+  if(lvl==='warn') return {lvl:'warn',t:'rWarnT',x:'rWarnX',cta:['termine','bookAppt']};
   return {lvl:'ok',t:'rOkT',x:'rOkX',cta:['tele','startVideo']};
 }
 function vSymptom(){
