@@ -3257,7 +3257,7 @@ const qrSvg=seed=>realQr('https://petconnect24.com/s/'+seed,120);
 function vShare(id){
   const p=getPet(id), sh=S.shares[id]=S.shares[id]||[], ps=S.pracShare[id]=S.pracShare[id]||{p1:true};
   const areas=['sVacc','sMed','sAll','sDoc'];
-  const pracRows=S.practices.filter(x=>x.n).map(x=>`<div class="row"><div class="grow"><div style="font-weight:600">${esc(x.n)}</div></div><span class="pill ${ps[x.id]?'ok':'info'}">${ps[x.id]?t('shPracOn'):t('shPracOff')}</span><button class="btn ghost" data-act="pracShareTog" data-pid="${id}" data-v="${x.id}">${ps[x.id]?t('shRevoke'):t('shGrant')}</button></div>`).join('');
+  const pracRows=S.practices.filter(x=>x.n).map(x=>`<div class="row"><div class="grow"><div style="font-weight:600">${esc(x.n)}</div></div><span class="pill ${shareOn(id,x.id)?'ok':'info'}">${shareOn(id,x.id)?t('shPracOn'):t('shPracOff')}</span><button class="btn ghost" data-act="pracShareTog" data-pid="${id}" data-v="${x.id}">${shareOn(id,x.id)?t('shRevoke'):t('shGrant')}</button></div>`).join('');
   const links=sh.map(l=>{ const active=!l.revoked&&l.exp>new Date(); return `<div class="row" style="align-items:flex-start;flex-wrap:wrap"><div>${qrSvg(l.token)}</div><div class="grow" style="min-width:160px"><div class="mono" style="font-size:.8rem;word-break:break-all">petconnect24.com/s/${l.token}</div><div class="muted" style="font-size:.85rem;margin:4px 0">${l.areas.map(a=>t(a)).join(', ')}</div><span class="pill ${active?'ok':'crit'}">${active?t('shActive',{d:fmt(l.exp)}):t('shRevoked')}</span></div><div class="chips">${active?`<button class="btn ghost" data-act="shCopy">${t('shCopy')}</button><button class="btn ghost" data-act="shRevokeLink" data-pid="${id}" data-v="${l.token}">${t('shRevoke')}</button>`:''}</div></div>`; }).join('')||`<p class="empty">${t('shNone')}</p>`;
   return head(t('shTitle'),t('shSub'),`<button class="btn ghost" data-act="subBack">${t('mBack')}</button>`)
    +`<div class="card"><h2>${t('shPrac')}</h2><div class="list">${pracRows}</div></div>`
@@ -3967,7 +3967,7 @@ triage=function(){
 
 /* Eingaben bleiben im Browser erhalten (gleicher Tag, gleiche Programmversion) */
 const PC_KEY='pc_state_v1', PC_BUILD='2026-10-11-e8';
-const PC_KEYS=['practiceName','practice','pets','practices','appts','chat','rem','er','inq','hours','types','blocks','others','notes','wait','cat','bill','invSeq','billCfg','inv','ins','nachweis','docs','pkgs','pendLines','extraMin','rset','areas','shares','pracShare','insList','claims','favs','stamm','invited','shareAreas','nearby','sitters','care','coHold','wlog','wTarget','invites','sent','sentN','autoRem','apptRem','pet','demo','actPrac','hhRef','vltIns','hhMode'];
+const PC_KEYS=['practiceName','practice','pets','practices','appts','chat','rem','er','inq','hours','types','blocks','others','notes','wait','cat','bill','invSeq','billCfg','inv','ins','nachweis','docs','pkgs','pendLines','extraMin','rset','areas','shares','pracShare','insList','claims','favs','stamm','invited','shareAreas','nearby','sitters','care','coHold','wlog','wTarget','invites','sent','sentN','autoRem','apptRem','pet','demo','actPrac','hhRef','vltIns','hhMode','accReq'];
 let pcOff=false;
 function pcSave(){
   if(pcOff) return;
@@ -6516,7 +6516,8 @@ vetAction=function(a,d){
 
 
 /* Etappe 14: jede Praxis sieht nur ihre eigenen Daten */
-function patVis(id){ const P=S.actPrac||'p1'; if(P==='p1') return true; if(S.pets[id]) return !!((S.pracShare[id]||{})[P])||S.appts.some(a=>a.pet===id&&a.p===P); const o=S.others[id]; return !!o&&o.prac===P; }
+function shareOn(id,P){ const ps=S.pracShare[id]||{}; if(ps[P]===true) return true; if(ps[P]===false) return false; return S.appts.some(a=>a.pet===id&&a.p===P); }
+function patVis(id){ const P=S.actPrac||'p1'; if(S.pets[id]) return P==='p1'?(S.pracShare[id]||{}).p1!==false:shareOn(id,P); if(P==='p1') return true; const o=S.others[id]; return !!o&&o.prac===P; }
 const inqV=()=>S.inq.map((q,i)=>[q,i]).filter(([q])=>(q.p||'p1')===(S.actPrac||'p1'));
 const inqPrac=()=>{ const s=S.stamm; return (s&&S.practices.some(x=>x.id===s))?s:((S.book&&S.book.p)||'p1'); };
 S.inq.forEach(q=>{ if(!q.p) q.p='p1'; });
@@ -6551,6 +6552,51 @@ vetAction=function(a,d){
   }
   return vetActionE16(a,d);
 };
+
+/* Etappe 17 Texte */
+Object.assign(STR.de,{"reqH": "Zugriff bei Halter:in anfragen", "reqSub": "Du hast keinen Zugriff auf die Akte? Schick der Halterin oder dem Halter eine Anfrage – sie/er entscheidet.", "reqPet": "Name des Tieres", "reqMail": "E-Mail der Halter:in (optional)", "reqSendB": "Anfrage senden", "reqNone": "Kein Tier mit diesem Namen gefunden.", "reqHave": "Du hast bereits Zugriff auf diese Akte.", "reqDup": "Für dieses Tier läuft schon eine Anfrage.", "reqSent": "Anfrage gesendet. Die Halter:in entscheidet.", "reqList": "Deine Anfragen", "reqSt_open": "Wartet auf Antwort", "reqSt_ok": "Freigegeben", "reqSt_no": "Abgelehnt", "reqOpenPat": "Akte öffnen", "reqTitle": "{p} bittet um Zugriff", "reqX": "{p} möchte die Akte von {n} sehen. Du kannst den Zugriff jederzeit unter Teilen & Freigaben widerrufen.", "reqAllow": "Zugriff erlauben", "reqDeny": "Ablehnen", "reqAllowedT": "Zugriff erlaubt", "reqDeniedT": "Anfrage abgelehnt", "shRevokedT": "Zugriff widerrufen", "shGrantedT": "Zugriff freigegeben"});
+Object.assign(STR.en,{"reqH": "Request access from the owner", "reqSub": "No access to the record? Send the owner a request – they decide.", "reqPet": "Animal's name", "reqMail": "Owner's e-mail (optional)", "reqSendB": "Send request", "reqNone": "No animal with that name found.", "reqHave": "You already have access to this record.", "reqDup": "A request for this animal is already pending.", "reqSent": "Request sent. The owner decides.", "reqList": "Your requests", "reqSt_open": "Waiting for reply", "reqSt_ok": "Granted", "reqSt_no": "Declined", "reqOpenPat": "Open record", "reqTitle": "{p} asks for access", "reqX": "{p} would like to see {n}'s record. You can revoke access at any time under Sharing & access.", "reqAllow": "Allow access", "reqDeny": "Decline", "reqAllowedT": "Access granted", "reqDeniedT": "Request declined", "shRevokedT": "Access revoked", "shGrantedT": "Access granted"});
+Object.assign(STR.fr,{"reqH": "Demander l'accès au propriétaire", "reqSub": "Pas d'accès au dossier ? Envoyez une demande au propriétaire – il décide.", "reqPet": "Nom de l'animal", "reqMail": "E-mail du propriétaire (facultatif)", "reqSendB": "Envoyer la demande", "reqNone": "Aucun animal de ce nom trouvé.", "reqHave": "Vous avez déjà accès à ce dossier.", "reqDup": "Une demande pour cet animal est déjà en cours.", "reqSent": "Demande envoyée. Le propriétaire décide.", "reqList": "Vos demandes", "reqSt_open": "En attente de réponse", "reqSt_ok": "Accordé", "reqSt_no": "Refusé", "reqOpenPat": "Ouvrir le dossier", "reqTitle": "{p} demande l'accès", "reqX": "{p} souhaite consulter le dossier de {n}. Vous pouvez retirer l'accès à tout moment sous Partage et accès.", "reqAllow": "Autoriser l'accès", "reqDeny": "Refuser", "reqAllowedT": "Accès autorisé", "reqDeniedT": "Demande refusée", "shRevokedT": "Accès retiré", "shGrantedT": "Accès accordé"});
+Object.assign(STR.ar,{"reqH": "طلب الوصول من المالك", "reqSub": "لا يوجد وصول إلى السجل؟ أرسل طلبًا إلى المالك – هو من يقرر.", "reqPet": "اسم الحيوان", "reqMail": "البريد الإلكتروني للمالك (اختياري)", "reqSendB": "إرسال الطلب", "reqNone": "لم يتم العثور على حيوان بهذا الاسم.", "reqHave": "لديك وصول بالفعل إلى هذا السجل.", "reqDup": "يوجد طلب قيد الانتظار لهذا الحيوان.", "reqSent": "تم إرسال الطلب. المالك هو من يقرر.", "reqList": "طلباتك", "reqSt_open": "بانتظار الرد", "reqSt_ok": "تمت الموافقة", "reqSt_no": "تم الرفض", "reqOpenPat": "فتح السجل", "reqTitle": "{p} تطلب الوصول", "reqX": "تريد {p} الاطلاع على سجل {n}. يمكنك سحب الوصول في أي وقت من المشاركة والأذونات.", "reqAllow": "السماح بالوصول", "reqDeny": "رفض", "reqAllowedT": "تم السماح بالوصول", "reqDeniedT": "تم رفض الطلب", "shRevokedT": "تم سحب الوصول", "shGrantedT": "تم منح الوصول"});
+Object.assign(STR.nl,{"reqH": "Toegang aanvragen bij de eigenaar", "reqSub": "Geen toegang tot het dossier? Stuur de eigenaar een verzoek – die beslist.", "reqPet": "Naam van het dier", "reqMail": "E-mail van de eigenaar (optioneel)", "reqSendB": "Verzoek versturen", "reqNone": "Geen dier met deze naam gevonden.", "reqHave": "Je hebt al toegang tot dit dossier.", "reqDup": "Er loopt al een verzoek voor dit dier.", "reqSent": "Verzoek verstuurd. De eigenaar beslist.", "reqList": "Jouw verzoeken", "reqSt_open": "Wacht op antwoord", "reqSt_ok": "Toegestaan", "reqSt_no": "Geweigerd", "reqOpenPat": "Dossier openen", "reqTitle": "{p} vraagt toegang", "reqX": "{p} wil het dossier van {n} inzien. Je kunt de toegang altijd intrekken onder Delen & toegang.", "reqAllow": "Toegang toestaan", "reqDeny": "Weigeren", "reqAllowedT": "Toegang toegestaan", "reqDeniedT": "Verzoek geweigerd", "shRevokedT": "Toegang ingetrokken", "shGrantedT": "Toegang verleend"});
+
+if(!S.accReq) S.accReq=[];
+const vetActionE17=vetAction;
+vetAction=function(a,d){
+  if(a==='pracShareTog'){
+    const ps=S.pracShare[d.pid]=S.pracShare[d.pid]||{}, on=shareOn(d.pid,d.v); ps[d.v]=!on;
+    if(on&&S.vpat===d.pid&&(S.actPrac||'p1')===d.v) S.vpat=null;
+    render(); toast(t(on?'shRevokedT':'shGrantedT')); return true;
+  }
+  if(a==='reqSend'){
+    const f=F(), nm=(f.reqPet||'').trim().toLowerCase(), P=S.actPrac||'p1';
+    const pid=Object.keys(S.pets).find(i=>String(getPet(i).name).toLowerCase()===nm);
+    if(!nm||!pid){ toast(t('reqNone')); return true; }
+    if(shareOn(pid,P)){ toast(t('reqHave')); return true; }
+    if(S.accReq.some(r=>r.pid===pid&&r.prac===P&&r.status==='open')){ toast(t('reqDup')); return true; }
+    S.accReq.unshift({id:'q'+Date.now(),pid,prac:P,pracName:(S.practices.find(x=>x.id===P)||{}).n||S.practiceName,status:'open'});
+    delete f.reqPet; delete f.reqMail; render(); toast(t('reqSent')); return true;
+  }
+  if(a==='reqOk'||a==='reqNo'){
+    const r=S.accReq.find(x=>x.id===d.v); if(!r) return true;
+    if(a==='reqOk'){ r.status='ok'; (S.pracShare[r.pid]=S.pracShare[r.pid]||{})[r.prac]=true; } else r.status='no';
+    render(); toast(t(a==='reqOk'?'reqAllowedT':'reqDeniedT')); return true;
+  }
+  return vetActionE17(a,d);
+};
+const vIntakeViewE17=vIntakeView;
+vIntakeView=function(){
+  const h=vIntakeViewE17();
+  if(S.intake!=='code') return h;
+  const P=S.actPrac||'p1', mine=S.accReq.filter(r=>r.prac===P);
+  const rows=mine.map(r=>{ const p=getPet(r.pid)||{name:'?'}; return `<div class="row"><div class="grow" style="font-weight:600">${esc(p.name)}</div><span class="pill ${r.status==='ok'?'ok':r.status==='no'?'crit':'info'}">${t('reqSt_'+r.status)}</span>${r.status==='ok'&&shareOn(r.pid,P)?`<button class="btn ghost" data-act="openPat" data-pid="${r.pid}">${t('reqOpenPat')}</button>`:''}</div>`; }).join('');
+  return h+`<div class="card" style="max-width:520px;margin-top:16px"><h2>${t('reqH')}</h2><p class="note">${t('reqSub')}</p><div class="grid g2">${fld('reqPet',t('reqPet'))}${fld('reqMail',t('reqMail'),'email')}</div><div class="chips"><button class="btn" data-act="reqSend">${t('reqSendB')}</button></div>${rows?`<h3 style="margin-top:14px">${t('reqList')}</h3><div class="list">${rows}</div>`:''}</div>`;
+};
+const vHomeE17=vHome;
+vHome=function(){ let h=vHomeE17();
+  const cards=S.accReq.filter(r=>r.status==='open'&&S.pets[r.pid]).map(r=>`<div class="card" style="border:2px solid var(--brand);margin-bottom:16px"><h2>${t('reqTitle',{p:esc(r.pracName||'')})}</h2><p>${t('reqX',{p:esc(r.pracName||''),n:esc(getPet(r.pid).name)})}</p><div class="chips"><button class="btn" data-act="reqOk" data-v="${r.id}">${t('reqAllow')}</button><button class="btn ghost" data-act="reqNo" data-v="${r.id}">${t('reqDeny')}</button></div></div>`).join('');
+  return cards?injectTop(h,cards):h; };
+VIEWS.home=vHome;
 
 render();
 </script>
