@@ -6598,6 +6598,112 @@ vHome=function(){ let h=vHomeE17();
   return cards?injectTop(h,cards):h; };
 VIEWS.home=vHome;
 
+/* ===== Etappe 9: Korrekturen aus den Browser-Tests (H-036 bis H-158) – letzte Schicht, ändert keine früheren Regeln ===== */
+(function(){
+  const add=(k,de,en)=>Object.keys(STR).forEach(l=>{ if(STR[l]&&typeof STR[l]==='object') STR[l][k]=(l==='de')?de:en; });
+  add('cancelFree','Die Absage ist kostenlos.','Cancelling is free of charge.');
+  add('docDelYes','Ja, löschen','Yes, delete');
+  add('docDelNo','Abbrechen','Cancel');
+
+  /* Feiertage (Hessen) – an Feiertagen werden keine Termine angeboten */
+  const easter=y=>{ const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1; return new Date(y,mo-1,da); };
+  const holidays=y=>{ const e=easter(y), pl=n=>{ const d=new Date(e); d.setDate(d.getDate()+n); return d; }; return [new Date(y,0,1),pl(-2),pl(1),new Date(y,4,1),pl(39),pl(50),pl(60),new Date(y,9,3),new Date(y,11,25),new Date(y,11,26)]; };
+  const isHoliday=d=>holidays(d.getFullYear()).some(h=>sameDay(h,d));
+
+  /* Slots: Feiertage sperren; Termine, die nicht mehr vor die Mittagspause bzw. den Feierabend passen, werden nicht angeboten */
+  const _sf=slotsFor;
+  slotsFor=function(dayIdx,p){
+    const r=_sf.apply(this,arguments);
+    if(!r.length) return r;
+    const d=addDays(dayIdx);
+    if(isHoliday(d)) return [];
+    if(p!==undefined) return r;
+    const dur=bookDur();
+    if(dur<=30) return r;
+    const h=(S.book.p==='p1'?S.hours:DEF_HOURS)[d.getDay()];
+    return r.map(s=>{ const st=toMin(s.t), lim=st<720?720:toMin(h.to); return st+dur>lim?{t:s.t,free:false}:s; });
+  };
+
+  /* Favoriten stehen oben (Profil und Praxisauswahl) */
+  const favOrder=()=>{ S.practices.forEach((p,i)=>{ if(p._i===undefined) p._i=i; }); S.practices.sort((a,b)=>((S.favs.includes(a.id)?0:1)-(S.favs.includes(b.id)?0:1))||a._i-b._i); };
+  const _render=render;
+  render=function(){ try{ favOrder(); }catch(e){} const r=_render.apply(this,arguments);
+    /* Gewichtsfeld: Komma-Eingabe auch in Browsern ohne deutsche Zahlenregion (type=number würde das Komma verwerfen) */
+    try{ const el=document.getElementById('f-wkKg'); if(el&&el.type==='number'){ el.type='text'; el.removeAttribute('min'); el.removeAttribute('step'); el.setAttribute('inputmode','decimal'); } }catch(e){}
+    return r; };
+
+  /* Symptomcheck → „Termin buchen“ übernimmt das gewählte Tier */
+  document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('.result [data-go="termine"]'); if(b&&S.sym&&S.pets[S.sym.pet]) S.book.pet=S.sym.pet; },true);
+
+  /* Demo-Konto hat eine Rufnummer für die Notfallkarte */
+  document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-act="demo"]'); if(b&&!S.cardContact) S.cardContact='0151 23456789'; },true);
+
+  /* Laborformular: Referenzwerte beim Tierwechsel neu vorbelegen (Hund ≠ Katze) */
+  document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-pet-akte]'); if(b){ const f=F(); Object.keys(f).filter(k=>/^l[rv]_/.test(k)).forEach(k=>delete f[k]); } },true);
+
+  /* Hinweis „kostenlos“ bei Absage mehr als 24 h vorher */
+  const _toast=toast;
+  toast=function(m){ if(S._freeCancel&&typeof m==='string'&&m.indexOf(t('toastOwnCancelled'))===0){ const a=[...arguments]; a[0]=m+' '+t('cancelFree'); return _toast.apply(this,a); } return _toast.apply(this,arguments); };
+
+  /* Kalenderdatei (.ics) */
+  const pad=n=>String(n).padStart(2,'0');
+  const icsStamp=(d,tm)=>{ const [h,m]=tm.split(':').map(Number); return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(h)+pad(m)+'00'; };
+  const icsEsc=s=>String(s).replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');
+  function downloadIcs(a){
+    const st=toMin(a.t), en=st+(a.dur||durOf(a)), endT=pad(Math.floor(en/60))+':'+pad(en%60);
+    const pr=prac(a.p), pn=pr?pr.n:'Tierarztpraxis', pet=S.pets[a.pet]?S.pets[a.pet].name:'';
+    const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//PetConnect//Termin//DE','CALSCALE:GREGORIAN','BEGIN:VEVENT','UID:'+a.id+'@petconnect','DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,''),
+      'DTSTART:'+icsStamp(a.d,a.t),'DTEND:'+icsStamp(a.d,endT),'SUMMARY:'+icsEsc('Tierarzttermin: '+pet),'LOCATION:'+icsEsc(pn),'DESCRIPTION:'+icsEsc('Termin über PetConnect. Absage bis 24 Stunden vorher kostenlos.'),'END:VEVENT','END:VCALENDAR'];
+    const u=URL.createObjectURL(new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'}));
+    const l=document.createElement('a'); l.href=u; l.download='PetConnect-Termin.ics'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u),2000);
+  }
+  document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('button'); if(b&&b.id==='bookbtn'&&!b.disabled){ const cs=document.getElementById('calsync'), want=!!(cs&&cs.checked), n=S.appts.length;
+    setTimeout(()=>{ if(want&&S.appts.length>n){ const a=S.appts[S.appts.length-1]; if(a.owner==='me'&&a.t){ try{ downloadIcs(a); }catch(err){} } } },30); } },true);
+
+  /* Tierakte: Button „Dokumente“ */
+  const _vAkte=vAkte;
+  vAkte=function(){ const h=_vAkte.apply(this,arguments); if(S.docView||S.impfView||S.akteSub||!S.pets[S.pet]||h.includes('data-act="docOpenView"')) return h;
+    const m=h.match(/<button[^>]*data-act="nwOpen"[^>]*>[^<]*<\/button>/); return m?h.replace(m[0],m[0]+docBtn(S.pet)):h; };
+  VIEWS.akte=vAkte;
+
+  /* Dokument löschen nur nach Bestätigung */
+  const _vDok=vDokumente;
+  vDokumente=function(id){ let h=_vDok.apply(this,arguments);
+    if(S.docDelAsk){ const re=new RegExp('<button[^>]*data-act="docDel"[^>]*data-did="'+S.docDelAsk+'"[^>]*>[^<]*</button>');
+      h=h.replace(re,`<button class="btn crit" data-act="docDelYes" data-pid="${id}" data-did="${S.docDelAsk}">${t('docDelYes')}</button><button class="btn ghost" data-act="docDelNo">${t('docDelNo')}</button>`); }
+    return h; };
+
+  /* Betreuung: widerrufene Einträge verschwinden aus der Liste (der Link selbst bleibt gesperrt) */
+  const _vSit=vSitter;
+  vSitter=function(id){ const all=S.sitters[id]; if(!all||!all.some(l=>l.revoked)) return _vSit.apply(this,arguments);
+    S.sitters[id]=all.filter(l=>!l.revoked); try{ return _vSit.apply(this,arguments); } finally{ S.sitters[id]=all; } };
+  SUBS.sitter=vSitter;
+
+  /* Notfall: „Stammpraxis anrufen“ ist ein tel:-Link */
+  const _vNot=vNotfall;
+  vNotfall=function(){ const h=_vNot.apply(this,arguments); const sp=stammInfo(); if(!sp||!sp.tel) return h;
+    return h.replace(/<button([^>]*data-act="sosCall"[^>]*)>([\s\S]*?)<\/button>/g,(m,attrs,inner)=>`<a${attrs} href="tel:${sp.tel.replace(/\s/g,'')}">${inner}</a>`); };
+  VIEWS.notfall=vNotfall;
+
+  const _va=vetAction;
+  vetAction=function(a,d){
+    if(a==='oCancelYes'){ const ap=findAp(d.id); if(ap&&(apDT(ap)-new Date())/36e5>=24) S._freeCancel=true; try{ return _va.call(this,a,d); } finally{ S._freeCancel=false; } }
+    if(a==='oMoveTo'){ const old=findAp(d.id), free=!!old&&(apDT(old)-new Date())/36e5>=24; const r=_va.call(this,a,d);
+      if(free&&old.status!=='cancelled'){ old.status='cancelled'; old.cancel={by:'move',at:new Date()}; delete old.moveTo; render(); } return r; }
+    if(a==='impfAddSave'){ const p=getPet(d.pid), n=p?p.impf.length:0, r=_va.call(this,a,d);
+      if(p&&p.impf.length>n&&S.pets[d.pid]){ const e=p.impf[p.impf.length-1]; if(e.f) S.rem.push({id:Date.now(),pet:d.pid,t:e.n,d:e.f,k:'kVacc',own:true}); render(); } return r; }
+    if(a==='docDel'){ S.docDelAsk=d.did; render(); return true; }
+    if(a==='docDelNo'){ S.docDelAsk=null; render(); return true; }
+    if(a==='docDelYes'){ S.docDelAsk=null; return _va.call(this,'docDel',d); }
+    if(a==='cardPrint'){ const dl=document.querySelector('#main dl.kv'), nm=((document.querySelector('#main .card h2')||{}).textContent||'').trim();
+      const html='<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Notfallkarte</title><style>body{font:16px/1.5 system-ui,sans-serif;margin:32px}h1{border-bottom:3px solid #b3261e;padding-bottom:8px}dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px}dt{font-weight:600}dd{margin:0}</style></head><body><h1>SOS · '+esc(nm)+'</h1>'+(dl?dl.outerHTML:'')+'</body></html>';
+      let w=null; try{ w=window.open('','_blank'); }catch(err){}
+      if(w){ w.document.write(html); w.document.close(); setTimeout(()=>{ try{ w.focus(); w.print(); }catch(err){} },300); } else { window.print(); }
+      return true; }
+    return _va.call(this,a,d);
+  };
+})();
+
 render();
 </script>
 
