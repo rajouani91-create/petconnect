@@ -6759,6 +6759,118 @@ VIEWS.home=vHome;
   document.addEventListener('change',e=>{ if(e.target&&e.target.name==='prac'){ S.book.off=0; } },true);
 })();
 
+/* ===== Etappe 11: Familie & Mithalter:innen – ein Tierprofil mit mehreren Personen teilen ===== */
+(function(){
+  const add=(k,de,en)=>Object.keys(STR).forEach(l=>{ if(STR[l]&&typeof STR[l]==='object') STR[l][k]=(l==='de')?de:en; });
+  add('hhTitle','Familie & Mithalter:innen','Family & co-owners');
+  add('hhSub','Teile Tierprofile mit Partner:in oder Familie. Alle Beteiligten sehen dieselbe Tierakte, dieselben Termine und Erinnerungen.','Share pet profiles with your partner or family. Everyone sees the same records, appointments and reminders.');
+  add('hhMe','Du · Haupthalter:in','You · main owner');
+  add('hhName','Name','Name');
+  add('hhMail','E-Mail','Email');
+  add('hhRole','Rechte','Permissions');
+  add('hhRoleCo','Mithalter:in','Co-owner');
+  add('hhRoleView','Nur ansehen','View only');
+  add('hhRoleCoX','Darf Tierakte bearbeiten, Termine buchen und absagen. Kann keine Tiere löschen und keine Personen verwalten.','Can edit records and book or cancel appointments. Cannot delete pets or manage people.');
+  add('hhRoleViewX','Sieht Tierakte, Termine und Notfallkarte, kann aber nichts ändern.','Sees records, appointments and emergency card but cannot change anything.');
+  add('hhPets','Welche Tiere?','Which pets?');
+  add('hhInvite','Einladen','Invite');
+  add('hhPending','Eingeladen','Invited');
+  add('hhActive','Aktiv','Active');
+  add('hhAccept','Annahme simulieren (Demo)','Simulate acceptance (demo)');
+  add('hhRemove','Entfernen','Remove');
+  add('hhRemoveAsk','{n} wirklich entfernen? Die Person verliert sofort den Zugriff auf die geteilten Tiere.','Really remove {n}? They lose access to the shared pets immediately.');
+  add('hhRemoveYes','Ja, entfernen','Yes, remove');
+  add('hhCancel','Abbrechen','Cancel');
+  add('hhNone','Noch niemand eingeladen.','Nobody invited yet.');
+  add('hhSent','Einladung an {m} vorgemerkt. Prototyp: es wird keine E-Mail gesendet.','Invitation to {m} saved. Prototype: no email is sent.');
+  add('hhRemoved','{n} wurde entfernt.','{n} was removed.');
+  add('hhAccepted','{n} hat die Einladung angenommen.','{n} accepted the invitation.');
+  add('hhErrName','Bitte einen Namen angeben.','Please enter a name.');
+  add('hhErrMail','Bitte eine gültige E-Mail-Adresse angeben.','Please enter a valid email address.');
+  add('hhErrDup','Diese Person ist schon eingeladen.','This person has already been invited.');
+  add('hhErrPets','Bitte mindestens ein Tier auswählen.','Please select at least one pet.');
+  add('hhErrMax','Es können höchstens 5 weitere Personen eingeladen werden.','You can invite at most 5 other people.');
+  add('hhShared','Geteilt mit','Shared with');
+  add('hhNote','Termine und Erinnerungen gehen an alle mit Zugriff. Die Praxis sieht, wer einen Termin gebucht hat.','Appointments and reminders go to everyone with access. The practice sees who booked an appointment.');
+
+  /* Zustand + Speicherung im Browser */
+  S.house=S.house||{members:[]}; S.hhForm=S.hhForm||{role:'co',pets:null}; S.hhAsk=null;
+  try{ ['house','bookWeeks'].forEach(k=>{ if(!PC_KEYS.includes(k)) PC_KEYS.push(k); });
+    const raw=localStorage.getItem(PC_KEY); if(raw){ const o=JSON.parse(raw,(k,v)=>{ if(v&&typeof v==='object'&&!Array.isArray(v)){ const ks=Object.keys(v); if(ks.length===1&&ks[0]==='$d') return new Date(v.$d); } return v; });
+      if(o&&o.b===PC_BUILD&&o.day===isoD(new Date())&&o.data){ if(o.data.house) S.house=o.data.house; if(o.data.bookWeeks) S.bookWeeks=o.data.bookWeeks; } } }catch(e){}
+
+  const MAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const petIds=()=>Object.keys(S.pets).filter(k=>!S.pets[k].dead);
+  const membersOf=pid=>S.house.members.filter(m=>m.pets.includes(pid));
+  /* Alte Co-Halter-Liste (Betreuung) aus der Familienliste ableiten */
+  const syncCo=()=>{ const co={}; S.house.members.forEach(m=>m.pets.forEach(p=>{ (co[p]=co[p]||[]).push(m.mail); })); S.coHold=co; };
+  const _render=render; render=function(){ try{ syncCo(); }catch(e){} return _render.apply(this,arguments); };
+
+  function hhCard(){
+    const f=F(), fm=S.hhForm, ids=petIds(); if(fm.pets===null) fm.pets=ids.slice();
+    const rolePill=r=>`<span class="pill info">${r==='view'?t('hhRoleView'):t('hhRoleCo')}</span>`;
+    const rows=S.house.members.map(m=>{ const names=m.pets.map(p=>S.pets[p]?esc(S.pets[p].name):'').filter(Boolean).join(', ');
+      const ask=S.hhAsk===m.id;
+      return `<div class="row" style="align-items:flex-start;flex-wrap:wrap" data-hh="${m.id}"><div class="grow"><div style="font-weight:600">${esc(m.name)}</div><div class="muted" style="font-size:.85rem">${esc(m.mail)} · ${names}</div><div class="chips" style="margin-top:4px">${rolePill(m.role)}<span class="pill ${m.status==='active'?'ok':'warn'}">${m.status==='active'?t('hhActive'):t('hhPending')}</span></div>
+        ${ask?`<p class="note">${t('hhRemoveAsk',{n:esc(m.name)})}</p>`:''}</div>
+        <div class="chips">${ask?`<button class="btn crit" data-act="hhRemoveYes" data-v="${m.id}">${t('hhRemoveYes')}</button><button class="btn ghost" data-act="hhRemoveNo">${t('hhCancel')}</button>`
+          :`${m.status!=='active'?`<button class="btn ghost" data-act="hhAccept" data-v="${m.id}">${t('hhAccept')}</button>`:''}<button class="btn ghost" data-act="hhRemove" data-v="${m.id}">${t('hhRemove')}</button>`}</div></div>`; }).join('');
+    const me=`<div class="row"><div class="grow"><div style="font-weight:600">${esc(myName())}</div><div class="muted" style="font-size:.85rem">${t('hhMe')}</div></div></div>`;
+    const roleChips=[['co','hhRoleCo'],['view','hhRoleView']].map(([k,l])=>`<button class="chip" data-act="hhRoleSel" data-v="${k}" aria-pressed="${fm.role===k}">${t(l)}</button>`).join('');
+    const petChips=ids.map(k=>`<button class="chip" data-act="hhPetTog" data-v="${k}" aria-pressed="${fm.pets.includes(k)}">${esc(S.pets[k].name)}</button>`).join('');
+    const pe=S.auth.errors.hhPets;
+    return `<div class="card" id="hh-card" style="margin-top:16px"><h2>${t('hhTitle')}</h2><p class="muted">${t('hhSub')}</p>
+      <div class="list">${me}${rows||`<p class="empty">${t('hhNone')}</p>`}</div>
+      <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px;display:flex;flex-direction:column;gap:10px">
+        <div class="grid g2">${fld('hhName',t('hhName'))}${fld('hhMail',t('hhMail'),'email','autocomplete="off"')}</div>
+        <span class="label">${t('hhRole')}</span><div class="chips" role="group">${roleChips}</div><p class="note" style="margin:0">${fm.role==='view'?t('hhRoleViewX'):t('hhRoleCoX')}</p>
+        <span class="label">${t('hhPets')}</span><div class="chips" role="group">${petChips}</div>${pe?`<span class="err">${t(pe)}</span>`:''}
+        <div class="chips"><button class="btn" data-act="hhInvite">${t('hhInvite')}</button></div>
+        <p class="note" style="margin:0">${t('hhNote')}</p></div></div>`;
+  }
+
+  const _vP=vProfil;
+  vProfil=function(){ const h=_vP.apply(this,arguments); if(S.role==='vet') return h; return h+hhCard(); };
+  VIEWS.profil=vProfil;
+
+  /* Tierakte: „Geteilt mit …“ */
+  const _vA=vAkte;
+  vAkte=function(){ const h=_vA.apply(this,arguments); if(S.docView||S.impfView||S.akteSub||!S.pets[S.pet]) return h;
+    const ms=membersOf(S.pet); if(!ms.length) return h;
+    const line=`<div class="card" style="margin-bottom:16px;padding:12px 16px" data-hh-shared><span class="label" style="margin:0">${t('hhShared')}</span><div class="chips">${ms.map(m=>`<span class="chip">${esc(m.name)} · ${m.role==='view'?t('hhRoleView'):t('hhRoleCo')}${m.status==='active'?'':' · '+t('hhPending')}</span>`).join('')}<button class="link" data-go="profil">${t('hhTitle')}</button></div></div>`;
+    const i=h.indexOf('<div class="grid split">'); return i>=0?h.slice(0,i)+line+h.slice(i):h+line; };
+  VIEWS.akte=vAkte;
+
+  const _va=vetAction;
+  vetAction=function(a,d){
+    const fm=S.hhForm;
+    if(a==='hhRoleSel'){ fm.role=d.v==='view'?'view':'co'; render(); return true; }
+    if(a==='hhPetTog'){ if(fm.pets===null) fm.pets=petIds(); const i=fm.pets.indexOf(d.v); i<0?fm.pets.push(d.v):fm.pets.splice(i,1); delete S.auth.errors.hhPets; render(); return true; }
+    if(a==='hhInvite'){ const f=F(), name=(f.hhName||'').trim(), mail=(f.hhMail||'').trim().toLowerCase(), pets=(fm.pets||petIds()).filter(k=>S.pets[k]);
+      const er=S.auth.errors; delete er.hhName; delete er.hhMail; delete er.hhPets;
+      if(!name) er.hhName='hhErrName';
+      if(!MAIL_RE.test(mail)) er.hhMail='hhErrMail'; else if(S.house.members.some(m=>m.mail===mail)||mail===(S.auth.email||'').toLowerCase()) er.hhMail='hhErrDup';
+      if(!pets.length) er.hhPets='hhErrPets';
+      if(!er.hhName&&!er.hhMail&&!er.hhPets&&S.house.members.length>=5){ toast(t('hhErrMax')); return true; }
+      if(er.hhName||er.hhMail||er.hhPets){ render(); return true; }
+      S.house.members.push({id:'m'+Date.now(),name,mail,role:fm.role,pets:pets.slice(),status:'pending',since:new Date()});
+      delete f.hhName; delete f.hhMail; S.hhForm={role:'co',pets:null}; render(); toast(t('hhSent',{m:mail})); return true; }
+    if(a==='hhAccept'){ const m=S.house.members.find(x=>x.id===d.v); if(m){ m.status='active'; toast(t('hhAccepted',{n:m.name})); } render(); return true; }
+    if(a==='hhRemove'){ S.hhAsk=d.v; render(); return true; }
+    if(a==='hhRemoveNo'){ S.hhAsk=null; render(); return true; }
+    if(a==='hhRemoveYes'){ const m=S.house.members.find(x=>x.id===d.v); S.house.members=S.house.members.filter(x=>x.id!==d.v); S.hhAsk=null; render(); if(m) toast(t('hhRemoved',{n:m.name})); return true; }
+    /* Einladen aus „Betreuung“ landet ebenfalls in der Familienliste (nur dieses Tier) */
+    if(a==='coInvite'){ const f=F(), mail=(f.coMail||'').trim().toLowerCase(); if(!MAIL_RE.test(mail)){ toast(t('hhErrMail')); return true; }
+      const ex=S.house.members.find(m=>m.mail===mail);
+      if(ex){ if(!ex.pets.includes(d.pid)) ex.pets.push(d.pid); } else S.house.members.push({id:'m'+Date.now(),name:mail.split('@')[0],mail,role:'co',pets:[d.pid],status:'pending',since:new Date()});
+      delete f.coMail; render(); toast(t('hhSent',{m:mail})); return true; }
+    /* Tier gelöscht/verstorben: aus allen Freigaben nehmen */
+    const r=_va.call(this,a,d);
+    if(a==='deadYes'||a==='petDelYes'){ S.house.members.forEach(m=>{ m.pets=m.pets.filter(p=>S.pets[p]&&!S.pets[p].dead); }); }
+    return r;
+  };
+})();
+
 render();
 </script>
 
