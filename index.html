@@ -622,6 +622,28 @@ const ico = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 /* ---------- Sprache ---------- */
 let LANG = 'de';
 try { const l = localStorage.getItem('pc-lang'); if (l && STR[l]) LANG = l; } catch(e) {}
+/* Ohne gespeicherte Wahl: Sprache des Browsers übernehmen (z. B. Französisch in Frankreich), sonst Deutsch */
+function pcDetectLang(){ let saved=null; try{ saved=localStorage.getItem('pc-lang'); }catch(e){}
+  if(saved && STR[saved]) return;
+  /* Reihenfolge: eigene Wahl → Sprache des Landes (Europa, Maghreb) → sonst Englisch.
+     Land aus der Zeitzone des Geräts, ersatzweise aus der Region der Browsersprache (z. B. „fr-MA“). Keine IP-Abfrage. */
+  const C={ DE:['de'],AT:['de'],CH:['de','fr'],LI:['de'], FR:['fr'],MC:['fr'],LU:['fr','de'],BE:['fr','nl'], NL:['nl'], ES:['es'],
+    NO:['no'],SE:['sv'],DK:['da'],FO:['da'], TR:['tr'], RU:['ru'], MA:['fr'],DZ:['fr'],TN:['fr'],EH:['fr'] };
+  const TZ={'Europe/Berlin':'DE','Europe/Busingen':'DE','Europe/Vienna':'AT','Europe/Zurich':'CH','Europe/Vaduz':'LI','Europe/Paris':'FR','Europe/Monaco':'MC',
+    'Europe/Luxembourg':'LU','Europe/Brussels':'BE','Europe/Amsterdam':'NL','Europe/Madrid':'ES','Atlantic/Canary':'ES','Africa/Ceuta':'ES','Europe/Oslo':'NO',
+    'Arctic/Longyearbyen':'NO','Europe/Stockholm':'SE','Europe/Copenhagen':'DK','Atlantic/Faroe':'FO','Europe/Istanbul':'TR','Asia/Istanbul':'TR',
+    'Europe/Moscow':'RU','Europe/Kaliningrad':'RU','Europe/Samara':'RU','Europe/Volgograd':'RU','Europe/Kirov':'RU','Europe/Astrakhan':'RU','Europe/Saratov':'RU','Europe/Ulyanovsk':'RU',
+    'Africa/Casablanca':'MA','Africa/El_Aaiun':'EH','Africa/Algiers':'DZ','Africa/Tunis':'TN'};
+  const alias={nb:'no',nn:'no'};
+  const list=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'']).map(x=>String(x||''));
+  const browser=list.map(x=>{ const k=x.toLowerCase().split(/[-_]/)[0]; return alias[k]||k; });
+  let tz=''; try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone||''; }catch(e){}
+  let cc=TZ[tz]||'';
+  if(!cc && (!tz || /^(UTC|Etc\/)/.test(tz))){ for(const x of list){ const r=(x.split(/[-_]/)[1]||'').toUpperCase(); if(C[r]){ cc=r; break; } } }
+  let pick='en';
+  if(C[cc]){ const langs=C[cc]; pick=browser.find(b=>langs.includes(b))||langs[0]; }
+  if(STR[pick]) LANG=pick; }
+pcDetectLang();
 const t = (k, v={}) => String(STR[LANG][k] ?? STR.de[k] ?? k).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '');
 const L = () => LOCALE[LANG];
 function applyLang(){
@@ -6871,6 +6893,8 @@ VIEWS.home=vHome;
   };
 })();
 
+/* Alle Sprachen sind jetzt geladen: Browsersprache noch einmal prüfen (z. B. Norwegisch, Türkisch) */
+pcDetectLang();
 render();
 </script>
 
