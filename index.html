@@ -6930,7 +6930,15 @@ render();
 /* ---- Barrierefreiheit: Toast schließen & Fokus auf neue Validierungsfehler ---- */
 (function(){
   const el=document.getElementById('toast');
-  const close=()=>{ if(el.dataset.kind==='undo') S.undo=null; el.hidden=true; delete el.dataset.kind; };
+  // Letztes fokussierte Element außerhalb des Toasts merken – dorthin geht der Fokus beim Schließen zurück
+  let before=null;
+  document.addEventListener('focusin',e=>{ if(!el.contains(e.target)) before=e.target; });
+  const shown=x=>!!x&&x!==document.body&&x.isConnected&&x.getClientRects().length>0;
+  const close=()=>{ const had=el.contains(document.activeElement);
+    if(el.dataset.kind==='undo') S.undo=null; el.hidden=true; delete el.dataset.kind;
+    if(!had) return;
+    if(shown(before)){ before.focus({preventScroll:true}); if(document.activeElement===before) return; }
+    const h=document.querySelector('#main h1')||document.getElementById('main'); if(h){ if(!h.hasAttribute('tabindex')) h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); } };
   // Klick auf Aktion oder Schließen blendet aus; die Aktion selbst läuft danach im globalen data-act-Handler
   el.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; if(b.hasAttribute('data-toast-close')){ close(); return; } el.hidden=true; delete el.dataset.kind; });
   // Esc schließt einen stehenden Aktions-Toast – nicht, solange der Termindialog offen ist (der hat Vorrang)
@@ -6940,6 +6948,53 @@ render();
   render=function(){ const r=_render.apply(this,arguments);
     try{ const sig=JSON.stringify(S.auth.errors||{}); if(sig!==errSig){ errSig=sig; if(sig!=='{}'){ const root=document.querySelector('.apedlg')||document.getElementById('main'); const f=root&&root.querySelector('[aria-invalid="true"],[role="group"][aria-describedby] button'); if(f) f.focus(); } } }catch(err){}
     return r; };
+})();
+/* ---- Fokusverwaltung nach render(): Fokus bleibt auf dem auslösenden Element bzw. dessen neu gezeichnetem Gegenstück,
+        sonst auf der Überschrift der Ansicht. Schon gesetzter Fokus (Fehlerfeld, Dialog, Chat) wird nicht überschrieben. ---- */
+(function(){
+  let lastInput='pointer', lastBlur=null;
+  document.addEventListener('keydown',()=>{ lastInput='key'; },true);
+  document.addEventListener('pointerdown',()=>{ lastInput='pointer'; },true);
+  // Wird das fokussierte Element schon vor render() ausgeblendet (z. B. Toast-Aktion), geht der Fokus vorher verloren
+  document.addEventListener('focusout',e=>{ lastBlur={el:e.target,t:Date.now()}; },true);
+  const KEEP=/^(name|type|for|href|aria-label|data-[\w-]+)$/;
+  const txt=el=>(el.textContent||'').trim();
+  // „Hat Fokus“ nur, wenn sichtbar: ein gerade ausgeblendetes Element meldet Chrome noch kurz als activeElement
+  const shown=el=>!!el&&el!==document.body&&el!==document.documentElement&&el.isConnected&&el.getClientRects().length>0;
+  function describe(el){
+    if(el.id) return {id:el.id};
+    const attrs=[...el.attributes].filter(a=>KEEP.test(a.name));
+    let sel=el.tagName.toLowerCase()+attrs.map(a=>`[${a.name}="${CSS.escape(a.value)}"]`).join('');
+    if(!attrs.length&&el.classList.length) sel+='.'+[...el.classList].map(c=>CSS.escape(c)).join('.');
+    return {sel, idx:[...document.querySelectorAll(sel)].indexOf(el), text:txt(el)};
+  }
+  function find(d){
+    if(d.id) return document.getElementById(d.id);
+    let list=[...document.querySelectorAll(d.sel)];
+    if(list.length>1){ const same=list.filter(x=>txt(x)===d.text); if(same.length) list=same; }
+    return list.length===1?list[0]:(list[Math.min(Math.max(d.idx,0),list.length-1)]||null);
+  }
+  const _render=render;
+  render=function(){
+    let prev=null, d=null, sel=null;
+    try{
+      const a=document.activeElement;
+      if(a&&a!==document.body&&a!==document.documentElement) prev=a;
+      else if(lastBlur&&Date.now()-lastBlur.t<1000&&(!lastBlur.el.isConnected||lastBlur.el.closest('[hidden]'))) prev=lastBlur.el;
+      if(prev&&prev.isConnected){ d=describe(prev); if(prev.matches('input,textarea')&&typeof prev.selectionStart==='number') sel=[prev.selectionStart,prev.selectionEnd]; }
+    }catch(e){ d=null; }
+    const r=_render.apply(this,arguments);
+    try{
+      const now=document.activeElement;
+      if(!d||shown(now)) return r;
+      lastBlur=null;
+      const el=shown(prev)?prev:find(d);
+      if(shown(el)){ el.focus({preventScroll:true}); if(document.activeElement===el){ if(sel) try{ el.setSelectionRange(sel[0],sel[1]); }catch(e){} return r; } }
+      const h=document.querySelector('#main h1')||document.getElementById('main');
+      if(h){ if(!h.hasAttribute('tabindex')) h.setAttribute('tabindex','-1'); h.focus({preventScroll:lastInput!=='key'}); }
+    }catch(e){}
+    return r;
+  };
 })();
 </script>
 
