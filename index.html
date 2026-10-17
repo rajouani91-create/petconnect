@@ -3286,7 +3286,7 @@ function vAreas(id){
    +`<div class="card"><h2>${t('aAdd')}</h2><div class="grid g2">${sel('areaCatSel',t('aTitle'),AREA_CATS.map(k=>[k,t(k)]))}${fld('areaDate',t('aDate'),'date')}</div>${fld('areaText',t('aText'))}<div class="chips"><button class="btn" data-act="areaSave" data-pid="${id}">${t('aSave')}</button></div></div>`;
 }
 function vNotCard(id){
-  const p=getPet(id), all=areaList(id), g=c=>all.filter(e=>e.cat===c).map(e=>esc(e.text)).join('; ')||t('cNoData');
+  const p=getPet(id), all=areaList(id), g=c=>medAreaPre(id,c).map(esc).concat(all.filter(e=>e.cat===c).map(e=>esc(e.text))).join('; ')||t('cNoData');
   const pr=S.stamm?(S.practices.find(x=>x.id===S.stamm)||{}):null, nb=!pr&&S.stamm?(S.nearby.find(x=>x.id===S.stamm)||{}):null, sp=pr&&pr.n?pr:nb;
   const f=F();
   return head(t('cTitle'),t('cSub'),`<button class="btn ghost" data-act="subBack">${t('mBack')}</button>`)+`<div class="card" style="border:2px solid var(--crit)"><div class="card-h"><h2>${esc(p.name)}</h2><span class="pill crit">SOS</span></div>
@@ -3457,7 +3457,7 @@ Object.assign(STR.nl,{"sosBtn": "Noodgeval / SOS", "sosSub": "Direct hulp in de 
 S.sitters={}; S.care={}; S.coHold={}; S.vltIns=false; S.sitView=null; S.hhMode='month'; S.hhRef=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
 S.practices.forEach((p,i)=>{ if(p.n&&!p.tel) p.tel='06142 000 10'+(i+1); });
 const stammInfo=()=>{ const id=S.stamm; if(!id) return null; const x=S.practices.find(p=>p.id===id&&p.n)||S.nearby.find(p=>p.id===id); return x?{n:x.n,tel:x.tel||''}:null; };
-const areaTxt=(id,c)=>areaList(id).filter(e=>e.cat===c).map(e=>esc(e.text)).join('; ')||t('cNoData');
+const areaTxt=(id,c)=>medAreaPre(id,c).map(esc).concat(areaList(id).filter(e=>e.cat===c).map(e=>esc(e.text))).join('; ')||t('cNoData');
 
 /* SOS: Startseite + Notfall-Ansicht */
 function sosCard(){ const p=S.pets[S.pet]; if(!p) return ''; const sp=stammInfo();
@@ -3747,10 +3747,12 @@ const petCode=id=>{ let n=0; for(const c of String(id)) n=(n*31+c.charCodeAt(0))
 
 /* ---------- Medikation ---------- */
 const medList=id=>{ const p=getPet(id); p.medi=p.medi||[]; p.medi.forEach(m=>{ if(!m.id) m.id=++WID; }); return p.medi; };
-const medSt=m=>{ if(m.to&&m.to<TODAY) return 'ended'; if(m.to&&(m.to-TODAY)/864e5<=7) return 'soon'; return m.to?'active':'long'; };
+function medDosTxt(m){ return t(m.dos); }
+function medAreaPre(id,c){ return []; }
+const medSt=m=>{ if(m.stopped||(m.to&&m.to<TODAY)) return 'ended'; if(m.to&&(m.to-TODAY)/864e5<=7) return 'soon'; return m.to?'active':'long'; };
 const medPill=m=>{ const s=medSt(m); return s==='ended'?`<span class="pill info">${t('mdEnded')}</span>`:s==='soon'?`<span class="pill warn">${t('mdSoon')}</span>`:`<span class="pill ok">${s==='long'?t('mdLong'):t('mdActive')}</span>`; };
 const medSorted=id=>medList(id).slice().sort((a,b)=>(medSt(a)==='ended')-(medSt(b)==='ended')||((b.from||0)-(a.from||0)));
-const medRow=(m,id,edit)=>`<div class="row" style="align-items:flex-start;flex-wrap:wrap;gap:8px"><div class="grow" style="min-width:150px"><div style="font-weight:600">${esc(t(m.n))}</div><div class="muted" style="font-size:.85rem">${esc(t(m.dos))}${m.why?' · '+esc(m.why):''}</div><div class="muted mono" style="font-size:.78rem">${m.from?t('mdSince',{d:fmt(m.from)}):''}${m.to?(m.from?' · ':'')+t('mdUntil',{d:fmt(m.to)}):''}</div></div>${medPill(m)}${edit?`<div class="chips">${medSt(m)==='ended'?'':`<button class="btn ghost" data-act="medStop" data-pid="${id}" data-v="${m.id}">${t('mdStop')}</button>`}<button class="btn ghost" data-act="medDel" data-pid="${id}" data-v="${m.id}">${t('mdDel')}</button></div>`:''}</div>`;
+const medRow=(m,id,edit)=>`<div class="row" style="align-items:flex-start;flex-wrap:wrap;gap:8px"><div class="grow" style="min-width:150px"><div style="font-weight:600">${esc(t(m.n))}</div><div class="muted" style="font-size:.85rem">${esc(medDosTxt(m))}${m.why?' · '+esc(m.why):''}</div><div class="muted mono" style="font-size:.78rem">${m.from?t('mdSince',{d:fmt(m.from)}):''}${m.to?(m.from?' · ':'')+t('mdUntil',{d:fmt(m.to)}):''}</div></div>${m.src==='own'?`<span class="pill info">${t('mdByOwnerV')}</span>`:''}${medPill(m)}${edit&&m.src!=='own'?`<div class="chips">${medSt(m)==='ended'?'':`<button class="btn ghost" data-act="medStop" data-pid="${id}" data-v="${m.id}">${t('mdStop')}</button>`}<button class="btn ghost" data-act="medDel" data-pid="${id}" data-v="${m.id}">${t('mdDel')}</button></div>`:''}</div>`;
 function medCardVet(id){
   const f=F(); if(!f.mdFrom) f.mdFrom=isoDate(TODAY);
   const rows=medSorted(id).map(m=>medRow(m,id,true)).join('');
@@ -3853,7 +3855,7 @@ VIEWS.akte=vAkte;
 
 const vltDocE6=vltDoc;
 vltDoc=function(id){ let h=vltDocE6(id); const p=getPet(id), ml=medSorted(id), a=p.anam;
-  const ex=`<h2>${t('mdPlan')}</h2>${ml.length?`<table><tr><th>${t('mdName')}</th><th>${t('mdDos').replace(/\s*\(.*\)\s*$/,'')}</th><th>${t('mdFrom')}</th><th></th></tr>${ml.map(m=>`<tr><td>${esc(t(m.n))}</td><td>${esc(t(m.dos))}${m.why?' · '+esc(m.why):''}</td><td>${m.from?fmt(m.from):'—'}${m.to?' – '+fmt(m.to):''}</td><td>${medSt(m)==='ended'?esc(t('mdEnded')):medSt(m)==='long'?esc(t('mdLong')):esc(t('mdActive'))}</td></tr>`).join('')}</table>`:`<p class="m">${t('vltNone')}</p>`}
+  const ex=`<h2>${t('mdPlan')}</h2>${ml.length?`<table><tr><th>${t('mdName')}</th><th>${t('mdDos').replace(/\s*\(.*\)\s*$/,'')}</th><th>${t('mdFrom')}</th><th></th></tr>${ml.map(m=>`<tr><td>${esc(t(m.n))}</td><td>${esc(medDosTxt(m))}${m.why?' · '+esc(m.why):''}</td><td>${m.from?fmt(m.from):'—'}${m.to?' – '+fmt(m.to):''}</td><td>${medSt(m)==='ended'?esc(t('mdEnded')):medSt(m)==='long'?esc(t('mdLong')):esc(t('mdActive'))}</td></tr>`).join('')}</table>`:`<p class="m">${t('vltNone')}</p>`}
   <h2>${t('vltHist')}</h2>${a?`<table>${Object.keys(HS_LBL).filter(k=>a[k]).map(k=>`<tr><th>${t(HS_LBL[k])}</th><td>${k==='hSince'?fmt(a[k]):HS_SEL[k]?esc(t(a[k])):esc(a[k])}</td></tr>`).join('')}</table>`:`<p class="m">${t('vltNone')}</p>`}`;
   const j=h.lastIndexOf('<p class="m" style="margin-top:16px">'); return j>=0?h.slice(0,j)+ex+h.slice(j):h+ex; };
 
@@ -3883,7 +3885,7 @@ vetAction=function(a,d){
   case 'medAdd': { const nm=(f.mdName||'').trim(), ds=(f.mdDos||'').trim(); if(!nm||!ds){ toast(t('mdNeed')); return true; }
     const from=parseD(f.mdFrom||isoDate(TODAY)), to=f.mdTo?parseD(f.mdTo):null; if(to&&from&&to<from){ toast(t('mdBad')); return true; }
     medList(d.pid).push({id:++WID,n:nm,dos:ds,why:(f.mdWhy||'').trim(),from,to,src:'prac'}); ['mdName','mdDos','mdWhy','mdTo'].forEach(k=>delete f[k]); render(); toast(t('mdSaved')); return true; }
-  case 'medStop': { const m=medList(d.pid).find(x=>String(x.id)===d.v); if(m){ const y=new Date(TODAY); y.setDate(y.getDate()-1); m.to=m.from&&y<m.from?new Date(m.from):y; render(); toast(t('mdStopped')); } return true; }
+  case 'medStop': { const m=medList(d.pid).find(x=>String(x.id)===d.v); if(m){ m.stopped=true; const y=new Date(TODAY); y.setDate(y.getDate()-1); m.to=m.from&&y<m.from?new Date(m.from):y; render(); toast(t('mdStopped')); } return true; }
   case 'medDel': { const L4=medList(d.pid), i=L4.findIndex(x=>String(x.id)===d.v); if(i>=0){ L4.splice(i,1); render(); toast(t('mdDeleted')); } return true; }
   case 'ivAccept': { const pid=d.v, p=S.others[pid]; if(!p) return true; const k='iv_'+pid;
     if(!f[k]){ S.auth.errors={[k]:'ivNeedC'}; render(); return true; } S.auth.errors={};
@@ -6481,7 +6483,7 @@ const SITE_BASE=/^https?:/.test(location.protocol)?location.origin+location.path
 const b64e=s=>btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const b64d=s=>decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/'))));
 const clip=(s,n)=>String(s||'').slice(0,n);
-const plainArea=(id,c)=>areaList(id).filter(e=>e.cat===c).map(e=>e.text).join('; ');
+const plainArea=(id,c)=>medAreaPre(id,c).concat(areaList(id).filter(e=>e.cat===c).map(e=>e.text)).join('; ');
 function sitUrl(pid,l){
   const p=getPet(pid), sp=stammInfo();
   const o={v:1,n:p.name,a:p.art,s:l.name,b:isoDate(l.from),e:isoDate(l.to),o:S.auth.full||S.auth.name||''};
@@ -7010,7 +7012,7 @@ pcDetectLang();
   const tplOf=sp=>sp==='dog'?SUGGEST:((window.PC_TPL&&PC_TPL[sp]&&PC_TPL[sp].plan)||[]);
   let seq=1;
   const mk=(pid,x)=>({id:pid+'-'+(seq++)+'-'+Date.now().toString(36),k:x[0],t:x[1],r:x[2],on:true,txt:'',done:{}});
-  const plan=pid=>{ if(!S.gassi[pid]) S.gassi[pid]=(DEMO[pid]||[]).map(x=>mk(pid,x)); return S.gassi[pid]; };
+  const plan=pid=>{ if(!S.gassi[pid]) S.gassi[pid]=(DEMO[pid]||[]).map(x=>mk(pid,x)); if(window.pcMedSync) pcMedSync(pid,S.gassi[pid]); return S.gassi[pid]; };
 
   const petIds=()=>Object.keys(S.pets||{}).filter(k=>!S.pets[k].dead);
   const curPid=()=>{ const ids=petIds(); if(S.gpPet&&ids.includes(S.gpPet)) return S.gpPet; return ids.includes(S.pet)?S.pet:ids[0]; };
@@ -7018,7 +7020,7 @@ pcDetectLang();
   const nowM=()=>{ const d=new Date(); return d.getHours()*60+d.getMinutes(); };
   const dayKey=()=>isoD(new Date());
   const today=x=>{ const w=new Date().getDay(); return x.r==='daily'||(x.r==='wd'&&w>=1&&w<=5)||(x.r==='we'&&(w===0||w===6)); };
-  const name=x=>x.k==='own'&&x.txt?x.txt:t('gpK_'+x.k);
+  const name=x=>(x.k==='own'||x.mid!=null)&&x.txt?x.txt:t('gpK_'+x.k);
   const at=x=>t('gpAt',{t:x.t});
   const full=x=>`${name(x)}, ${at(x)}`;
   const sorted=pid=>plan(pid).slice().sort((a,b)=>mins(a.t)-mins(b.t));
@@ -7052,10 +7054,10 @@ pcDetectLang();
     else if(L.length){ const tl=L.filter(x=>x.on&&today(x)); next=`<div class="gp-next calm" aria-live="polite"><span class="gp-big" aria-hidden="true">✓</span><div class="grow" style="font-weight:600">${tl.length&&tl.every(isDone)?t('gpAllDone'):t('gpRest')}</div></div>`; }
     const rows=L.map(x=>{ const act=today(x), dn=isDone(x), ask=S.gpAsk===x.id;
       return `<div class="row gp-row${x.on?'':' off'}${S.gpFresh===x.id?' fresh':''}" style="flex-wrap:wrap" data-gp="${x.id}"><span class="gp-ic">${ICON[x.k]||ICON.own}</span>
-        <div class="grow" style="min-width:140px"><div style="font-weight:600">${esc(name(x))} <span class="pill info">${t('aByMe')}</span></div><div class="muted" style="font-size:.85rem">${at(x)} · ${t('gpR'+x.r)}${act?'':' · '+t('gpNotToday')}</div></div>
+        <div class="grow" style="min-width:140px"><div style="font-weight:600">${esc(name(x))} <span class="pill info">${x.mid!=null?t('omFromMed'):t('aByMe')}</span></div><div class="muted" style="font-size:.85rem">${at(x)} · ${t('gpR'+x.r)}${act?'':' · '+t('gpNotToday')}</div></div>
         ${act?`<button class="btn ghost gp-done" data-act="gpDone" data-v="${x.id}" aria-pressed="${dn}">${dn?CHECK:''}${t('gpDoneBtn')}</button>`:''}
         <button class="gp-sw" role="switch" aria-checked="${x.on}" data-act="gpTog" data-v="${x.id}" aria-label="${esc(t('gpSwL',{x:full(x)}))}"><span class="gp-knob"></span></button>
-        <button class="btn ghost gp-del" data-act="gpDel" data-v="${x.id}" aria-label="${esc(t('gpDelL',{x:full(x)}))}">${TRASH}</button>
+        ${x.mid!=null?'':`<button class="btn ghost gp-del" data-act="gpDel" data-v="${x.id}" aria-label="${esc(t('gpDelL',{x:full(x)}))}">${TRASH}</button>`}
         ${ask?`<div class="gp-ask"><p class="note">${t('gpDelAsk',{x:esc(full(x))})}</p><div class="chips"><button class="btn crit" data-act="gpDelYes" data-v="${x.id}">${t('gpDelYes')}</button><button class="btn ghost" data-act="gpDelNo" data-v="${x.id}">${t('hhCancel')}</button></div></div>`:''}</div>`; }).join('');
     const empty=L.length?'':`<p class="empty">${t('gpEmpty',{n:esc(p.name)})}</p>${tplOf(sp).length?`<p class="note">${sp==='dog'?t('gpSuggestX'):t('gpSuggestY')}</p><div class="chips"><button class="btn ghost" data-act="gpSuggest" data-v="${pid}">${t('gpSuggestBtn')}</button></div>`:''}`;
     const fm=S.gpForm;
@@ -7254,6 +7256,293 @@ pcDetectLang();
     const card=`<div class="card" id="care-card" style="margin-top:16px"><h2>${t('careH',{n:esc(p.name)})}</h2><ul style="margin:6px 0 10px;padding-inline-start:20px">${care.map(c=>`<li>${t(c)}</li>`).join('')}</ul>${p.stall?`<p class="muted" style="margin:0 0 8px">${t('gpT_muck')}: ${esc(p.stall)}</p>`:''}<p class="note">${t('careSub')}</p></div>`;
     return h+card; };
   VIEWS.akte=vAkte;
+})();
+
+/* ===== Etappe 20: Praxissuche mit Filtern – Tierart, Leistungen, Fachtierarzt-Bezeichnung (16.10.2026) ===== */
+(function(){
+  const P={"de": {"psFor": "Für welches Tier?", "psAll": "Alle Tierarten", "psNeed": "Was brauchen Sie?", "psSpecH": "Fachtierarzt-Bezeichnung", "psPetOf": "{a} · {n}", "svcOp": "Operationen", "svcDent": "Zahnheilkunde", "svcImg": "Röntgen und Ultraschall", "svcCt": "CT oder MRT", "svcBlood": "Blutspende und Blutbank", "svcHib": "Überwinterung (Winterstarre-Betreuung)", "svcHouse": "Hausbesuche", "svcEr": "24-h-Notdienst", "svcPhysio": "Physiotherapie", "svcRide": "Fahrpraxis für Pferde", "fSmall": "Fachtierarzt für Kleintiere", "fSurg": "Fachtierarzt für Chirurgie", "fRept": "Fachtierarzt für Reptilien", "fBird": "Fachtierarzt für Zier-, Zoo- und Wildvögel", "fHorse": "Fachtierarzt für Pferde", "psCount": "{n} Praxen bei PetConnect passen", "psCount1": "1 Praxis bei PetConnect passt", "psNone": "Keine Praxis bei PetConnect passt zu Ihrer Auswahl. Nehmen Sie einen Filter heraus oder fragen Sie bei einer Praxis ohne Angaben nach.", "psReset": "Filter zurücksetzen", "psTreats": "Behandelt: {x}", "psOffers": "Angebot: {x}", "psFocus": "Schwerpunkt: {a}", "psUnknownH": "Praxen ohne Angaben zum Angebot", "psUnknown": "Angebot unbekannt, bitte anrufen", "psNote": "Tierarten, Leistungen und Fachtierarzt-Bezeichnungen gibt jede Praxis selbst in ihrem Profil an. In der fertigen App sollen Fachtierarzt-Bezeichnungen mit der Tierärztekammer abgeglichen werden."}, "en": {"psFor": "Which animal?", "psAll": "All species", "psNeed": "What do you need?", "psSpecH": "Specialist title", "psPetOf": "{a} · {n}", "svcOp": "Surgery", "svcDent": "Dentistry", "svcImg": "X-ray and ultrasound", "svcCt": "CT or MRI", "svcBlood": "Blood donation and blood bank", "svcHib": "Hibernation care", "svcHouse": "Home visits", "svcEr": "24-hour emergency service", "svcPhysio": "Physiotherapy", "svcRide": "Mobile equine practice", "fSmall": "Specialist in small animals", "fSurg": "Specialist in surgery", "fRept": "Specialist in reptiles", "fBird": "Specialist in pet, zoo and wild birds", "fHorse": "Specialist in horses", "psCount": "{n} practices on PetConnect match", "psCount1": "1 practice on PetConnect matches", "psNone": "No practice on PetConnect matches your selection. Remove a filter or ask a practice without details.", "psReset": "Reset filters", "psTreats": "Treats: {x}", "psOffers": "Services: {x}", "psFocus": "Focus: {a}", "psUnknownH": "Practices without service details", "psUnknown": "Services unknown, please call", "psNote": "Each practice states its species, services and specialist titles in its own profile. In the finished app, specialist titles are to be checked against the veterinary chamber."}, "fr": {"psFor": "Pour quel animal ?", "psAll": "Toutes les espèces", "psNeed": "De quoi avez-vous besoin ?", "psSpecH": "Titre de vétérinaire spécialisé", "psPetOf": "{a} · {n}", "svcOp": "Chirurgie", "svcDent": "Dentisterie", "svcImg": "Radiographie et échographie", "svcCt": "Scanner ou IRM", "svcBlood": "Don du sang et banque de sang", "svcHib": "Hibernation (suivi)", "svcHouse": "Visites à domicile", "svcEr": "Urgences 24 h/24", "svcPhysio": "Physiothérapie", "svcRide": "Vétérinaire équin itinérant", "fSmall": "Spécialiste des animaux de compagnie", "fSurg": "Spécialiste en chirurgie", "fRept": "Spécialiste des reptiles", "fBird": "Spécialiste des oiseaux d'ornement, de zoo et sauvages", "fHorse": "Spécialiste des chevaux", "psCount": "{n} cabinets sur PetConnect correspondent", "psCount1": "1 cabinet sur PetConnect correspond", "psNone": "Aucun cabinet sur PetConnect ne correspond à votre sélection. Retirez un filtre ou renseignez-vous auprès d'un cabinet sans indications.", "psReset": "Réinitialiser les filtres", "psTreats": "Soigne : {x}", "psOffers": "Prestations : {x}", "psFocus": "Spécialité : {a}", "psUnknownH": "Cabinets sans indications sur leurs prestations", "psUnknown": "Prestations inconnues, veuillez appeler", "psNote": "Chaque cabinet indique lui-même dans son profil les espèces, prestations et titres de spécialiste. Dans l'app finale, les titres de spécialiste seront vérifiés auprès de l'ordre des vétérinaires."}, "ar": {"psFor": "لأي حيوان؟", "psAll": "كل الأنواع", "psNeed": "ماذا تحتاج؟", "psSpecH": "لقب طبيب بيطري متخصص", "psPetOf": "{a} · {n}", "svcOp": "العمليات الجراحية", "svcDent": "طب الأسنان", "svcImg": "الأشعة السينية والموجات فوق الصوتية", "svcCt": "التصوير المقطعي أو الرنين المغناطيسي", "svcBlood": "التبرع بالدم وبنك الدم", "svcHib": "رعاية السبات الشتوي", "svcHouse": "زيارات منزلية", "svcEr": "طوارئ على مدار 24 ساعة", "svcPhysio": "العلاج الطبيعي", "svcRide": "عيادة متنقلة للخيول", "fSmall": "متخصص في الحيوانات الصغيرة", "fSurg": "متخصص في الجراحة", "fRept": "متخصص في الزواحف", "fBird": "متخصص في طيور الزينة وطيور الحدائق والطيور البرية", "fHorse": "متخصص في الخيول", "psCount": "{n} عيادات على PetConnect مناسبة", "psCount1": "عيادة واحدة على PetConnect مناسبة", "psNone": "لا توجد عيادة على PetConnect تناسب اختيارك. أزل أحد المرشحات أو اسأل عيادة بلا بيانات.", "psReset": "إعادة ضبط المرشحات", "psTreats": "تعالج: {x}", "psOffers": "الخدمات: {x}", "psFocus": "التركيز: {a}", "psUnknownH": "عيادات بلا بيانات عن خدماتها", "psUnknown": "الخدمات غير معروفة، يرجى الاتصال", "psNote": "تحدد كل عيادة بنفسها في ملفها أنواع الحيوانات والخدمات وألقاب التخصص. في التطبيق النهائي ستُطابق ألقاب التخصص مع نقابة الأطباء البيطريين."}, "nl": {"psFor": "Voor welk dier?", "psAll": "Alle diersoorten", "psNeed": "Wat heeft u nodig?", "psSpecH": "Specialisatie", "psPetOf": "{a} · {n}", "svcOp": "Operaties", "svcDent": "Tandheelkunde", "svcImg": "Röntgen en echografie", "svcCt": "CT of MRI", "svcBlood": "Bloeddonatie en bloedbank", "svcHib": "Winterslaapbegeleiding", "svcHouse": "Huisbezoeken", "svcEr": "24-uurs spoeddienst", "svcPhysio": "Fysiotherapie", "svcRide": "Ambulante paardenpraktijk", "fSmall": "Specialist gezelschapsdieren", "fSurg": "Specialist chirurgie", "fRept": "Specialist reptielen", "fBird": "Specialist sier-, dierentuin- en wilde vogels", "fHorse": "Specialist paarden", "psCount": "{n} praktijken bij PetConnect passen", "psCount1": "1 praktijk bij PetConnect past", "psNone": "Geen praktijk bij PetConnect past bij uw keuze. Haal een filter weg of vraag het na bij een praktijk zonder gegevens.", "psReset": "Filters wissen", "psTreats": "Behandelt: {x}", "psOffers": "Aanbod: {x}", "psFocus": "Specialiteit: {a}", "psUnknownH": "Praktijken zonder gegevens over hun aanbod", "psUnknown": "Aanbod onbekend, bel even", "psNote": "Elke praktijk geeft zelf in haar profiel diersoorten, aanbod en specialisaties op. In de definitieve app worden specialisaties gecontroleerd bij de beroepsorganisatie."}, "es": {"psFor": "¿Para qué animal?", "psAll": "Todas las especies", "psNeed": "¿Qué necesita?", "psSpecH": "Título de veterinario especialista", "psPetOf": "{a} · {n}", "svcOp": "Cirugía", "svcDent": "Odontología", "svcImg": "Radiografía y ecografía", "svcCt": "TAC o resonancia", "svcBlood": "Donación de sangre y banco de sangre", "svcHib": "Cuidado de la hibernación", "svcHouse": "Visitas a domicilio", "svcEr": "Urgencias 24 h", "svcPhysio": "Fisioterapia", "svcRide": "Clínica ambulante equina", "fSmall": "Especialista en pequeños animales", "fSurg": "Especialista en cirugía", "fRept": "Especialista en reptiles", "fBird": "Especialista en aves ornamentales, de zoo y silvestres", "fHorse": "Especialista en caballos", "psCount": "{n} clínicas en PetConnect coinciden", "psCount1": "1 clínica en PetConnect coincide", "psNone": "Ninguna clínica en PetConnect coincide con su selección. Quite un filtro o pregunte en una clínica sin datos.", "psReset": "Restablecer filtros", "psTreats": "Atiende: {x}", "psOffers": "Servicios: {x}", "psFocus": "Especialidad: {a}", "psUnknownH": "Clínicas sin datos sobre sus servicios", "psUnknown": "Servicios desconocidos, llame por favor", "psNote": "Cada clínica indica en su perfil las especies, los servicios y los títulos de especialista. En la app final, los títulos se comprobarán con el colegio de veterinarios."}, "ru": {"psFor": "Для какого животного?", "psAll": "Все виды", "psNeed": "Что вам нужно?", "psSpecH": "Звание ветеринара-специалиста", "psPetOf": "{a} · {n}", "svcOp": "Операции", "svcDent": "Стоматология", "svcImg": "Рентген и УЗИ", "svcCt": "КТ или МРТ", "svcBlood": "Донорство крови и банк крови", "svcHib": "Сопровождение зимней спячки", "svcHouse": "Выезд на дом", "svcEr": "Круглосуточная неотложная помощь", "svcPhysio": "Физиотерапия", "svcRide": "Выездной ветеринар для лошадей", "fSmall": "Специалист по мелким животным", "fSurg": "Специалист по хирургии", "fRept": "Специалист по рептилиям", "fBird": "Специалист по декоративным, зоопарковым и диким птицам", "fHorse": "Специалист по лошадям", "psCount": "Подходящих клиник в PetConnect: {n}", "psCount1": "Подходит 1 клиника в PetConnect", "psNone": "Ни одна клиника в PetConnect не подходит под ваш выбор. Уберите фильтр или спросите в клинике без данных.", "psReset": "Сбросить фильтры", "psTreats": "Лечит: {x}", "psOffers": "Услуги: {x}", "psFocus": "Специализация: {a}", "psUnknownH": "Клиники без данных об услугах", "psUnknown": "Услуги неизвестны, позвоните, пожалуйста", "psNote": "Каждая клиника сама указывает в профиле виды животных, услуги и звания специалистов. В готовом приложении звания будут сверяться с ветеринарной палатой."}, "tr": {"psFor": "Hangi hayvan için?", "psAll": "Tüm türler", "psNeed": "Neye ihtiyacınız var?", "psSpecH": "Uzman veteriner unvanı", "psPetOf": "{a} · {n}", "svcOp": "Ameliyatlar", "svcDent": "Diş hekimliği", "svcImg": "Röntgen ve ultrason", "svcCt": "BT veya MR", "svcBlood": "Kan bağışı ve kan bankası", "svcHib": "Kış uykusu bakımı", "svcHouse": "Ev ziyareti", "svcEr": "24 saat acil servis", "svcPhysio": "Fizyoterapi", "svcRide": "Gezici at veterinerliği", "fSmall": "Küçük hayvan uzmanı", "fSurg": "Cerrahi uzmanı", "fRept": "Sürüngen uzmanı", "fBird": "Süs, hayvanat bahçesi ve yaban kuşları uzmanı", "fHorse": "At uzmanı", "psCount": "PetConnect'te {n} klinik uygun", "psCount1": "PetConnect'te 1 klinik uygun", "psNone": "PetConnect'te seçiminize uyan klinik yok. Bir filtreyi kaldırın veya bilgisi olmayan bir kliniğe sorun.", "psReset": "Filtreleri sıfırla", "psTreats": "Baktığı hayvanlar: {x}", "psOffers": "Hizmetler: {x}", "psFocus": "Uzmanlık: {a}", "psUnknownH": "Hizmet bilgisi olmayan klinikler", "psUnknown": "Hizmetler bilinmiyor, lütfen arayın", "psNote": "Her klinik hayvan türlerini, hizmetlerini ve uzmanlık unvanlarını kendi profilinde belirtir. Tamamlanmış uygulamada uzmanlık unvanları veteriner hekimler odasıyla karşılaştırılacak."}, "sv": {"psFor": "För vilket djur?", "psAll": "Alla djurarter", "psNeed": "Vad behöver du?", "psSpecH": "Specialisttitel", "psPetOf": "{a} · {n}", "svcOp": "Operationer", "svcDent": "Tandvård", "svcImg": "Röntgen och ultraljud", "svcCt": "DT eller MR", "svcBlood": "Blodgivning och blodbank", "svcHib": "Vintervila (övervakning)", "svcHouse": "Hembesök", "svcEr": "Akutjour dygnet runt", "svcPhysio": "Fysioterapi", "svcRide": "Ambulerande hästpraktik", "fSmall": "Specialist på smådjur", "fSurg": "Specialist i kirurgi", "fRept": "Specialist på reptiler", "fBird": "Specialist på prydnads-, djurparks- och vilda fåglar", "fHorse": "Specialist på hästar", "psCount": "{n} kliniker på PetConnect passar", "psCount1": "1 klinik på PetConnect passar", "psNone": "Ingen klinik på PetConnect passar ditt val. Ta bort ett filter eller fråga en klinik utan uppgifter.", "psReset": "Återställ filter", "psTreats": "Behandlar: {x}", "psOffers": "Tjänster: {x}", "psFocus": "Inriktning: {a}", "psUnknownH": "Kliniker utan uppgifter om tjänster", "psUnknown": "Tjänster okända, ring gärna", "psNote": "Varje klinik anger själv djurarter, tjänster och specialisttitlar i sin profil. I den färdiga appen ska specialisttitlar stämmas av mot veterinärförbundet."}, "da": {"psFor": "Til hvilket dyr?", "psAll": "Alle dyrearter", "psNeed": "Hvad har du brug for?", "psSpecH": "Specialisttitel", "psPetOf": "{a} · {n}", "svcOp": "Operationer", "svcDent": "Tandbehandling", "svcImg": "Røntgen og ultralyd", "svcCt": "CT eller MR", "svcBlood": "Bloddonation og blodbank", "svcHib": "Pasning under dvale", "svcHouse": "Hjemmebesøg", "svcEr": "Døgnåben vagt", "svcPhysio": "Fysioterapi", "svcRide": "Kørende hestepraksis", "fSmall": "Specialist i smådyr", "fSurg": "Specialist i kirurgi", "fRept": "Specialist i krybdyr", "fBird": "Specialist i stue-, zoo- og vilde fugle", "fHorse": "Specialist i heste", "psCount": "{n} klinikker på PetConnect passer", "psCount1": "1 klinik på PetConnect passer", "psNone": "Ingen klinik på PetConnect passer til dit valg. Fjern et filter, eller spørg en klinik uden oplysninger.", "psReset": "Nulstil filtre", "psTreats": "Behandler: {x}", "psOffers": "Ydelser: {x}", "psFocus": "Fokus: {a}", "psUnknownH": "Klinikker uden oplysninger om ydelser", "psUnknown": "Ydelser ukendte, ring venligst", "psNote": "Hver klinik angiver selv dyrearter, ydelser og specialisttitler i sin profil. I den færdige app skal specialisttitler afstemmes med dyrlægeforeningen."}, "no": {"psFor": "For hvilket dyr?", "psAll": "Alle dyrearter", "psNeed": "Hva trenger du?", "psSpecH": "Spesialisttittel", "psPetOf": "{a} · {n}", "svcOp": "Operasjoner", "svcDent": "Tannbehandling", "svcImg": "Røntgen og ultralyd", "svcCt": "CT eller MR", "svcBlood": "Blodgivning og blodbank", "svcHib": "Oppfølging under dvale", "svcHouse": "Hjemmebesøk", "svcEr": "Døgnåpen vakt", "svcPhysio": "Fysioterapi", "svcRide": "Ambulerende hestepraksis", "fSmall": "Spesialist på smådyr", "fSurg": "Spesialist i kirurgi", "fRept": "Spesialist på krypdyr", "fBird": "Spesialist på prydfugler, dyreparkfugler og ville fugler", "fHorse": "Spesialist på hest", "psCount": "{n} klinikker på PetConnect passer", "psCount1": "1 klinikk på PetConnect passer", "psNone": "Ingen klinikk på PetConnect passer til valget ditt. Fjern et filter, eller spør en klinikk uten opplysninger.", "psReset": "Tilbakestill filtre", "psTreats": "Behandler: {x}", "psOffers": "Tjenester: {x}", "psFocus": "Fokus: {a}", "psUnknownH": "Klinikker uten opplysninger om tjenester", "psUnknown": "Tjenester ukjent, ring gjerne", "psNote": "Hver klinikk oppgir selv dyrearter, tjenester og spesialisttitler i profilen sin. I den ferdige appen skal spesialisttitler sjekkes mot veterinærforeningen."}};
+  Object.keys(P).forEach(l=>{ if(STR[l]) Object.assign(STR[l],P[l]); });
+
+  const css=document.createElement('style');
+  css.textContent=`
+#ps-card .ps-filters{display:flex;flex-direction:column;gap:12px;margin:12px 0 16px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2)}
+#ps-card .ps-filters .label{display:block;margin-bottom:6px}
+#ps-card .chips{flex-wrap:wrap}
+#ps-card .ps-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+#ps-card .list>.row>.grow{flex:1 1 240px;min-width:0}
+#ps-card .list>.row>.chips{flex:0 1 auto}
+#ps-card .ps-tags{font-size:.85rem;margin-top:4px;line-height:1.45}
+#ps-card .ps-tags .pill{margin-inline-end:4px}
+#ps-card h3{font-size:1rem;margin:16px 0 4px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+`;
+  document.head.appendChild(css);
+
+  const SPEC_SP=['dog','cat','rabbit','guinea','bird','reptile','horse'];
+  const SVC=['svcOp','svcDent','svcImg','svcCt','svcBlood','svcHib','svcHouse','svcEr','svcPhysio','svcRide'];
+  const TITLES=['fSmall','fSurg','fRept','fBird','fHorse'];
+  /* Beispieldaten: Angaben der (erfundenen) Beispielpraxen. Echte Angaben pflegt jede Praxis selbst. */
+  const OFFER={
+    p1:{sp:['dog','cat','rabbit','guinea'],svc:['svcOp','svcImg','svcHouse'],titles:['fSmall'],focus:[]},
+    p2:{sp:['dog','cat','rabbit','guinea','bird','reptile'],svc:['svcOp','svcDent','svcImg','svcBlood','svcHib'],titles:['fRept','fSurg'],focus:['reptile','bird']},
+    p3:{sp:['dog','cat','horse'],svc:['svcPhysio','svcHouse','svcRide'],titles:[],focus:['horse']}
+  };
+  window.PC_OFFER=OFFER;
+  const PF=()=>S.psF||(S.psF={sp:'',svc:[],titles:[]});
+
+  const offerOf=p=>OFFER[p.id]||null;
+  const active=()=>{ const f=PF(); return !!(f.sp||f.svc.length||f.titles.length); };
+  const matches=o=>{ const f=PF(); if(!o) return false;
+    if(f.sp&&!o.sp.includes(f.sp)) return false;
+    if(f.svc.some(s=>!o.svc.includes(s))) return false;
+    if(f.titles.some(x=>!o.titles.includes(x))) return false;
+    return true; };
+  const list=a=>a.map(k=>t(k)).join(', ');
+
+  function filters(){
+    const f=PF();
+    const petsBySp={}; Object.values(S.pets||{}).forEach(p=>{ if(p&&!p.deceased&&SPEC_SP.includes(p.art)) (petsBySp[p.art]=petsBySp[p.art]||[]).push(p.name); });
+    const spChip=(v,label)=>`<button type="button" class="chip" data-act="psSp" data-v="${v}" aria-pressed="${f.sp===v}">${label}</button>`;
+    const spRow=spChip('',t('psAll'))+SPEC_SP.map(s=>spChip(s,petsBySp[s]?t('psPetOf',{a:t(s),n:esc(petsBySp[s].join(', '))}):t(s))).join('');
+    const svcRow=SVC.map(s=>`<button type="button" class="chip" data-act="psSvc" data-v="${s}" aria-pressed="${f.svc.includes(s)}">${t(s)}</button>`).join('');
+    const tRow=TITLES.map(s=>`<button type="button" class="chip" data-act="psTitle" data-v="${s}" aria-pressed="${f.titles.includes(s)}">${t(s)}</button>`).join('');
+    return `<div class="ps-filters">
+      <div><span class="label" id="ps-sp-l">${t('psFor')}</span><div class="chips" role="group" aria-labelledby="ps-sp-l">${spRow}</div></div>
+      <div><span class="label" id="ps-svc-l">${t('psNeed')}</span><div class="chips" role="group" aria-labelledby="ps-svc-l">${svcRow}</div></div>
+      <div><span class="label" id="ps-t-l">${t('psSpecH')}</span><div class="chips" role="group" aria-labelledby="ps-t-l">${tRow}</div></div>
+    </div>`;
+  }
+
+  function tags(o){
+    if(!o) return `<div class="ps-tags muted">${t('psUnknown')}</div>`;
+    const f=PF();
+    const focus=o.focus.filter(s=>!f.sp||s===f.sp).map(s=>`<span class="pill ok">${t('psFocus',{a:t(s)})}</span>`).join('');
+    const titles=o.titles.map(x=>`<span class="pill info">${t(x)}</span>`).join('');
+    return `<div class="ps-tags">${focus}${titles}</div>
+      <div class="ps-tags muted">${t('psTreats',{x:list(o.sp)})}</div>
+      ${o.svc.length?`<div class="ps-tags muted">${t('psOffers',{x:list(o.svc)})}</div>`:''}`;
+  }
+
+  const star=id=>`<button class="chip" data-act="favTog" data-v="${id}" aria-pressed="${S.favs.includes(id)}">★ ${t('nbFav')}</button>`;
+  const stm=id=>`<button class="chip" data-act="stammSet" data-v="${id}" aria-pressed="${S.stamm===id}">${S.stamm===id?t('nbIsStamm'):t('nbSetStamm')}</button>`;
+  const km=x=>String(x.km).replace('.',',');
+  const regRow=x=>`<div class="row" data-prac="${x.id}" style="align-items:flex-start;flex-wrap:wrap"><div class="grow"><div style="font-weight:600">${esc(x.n)}</div><div class="muted" style="font-size:.85rem">${esc(x.ort)} · ${km(x)} km · <span class="pill ok">${t('nbReg')}</span></div>${tags(offerOf(x))}</div><div class="chips">${star(x.id)}${stm(x.id)}</div></div>`;
+  const nonRow=x=>`<div class="row" data-prac="${x.id}" style="align-items:flex-start;flex-wrap:wrap"><div class="grow"><div style="font-weight:600">${esc(x.n)}</div><div class="muted" style="font-size:.85rem">${esc(x.ort)} · ${km(x)} km · <span class="pill info">${t('nbNot')}</span></div>${active()?`<div class="ps-tags muted">${t('psUnknown')}</div>`:''}${S.inviteAsk===x.id?`<p class="note">${t('nbSure',{n:esc(x.n)})}</p><div class="chips"><button class="btn" data-act="invYes" data-v="${x.id}">${t('nbSend')}</button><button class="btn ghost" data-act="invNo">${t('nbCancel')}</button></div>`:''}</div><div class="chips">${star(x.id)}${stm(x.id)}<button class="btn ghost" data-act="nbCall">${t('nbCall')}</button><button class="btn ghost" data-act="nbRoute">${t('nbRoute')}</button>${S.invited[x.id]?`<span class="pill ok">${t('nbInvited')}</span>`:`<button class="btn ghost" data-act="invAsk" data-v="${x.id}">${t('nbInvite')}</button>`}</div></div>`;
+
+  function card(){
+    const reg=S.practices.filter(x=>x.n&&x.km<9);
+    let body;
+    if(!active()){
+      body=`<div class="list">${reg.map(regRow).join('')}${S.nearby.map(nonRow).join('')}</div>`;
+    } else {
+      const f=PF(), fav=x=>S.favs.includes(x.id)?0:1, foc=x=>{ const o=offerOf(x); return o&&f.sp&&o.focus.includes(f.sp)?0:1; };
+      const hit=reg.filter(x=>matches(offerOf(x))).sort((a,b)=>fav(a)-fav(b)||foc(a)-foc(b)||a.km-b.km);
+      const unknown=reg.filter(x=>!offerOf(x));
+      const n=hit.length;
+      body=`<div class="ps-meta"><p style="margin:0;font-weight:600" id="ps-count">${n===1?t('psCount1'):t('psCount',{n})}</p><button type="button" class="btn ghost" data-act="psReset">${t('psReset')}</button></div>
+        ${n?`<div class="list">${hit.map(regRow).join('')}</div>`:`<p class="note" id="ps-none">${t('psNone')}</p>`}
+        <h3>${t('psUnknownH')}</h3><div class="list" id="ps-unknown">${unknown.map(regRow).join('')}${S.nearby.map(nonRow).join('')}</div>`;
+    }
+    return `<div class="card" id="ps-card"><h2>${t('nbTitle')}</h2><p class="muted">${t('nbSub')}</p>${filters()}${body}<p class="note">${t('psNote')}</p><p class="note">${t('nbNote')}</p></div>`;
+  }
+
+  const _vP=vProfil;
+  vProfil=function(){
+    const h=_vP.apply(this,arguments); if(S.role==='vet') return h;
+    const head=`<h2>${t('nbTitle')}</h2>`, i=h.indexOf(head); if(i<0) return h;
+    const start=h.lastIndexOf('<div class="card">',i);
+    const endMark=`<p class="note">${t('nbNote')}</p></div>`, j=h.indexOf(endMark,i); if(start<0||j<0) return h;
+    return h.slice(0,start)+card()+h.slice(j+endMark.length);
+  };
+  VIEWS.profil=vProfil;
+
+  const refocus=(a,v)=>{ const b=document.querySelector(v===undefined?`[data-act="${a}"]`:`[data-act="${a}"][data-v="${v}"]`); if(b) b.focus(); };
+  const _va=vetAction;
+  vetAction=function(a,d){
+    const f=PF();
+    if(a==='psSp'){ f.sp=f.sp===d.v?'':d.v; render(); refocus('psSp',d.v); live(); return true; }
+    if(a==='psSvc'){ const k=f.svc.indexOf(d.v); k<0?f.svc.push(d.v):f.svc.splice(k,1); render(); refocus('psSvc',d.v); live(); return true; }
+    if(a==='psTitle'){ const k=f.titles.indexOf(d.v); k<0?f.titles.push(d.v):f.titles.splice(k,1); render(); refocus('psTitle',d.v); live(); return true; }
+    if(a==='psReset'){ S.psF={sp:'',svc:[],titles:[]}; render(); refocus('psSp',''); live(); return true; }
+    return _va.apply(this,arguments);
+  };
+  /* Trefferzahl für Screenreader ansagen, ohne den Fokus zu verschieben */
+  let lr;
+  function live(){
+    if(!lr){ lr=document.createElement('p'); lr.className='sr-only'; lr.setAttribute('role','status'); lr.setAttribute('aria-live','polite'); lr.id='ps-live'; document.body.appendChild(lr); }
+    const c=document.getElementById('ps-count'); const none=document.getElementById('ps-none');
+    lr.textContent=''; setTimeout(()=>{ lr.textContent=c?c.textContent:(none?none.textContent:''); },50);
+  }
+})();
+
+
+/* ===== Etappe 21: Medikation durch Tierhalter:innen – Menge, Einheit, Uhrzeiten, Hinweis, Tagesplan, Notfallkarte, Sitter, Gesundheitsakte (17.10.2026) ===== */
+(function(){
+  const P={"de": {"omSafe": "Geben Sie Medikamente nur so, wie Ihre Tierarztpraxis sie verordnet hat. Ändern Sie die Dosierung nicht ohne Rücksprache. PetConnect berechnet und empfiehlt keine Dosierungen.", "omAmt": "Menge pro Gabe", "omUnit": "Einheit", "u_tab1": "Tablette", "u_tabN": "Tabletten", "u_cap1": "Kapsel", "u_capN": "Kapseln", "u_drop1": "Tropfen", "u_dropN": "Tropfen", "u_pip1": "Pipette", "u_pipN": "Pipetten", "u_puff1": "Hub", "u_puffN": "Hübe", "u_sach1": "Beutel", "u_sachN": "Beutel", "u_app1": "Anwendung", "u_appN": "Anwendungen", "u_ml": "ml", "u_g": "g", "u_mg": "mg", "omFreq": "Wie oft?", "omDaily": "{n}× täglich", "omPrn": "bei Bedarf", "omTimeN": "{n}. Gabe", "omHint": "Hinweis zur Gabe", "omHNone": "kein Hinweis", "omHFood": "mit Futter", "omHEmpty": "nüchtern (vor dem Füttern)", "omHintTxt": "Weitere Hinweise (optional)", "omBy": "Verordnet von (optional)", "omPlan": "Uhrzeiten im Tagesplan erinnern", "omPrnNote": "Bei Bedarf gibt es keine feste Uhrzeit und keine Erinnerung im Tagesplan.", "omErrName": "Bitte geben Sie das Präparat an.", "omErrAmt": "Bitte geben Sie die Menge als Zahl an, z. B. 1 oder 0,5.", "omErrTime": "Bitte geben Sie eine Uhrzeit an.", "omErrDup": "Diese Uhrzeit ist schon eingetragen.", "omSaved": "{n} eingetragen.", "omSavedPlan": "{n} eingetragen und in den Tagesplan übernommen.", "omBySrc": "verordnet von {p}", "omRemAt": "Erinnerung im Tagesplan: {t}", "omSetTimes": "Erinnerung festlegen", "omChgTimes": "Erinnerung ändern", "omTimesH": "Erinnerungszeiten für {n}", "omTimesSave": "Zeiten speichern", "omTimesSaved": "Erinnerung für {n} gespeichert. Sie steht jetzt im Tagesplan.", "omTimesOff": "Erinnerung entfernen", "omTimesRemoved": "Erinnerung für {n} entfernt.", "omDelAsk": "{n} wirklich löschen? Die Erinnerungen im Tagesplan werden ebenfalls entfernt.", "omDelYes": "Ja, löschen", "omFromMed": "aus der Medikation", "omPracOnly": "Einträge der Praxis kann nur die Praxis ändern. Sie können dafür Erinnerungszeiten festlegen.", "mdByOwnerV": "Von Halter:in eingetragen"}, "en": {"omSafe": "Only give medication exactly as your veterinary practice prescribed it. Do not change the dose without asking. PetConnect does not calculate or recommend doses.", "omAmt": "Amount per dose", "omUnit": "Unit", "u_tab1": "tablet", "u_tabN": "tablets", "u_cap1": "capsule", "u_capN": "capsules", "u_drop1": "drop", "u_dropN": "drops", "u_pip1": "pipette", "u_pipN": "pipettes", "u_puff1": "puff", "u_puffN": "puffs", "u_sach1": "sachet", "u_sachN": "sachets", "u_app1": "application", "u_appN": "applications", "u_ml": "ml", "u_g": "g", "u_mg": "mg", "omFreq": "How often?", "omDaily": "{n}× daily", "omPrn": "as needed", "omTimeN": "Dose {n}", "omHint": "How to give", "omHNone": "no note", "omHFood": "with food", "omHEmpty": "on an empty stomach (before feeding)", "omHintTxt": "Other notes (optional)", "omBy": "Prescribed by (optional)", "omPlan": "Remind me at these times in the daily plan", "omPrnNote": "As needed has no fixed time and no reminder in the daily plan.", "omErrName": "Please enter the medication.", "omErrAmt": "Please enter the amount as a number, e.g. 1 or 0.5.", "omErrTime": "Please enter a time.", "omErrDup": "This time is already entered.", "omSaved": "{n} added.", "omSavedPlan": "{n} added and put into the daily plan.", "omBySrc": "prescribed by {p}", "omRemAt": "Reminder in daily plan: {t}", "omSetTimes": "Set reminder", "omChgTimes": "Change reminder", "omTimesH": "Reminder times for {n}", "omTimesSave": "Save times", "omTimesSaved": "Reminder for {n} saved. It is now in the daily plan.", "omTimesOff": "Remove reminder", "omTimesRemoved": "Reminder for {n} removed.", "omDelAsk": "Really delete {n}? The reminders in the daily plan will be removed too.", "omDelYes": "Yes, delete", "omFromMed": "from medication", "omPracOnly": "Only the practice can change its entries. You can set reminder times for them.", "mdByOwnerV": "Entered by the owner"}, "fr": {"omSafe": "Ne donnez les médicaments que selon la prescription de votre cabinet vétérinaire. Ne modifiez pas la dose sans avis. PetConnect ne calcule ni ne recommande aucune dose.", "omAmt": "Quantité par prise", "omUnit": "Unité", "u_tab1": "comprimé", "u_tabN": "comprimés", "u_cap1": "gélule", "u_capN": "gélules", "u_drop1": "goutte", "u_dropN": "gouttes", "u_pip1": "pipette", "u_pipN": "pipettes", "u_puff1": "pulvérisation", "u_puffN": "pulvérisations", "u_sach1": "sachet", "u_sachN": "sachets", "u_app1": "application", "u_appN": "applications", "u_ml": "ml", "u_g": "g", "u_mg": "mg", "omFreq": "À quelle fréquence ?", "omDaily": "{n}× par jour", "omPrn": "si besoin", "omTimeN": "{n}ᵉ prise", "omHint": "Conseil d’administration", "omHNone": "aucun", "omHFood": "avec la nourriture", "omHEmpty": "à jeun (avant le repas)", "omHintTxt": "Autres remarques (facultatif)", "omBy": "Prescrit par (facultatif)", "omPlan": "Me rappeler ces heures dans le planning du jour", "omPrnNote": "Si besoin : pas d’heure fixe ni de rappel dans le planning du jour.", "omErrName": "Veuillez indiquer le médicament.", "omErrAmt": "Veuillez indiquer la quantité en chiffres, p. ex. 1 ou 0,5.", "omErrTime": "Veuillez indiquer une heure.", "omErrDup": "Cette heure est déjà saisie.", "omSaved": "{n} ajouté.", "omSavedPlan": "{n} ajouté et repris dans le planning du jour.", "omBySrc": "prescrit par {p}", "omRemAt": "Rappel dans le planning : {t}", "omSetTimes": "Définir un rappel", "omChgTimes": "Modifier le rappel", "omTimesH": "Heures de rappel pour {n}", "omTimesSave": "Enregistrer les heures", "omTimesSaved": "Rappel pour {n} enregistré. Il figure maintenant dans le planning du jour.", "omTimesOff": "Supprimer le rappel", "omTimesRemoved": "Rappel pour {n} supprimé.", "omDelAsk": "Vraiment supprimer {n} ? Les rappels du planning du jour seront aussi supprimés.", "omDelYes": "Oui, supprimer", "omFromMed": "issu de la médication", "omPracOnly": "Seul le cabinet peut modifier ses entrées. Vous pouvez y ajouter des heures de rappel.", "mdByOwnerV": "Saisi par le propriétaire"}, "ar": {"omSafe": "أعطِ الأدوية فقط كما وصفتها عيادتك البيطرية. لا تغيّر الجرعة دون استشارة. لا يحسب PetConnect الجرعات ولا يوصي بها.", "omAmt": "الكمية لكل جرعة", "omUnit": "الوحدة", "u_tab1": "قرص", "u_tabN": "أقراص", "u_cap1": "كبسولة", "u_capN": "كبسولات", "u_drop1": "قطرة", "u_dropN": "قطرات", "u_pip1": "ماصة", "u_pipN": "ماصات", "u_puff1": "بخة", "u_puffN": "بخات", "u_sach1": "كيس", "u_sachN": "أكياس", "u_app1": "استخدام", "u_appN": "استخدامات", "u_ml": "مل", "u_g": "غ", "u_mg": "ملغ", "omFreq": "كم مرة؟", "omDaily": "{n} مرات يوميًا", "omPrn": "عند الحاجة", "omTimeN": "الجرعة {n}", "omHint": "ملاحظة الإعطاء", "omHNone": "بلا ملاحظة", "omHFood": "مع الطعام", "omHEmpty": "على معدة فارغة (قبل الإطعام)", "omHintTxt": "ملاحظات أخرى (اختياري)", "omBy": "وصفه (اختياري)", "omPlan": "ذكّرني بهذه الأوقات في الخطة اليومية", "omPrnNote": "عند الحاجة لا يوجد وقت ثابت ولا تذكير في الخطة اليومية.", "omErrName": "يرجى إدخال اسم الدواء.", "omErrAmt": "يرجى إدخال الكمية كرقم، مثل 1 أو 0.5.", "omErrTime": "يرجى إدخال وقت.", "omErrDup": "هذا الوقت مُدخل بالفعل.", "omSaved": "تمت إضافة {n}.", "omSavedPlan": "تمت إضافة {n} وإدراجه في الخطة اليومية.", "omBySrc": "وصفه {p}", "omRemAt": "تذكير في الخطة اليومية: {t}", "omSetTimes": "تحديد تذكير", "omChgTimes": "تغيير التذكير", "omTimesH": "أوقات التذكير لـ {n}", "omTimesSave": "حفظ الأوقات", "omTimesSaved": "تم حفظ تذكير {n}. أصبح الآن في الخطة اليومية.", "omTimesOff": "إزالة التذكير", "omTimesRemoved": "تمت إزالة تذكير {n}.", "omDelAsk": "هل تريد حذف {n} فعلًا؟ ستُحذف التذكيرات في الخطة اليومية أيضًا.", "omDelYes": "نعم، احذف", "omFromMed": "من الأدوية", "omPracOnly": "العيادة وحدها يمكنها تعديل إدخالاتها. يمكنك تحديد أوقات تذكير لها.", "mdByOwnerV": "أدخله المالك"}, "nl": {"omSafe": "Geef medicijnen alleen zoals je dierenartspraktijk ze heeft voorgeschreven. Verander de dosering niet zonder overleg. PetConnect berekent of adviseert geen doseringen.", "omAmt": "Hoeveelheid per keer", "omUnit": "Eenheid", "u_tab1": "tablet", "u_tabN": "tabletten", "u_cap1": "capsule", "u_capN": "capsules", "u_drop1": "druppel", "u_dropN": "druppels", "u_pip1": "pipet", "u_pipN": "pipetten", "u_puff1": "pufje", "u_puffN": "pufjes", "u_sach1": "zakje", "u_sachN": "zakjes", "u_app1": "toepassing", "u_appN": "toepassingen", "u_ml": "ml", "u_g": "g", "u_mg": "mg", "omFreq": "Hoe vaak?", "omDaily": "{n}× per dag", "omPrn": "indien nodig", "omTimeN": "{n}e keer", "omHint": "Hoe toedienen", "omHNone": "geen opmerking", "omHFood": "met voer", "omHEmpty": "nuchter (voor het voeren)", "omHintTxt": "Overige opmerkingen (optioneel)", "omBy": "Voorgeschreven door (optioneel)", "omPlan": "Herinner me op deze tijden in de dagplanning", "omPrnNote": "Indien nodig heeft geen vaste tijd en geen herinnering in de dagplanning.", "omErrName": "Vul het medicijn in.", "omErrAmt": "Vul de hoeveelheid in als getal, bijv. 1 of 0,5.", "omErrTime": "Vul een tijd in.", "omErrDup": "Deze tijd staat er al.", "omSaved": "{n} toegevoegd.", "omSavedPlan": "{n} toegevoegd en in de dagplanning gezet.", "omBySrc": "voorgeschreven door {p}", "omRemAt": "Herinnering in dagplanning: {t}", "omSetTimes": "Herinnering instellen", "omChgTimes": "Herinnering wijzigen", "omTimesH": "Herinneringstijden voor {n}", "omTimesSave": "Tijden opslaan", "omTimesSaved": "Herinnering voor {n} opgeslagen. Die staat nu in de dagplanning.", "omTimesOff": "Herinnering verwijderen", "omTimesRemoved": "Herinnering voor {n} verwijderd.", "omDelAsk": "{n} echt verwijderen? De herinneringen in de dagplanning worden ook verwijderd.", "omDelYes": "Ja, verwijderen", "omFromMed": "uit de medicatie", "omPracOnly": "Alleen de praktijk kan haar items wijzigen. Je kunt er wel herinneringstijden voor instellen.", "mdByOwnerV": "Ingevoerd door eigenaar"}, "es": {"omSafe": "Administre los medicamentos solo como se los ha recetado su clínica veterinaria. No cambie la dosis sin consultar. PetConnect no calcula ni recomienda dosis.", "omAmt": "Cantidad por toma", "omUnit": "Unidad", "u_tab1": "comprimido", "u_tabN": "comprimidos", "u_cap1": "cápsula", "u_capN": "cápsulas", "u_drop1": "gota", "u_dropN": "gotas", "u_pip1": "pipeta", "u_pipN": "pipetas", "u_puff1": "pulsación", "u_puffN": "pulsaciones", "u_sach1": "sobre", "u_sachN": "sobres", "u_app1": "aplicación", "u_appN": "aplicaciones", "u_ml": "ml", "u_g": "g", "u_mg": "mg", "omFreq": "¿Con qué frecuencia?", "omDaily": "{n}× al día", "omPrn": "si es necesario", "omTimeN": "{n}.ª toma", "omHint": "Cómo administrarlo", "omHNone": "sin indicación", "omHFood": "con comida", "omHEmpty": "en ayunas (antes de comer)", "omHintTxt": "Otras indicaciones (opcional)", "omBy": "Recetado por (opcional)", "omPlan": "Recordarme estas horas en el plan diario", "omPrnNote": "Si es necesario no tiene hora fija ni recordatorio en el plan diario.", "omErrName": "Indique el medicamento.", "omErrAmt": "Indique la cantidad como número, p. ej. 1 o 0,5.", "omErrTime": "Indique una hora.", "omErrDup": "Esta hora ya está registrada.", "omSaved": "{n} añadido.", "omSavedPlan": "{n} añadido e incluido en el plan diario.", "omBySrc": "recetado por {p}", "omRemAt": "Recordatorio en el plan diario: {t}", "omSetTimes": "Fijar recordatorio", "omChgTimes": "Cambiar recordatorio", "omTimesH": "Horas de recordatorio para {n}", "omTimesSave": "Guardar horas", "omTimesSaved": "Recordatorio para {n} guardado. Ya aparece en el plan diario.", "omTimesOff": "Quitar recordatorio", "omTimesRemoved": "Recordatorio para {n} quitado.", "omDelAsk": "¿Seguro que desea eliminar {n}? También se quitarán los recordatorios del plan diario.", "omDelYes": "Sí, eliminar", "omFromMed": "de la medicación", "omPracOnly": "Solo la clínica puede cambiar sus registros. Usted puede fijar horas de recordatorio para ellos.", "mdByOwnerV": "Registrado por el propietario"}, "ru": {"omSafe": "Давайте лекарства только так, как их назначила ваша ветеринарная клиника. Не меняйте дозировку без консультации. PetConnect не рассчитывает и не рекомендует дозировки.", "omAmt": "Количество на приём", "omUnit": "Единица", "u_tab1": "табл.", "u_tabN": "табл.", "u_cap1": "капс.", "u_capN": "капс.", "u_drop1": "кап.", "u_dropN": "кап.", "u_pip1": "пипетка", "u_pipN": "пипетки", "u_puff1": "впрыск.", "u_puffN": "впрыск.", "u_sach1": "пакет.", "u_sachN": "пакет.", "u_app1": "примен.", "u_appN": "примен.", "u_ml": "мл", "u_g": "г", "u_mg": "мг", "omFreq": "Как часто?", "omDaily": "{n}× в день", "omPrn": "по необходимости", "omTimeN": "{n}-й приём", "omHint": "Как давать", "omHNone": "без указаний", "omHFood": "с кормом", "omHEmpty": "натощак (до кормления)", "omHintTxt": "Другие указания (необязательно)", "omBy": "Кто назначил (необязательно)", "omPlan": "Напоминать в это время в плане дня", "omPrnNote": "По необходимости — без фиксированного времени и без напоминания в плане дня.", "omErrName": "Укажите препарат.", "omErrAmt": "Укажите количество числом, например 1 или 0,5.", "omErrTime": "Укажите время.", "omErrDup": "Это время уже указано.", "omSaved": "{n} добавлено.", "omSavedPlan": "{n} добавлено и внесено в план дня.", "omBySrc": "назначил(а): {p}", "omRemAt": "Напоминание в плане дня: {t}", "omSetTimes": "Задать напоминание", "omChgTimes": "Изменить напоминание", "omTimesH": "Время напоминаний для {n}", "omTimesSave": "Сохранить время", "omTimesSaved": "Напоминание для {n} сохранено. Оно теперь в плане дня.", "omTimesOff": "Удалить напоминание", "omTimesRemoved": "Напоминание для {n} удалено.", "omDelAsk": "Действительно удалить {n}? Напоминания в плане дня тоже будут удалены.", "omDelYes": "Да, удалить", "omFromMed": "из лекарств", "omPracOnly": "Записи клиники может изменять только клиника. Вы можете задать для них время напоминаний.", "mdByOwnerV": "Внесено владельцем"}, "tr": {"omSafe": "İlaçları yalnızca veteriner kliniğinizin reçete ettiği şekilde verin. Dozu danışmadan değiştirmeyin. PetConnect doz hesaplamaz ve önermez.", "omAmt": "Bir seferdeki miktar", "omUnit": "Birim", "u_tab1": "tablet", "u_tabN": "tablet", "u_cap1": "kapsül", "u_capN": "kapsül", "u_drop1": "damla", "u_dropN": "damla", "u_pip1": "pipet", "u_pipN": "pipet", "u_puff1": "sıkım", "u_puffN": "sıkım", "u_sach1": "poşet", "u_sachN": "poşet", "u_app1": "uygulama", "u_appN": "uygulama", "u_ml": "ml", "u_g": "g", "u_mg": "mg", "omFreq": "Ne sıklıkla?", "omDaily": "Günde {n}×", "omPrn": "gerektiğinde", "omTimeN": "{n}. doz", "omHint": "Verme notu", "omHNone": "not yok", "omHFood": "mamayla birlikte", "omHEmpty": "aç karnına (beslemeden önce)", "omHintTxt": "Diğer notlar (isteğe bağlı)", "omBy": "Reçete eden (isteğe bağlı)", "omPlan": "Bu saatlerde günlük planda hatırlat", "omPrnNote": "Gerektiğinde verilen ilaçların sabit saati ve günlük planda hatırlatması yoktur.", "omErrName": "Lütfen ilacı girin.", "omErrAmt": "Lütfen miktarı sayı olarak girin, ör. 1 veya 0,5.", "omErrTime": "Lütfen bir saat girin.", "omErrDup": "Bu saat zaten girilmiş.", "omSaved": "{n} eklendi.", "omSavedPlan": "{n} eklendi ve günlük plana alındı.", "omBySrc": "reçete eden: {p}", "omRemAt": "Günlük planda hatırlatma: {t}", "omSetTimes": "Hatırlatma ayarla", "omChgTimes": "Hatırlatmayı değiştir", "omTimesH": "{n} için hatırlatma saatleri", "omTimesSave": "Saatleri kaydet", "omTimesSaved": "{n} için hatırlatma kaydedildi. Artık günlük planda.", "omTimesOff": "Hatırlatmayı kaldır", "omTimesRemoved": "{n} için hatırlatma kaldırıldı.", "omDelAsk": "{n} gerçekten silinsin mi? Günlük plandaki hatırlatmalar da kaldırılır.", "omDelYes": "Evet, sil", "omFromMed": "ilaç listesinden", "omPracOnly": "Kliniğin kayıtlarını yalnızca klinik değiştirebilir. Bunlar için hatırlatma saatleri ayarlayabilirsiniz.", "mdByOwnerV": "Sahibi tarafından girildi"}, "sv": {"omSafe": "Ge läkemedel endast så som din veterinärklinik har ordinerat. Ändra inte dosen utan att fråga. PetConnect beräknar eller rekommenderar inga doser.", "omAmt": "Mängd per dos", "omUnit": "Enhet", "u_tab1": "tablett", "u_tabN": "tabletter", "u_cap1": "kapsel", "u_capN": "kapslar", "u_drop1": "droppe", "u_dropN": "droppar", "u_pip1": "pipett", "u_pipN": "pipetter", "u_puff1": "puff", "u_puffN": "puffar", "u_sach1": "påse", "u_sachN": "påsar", "u_app1": "applicering", "u_appN": "appliceringar", "u_ml": "ml", "u_g": "g", "u_mg": "mg", "omFreq": "Hur ofta?", "omDaily": "{n}× dagligen", "omPrn": "vid behov", "omTimeN": "Dos {n}", "omHint": "Hur det ges", "omHNone": "ingen anvisning", "omHFood": "med mat", "omHEmpty": "på fastande mage (före utfodring)", "omHintTxt": "Övriga anvisningar (valfritt)", "omBy": "Ordinerat av (valfritt)", "omPlan": "Påminn mig vid dessa tider i dagsplanen", "omPrnNote": "Vid behov har ingen fast tid och ingen påminnelse i dagsplanen.", "omErrName": "Ange läkemedlet.", "omErrAmt": "Ange mängden som en siffra, t.ex. 1 eller 0,5.", "omErrTime": "Ange en tid.", "omErrDup": "Den här tiden finns redan.", "omSaved": "{n} har lagts till.", "omSavedPlan": "{n} har lagts till och förts in i dagsplanen.", "omBySrc": "ordinerat av {p}", "omRemAt": "Påminnelse i dagsplanen: {t}", "omSetTimes": "Ställ in påminnelse", "omChgTimes": "Ändra påminnelse", "omTimesH": "Påminnelsetider för {n}", "omTimesSave": "Spara tider", "omTimesSaved": "Påminnelse för {n} sparad. Den finns nu i dagsplanen.", "omTimesOff": "Ta bort påminnelse", "omTimesRemoved": "Påminnelse för {n} borttagen.", "omDelAsk": "Vill du verkligen radera {n}? Påminnelserna i dagsplanen tas också bort.", "omDelYes": "Ja, radera", "omFromMed": "från läkemedel", "omPracOnly": "Bara kliniken kan ändra sina poster. Du kan ställa in påminnelsetider för dem.", "mdByOwnerV": "Inlagt av ägaren"}, "da": {"omSafe": "Giv kun medicin, som din dyrlægeklinik har ordineret den. Ændr ikke doseringen uden at spørge. PetConnect beregner eller anbefaler ikke doser.", "omAmt": "Mængde pr. dosis", "omUnit": "Enhed", "u_tab1": "tablet", "u_tabN": "tabletter", "u_cap1": "kapsel", "u_capN": "kapsler", "u_drop1": "dråbe", "u_dropN": "dråber", "u_pip1": "pipette", "u_pipN": "pipetter", "u_puff1": "pust", "u_puffN": "pust", "u_sach1": "pose", "u_sachN": "poser", "u_app1": "påføring", "u_appN": "påføringer", "u_ml": "ml", "u_g": "g", "u_mg": "mg", "omFreq": "Hvor tit?", "omDaily": "{n}× dagligt", "omPrn": "efter behov", "omTimeN": "{n}. dosis", "omHint": "Sådan gives det", "omHNone": "ingen bemærkning", "omHFood": "med foder", "omHEmpty": "på tom mave (før fodring)", "omHintTxt": "Andre bemærkninger (valgfrit)", "omBy": "Ordineret af (valgfrit)", "omPlan": "Påmind mig på disse tidspunkter i dagsplanen", "omPrnNote": "Efter behov har intet fast tidspunkt og ingen påmindelse i dagsplanen.", "omErrName": "Angiv medicinen.", "omErrAmt": "Angiv mængden som et tal, f.eks. 1 eller 0,5.", "omErrTime": "Angiv et tidspunkt.", "omErrDup": "Dette tidspunkt er allerede angivet.", "omSaved": "{n} er tilføjet.", "omSavedPlan": "{n} er tilføjet og sat ind i dagsplanen.", "omBySrc": "ordineret af {p}", "omRemAt": "Påmindelse i dagsplanen: {t}", "omSetTimes": "Indstil påmindelse", "omChgTimes": "Ændr påmindelse", "omTimesH": "Påmindelsestider for {n}", "omTimesSave": "Gem tidspunkter", "omTimesSaved": "Påmindelse for {n} er gemt. Den står nu i dagsplanen.", "omTimesOff": "Fjern påmindelse", "omTimesRemoved": "Påmindelse for {n} er fjernet.", "omDelAsk": "Vil du virkelig slette {n}? Påmindelserne i dagsplanen fjernes også.", "omDelYes": "Ja, slet", "omFromMed": "fra medicin", "omPracOnly": "Kun klinikken kan ændre sine registreringer. Du kan indstille påmindelsestider for dem.", "mdByOwnerV": "Indtastet af ejeren"}, "no": {"omSafe": "Gi medisin bare slik dyreklinikken din har forskrevet den. Ikke endre doseringen uten å spørre. PetConnect beregner eller anbefaler ingen doser.", "omAmt": "Mengde per dose", "omUnit": "Enhet", "u_tab1": "tablett", "u_tabN": "tabletter", "u_cap1": "kapsel", "u_capN": "kapsler", "u_drop1": "dråpe", "u_dropN": "dråper", "u_pip1": "pipette", "u_pipN": "pipetter", "u_puff1": "drag", "u_puffN": "drag", "u_sach1": "pose", "u_sachN": "poser", "u_app1": "påføring", "u_appN": "påføringer", "u_ml": "ml", "u_g": "g", "u_mg": "mg", "omFreq": "Hvor ofte?", "omDaily": "{n}× daglig", "omPrn": "ved behov", "omTimeN": "{n}. dose", "omHint": "Slik gis det", "omHNone": "ingen merknad", "omHFood": "med fôr", "omHEmpty": "på tom mage (før fôring)", "omHintTxt": "Andre merknader (valgfritt)", "omBy": "Forskrevet av (valgfritt)", "omPlan": "Påminn meg på disse tidene i dagsplanen", "omPrnNote": "Ved behov har ingen fast tid og ingen påminnelse i dagsplanen.", "omErrName": "Oppgi medisinen.", "omErrAmt": "Oppgi mengden som et tall, f.eks. 1 eller 0,5.", "omErrTime": "Oppgi et klokkeslett.", "omErrDup": "Dette klokkeslettet er allerede lagt inn.", "omSaved": "{n} er lagt til.", "omSavedPlan": "{n} er lagt til og satt inn i dagsplanen.", "omBySrc": "forskrevet av {p}", "omRemAt": "Påminnelse i dagsplanen: {t}", "omSetTimes": "Still inn påminnelse", "omChgTimes": "Endre påminnelse", "omTimesH": "Påminnelsestider for {n}", "omTimesSave": "Lagre tider", "omTimesSaved": "Påminnelse for {n} er lagret. Den står nå i dagsplanen.", "omTimesOff": "Fjern påminnelse", "omTimesRemoved": "Påminnelse for {n} er fjernet.", "omDelAsk": "Vil du virkelig slette {n}? Påminnelsene i dagsplanen fjernes også.", "omDelYes": "Ja, slett", "omFromMed": "fra medisinering", "omPracOnly": "Bare klinikken kan endre sine registreringer. Du kan stille inn påminnelsestider for dem.", "mdByOwnerV": "Lagt inn av eieren"}};
+  Object.keys(P).forEach(l=>{ if(STR[l]) Object.assign(STR[l],P[l]); });
+
+  const css=document.createElement('style');
+  css.textContent=`
+#md-card .md-safe{border-inline-start:4px solid var(--warn-ink,var(--warn));background:var(--warn-soft);padding:10px 12px;border-radius:8px;color:var(--fg);margin:8px 0 12px}
+#md-card .md-line{font-size:.85rem}
+#md-card .md-ask{flex-basis:100%}
+#md-card .md-times{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+#md-card .md-times input[type=time]{max-width:100%}
+`;
+  document.head.appendChild(css);
+
+  const UNITS=['tab','cap','ml','drop','pip','puff','sach','g','mg','app'];
+  const COUNTED={tab:1,cap:1,drop:1,pip:1,puff:1,sach:1,app:1};
+  const DEF={1:['08:00'],2:['08:00','20:00'],3:['08:00','14:00','20:00'],4:['07:00','12:00','17:00','22:00']};
+  const FREQS=['1','2','3','4','prn'];
+  const HINTS=['none','food','empty'];
+  S.om={open:false,freq:'1',hint:'none',del:null,tm:null,tmFreq:'1'};
+
+  const amtNum=a=>{ const v=parseFloat(String(a).replace(',','.')); return isNaN(v)?null:v; };
+  const amtTxt=a=>{ const v=amtNum(a); return v==null?String(a):new Intl.NumberFormat(L(),{maximumFractionDigits:2}).format(v); };
+  const unitTxt=(u,a)=>COUNTED[u]?t('u_'+u+(amtNum(a)===1?'1':'N')):t('u_'+u);
+  const timesTxt=ts=>t('gpAt',{t:ts.join(', ')});
+  const isStruct=m=>m&&m.amt!=null&&m.unit;
+  const activeToday=m=>{ if(m.stopped) return false; if(m.from&&m.from>TODAY) return false; if(m.to&&m.to<TODAY) return false; return true; };
+
+  /* Dosierungstext: strukturierte Einträge werden in der gewählten Sprache zusammengesetzt, alte Freitexte bleiben */
+  medDosTxt=function(m){
+    if(!isStruct(m)) return t(m.dos||'');
+    const parts=[amtTxt(m.amt)+' '+unitTxt(m.unit,m.amt)];
+    parts.push(m.freq==='prn'?t('omPrn'):t('omDaily',{n:m.freq})+(m.times&&m.times.length?' ('+timesTxt(m.times)+')':''));
+    if(m.hint==='food') parts.push(t('omHFood')); else if(m.hint==='empty') parts.push(t('omHEmpty'));
+    if(m.hintTxt) parts.push(m.hintTxt);
+    return parts.join(' · ');
+  };
+  /* Notfallkarte, Sitter-Ansicht und Sitter-Link: laufende Medikamente mit Dosierung zuerst */
+  medAreaPre=function(id,c){
+    if(c!=='aMed') return [];
+    const p=getPet(id); if(!p||!p.medi) return [];
+    return medList(id).filter(m=>medSt(m)!=='ended'&&activeToday(m)).map(m=>{ const d=medDosTxt(m); return t(m.n)+(d?' – '+d:''); });
+  };
+
+  /* Tagesplan: Uhrzeiten laufender Medikamente als Einträge „aus der Medikation“ (werden mit der Medikation angelegt und entfernt) */
+  window.pcMedSync=function(pid,L){
+    const p=S.pets&&S.pets[pid]; if(!p||!Array.isArray(L)) return;
+    const want={};
+    if(!p.dead) (p.medi||[]).forEach(m=>{ if(!m.id||!m.times||!m.times.length||m.plan===false||m.freq==='prn'||!activeToday(m)||medSt(m)==='ended') return;
+      const short=isStruct(m)?amtTxt(m.amt)+' '+unitTxt(m.unit,m.amt):'';
+      m.times.forEach(tm=>{ want['md-'+m.id+'-'+tm]={m,tm,txt:t(m.n)+(short?' · '+short:'')}; }); });
+    for(let i=L.length-1;i>=0;i--){ const x=L[i]; if(x.mid!=null&&!want[x.id]) L.splice(i,1); else if(x.mid!=null){ x.txt=want[x.id].txt; } }
+    Object.keys(want).forEach(k=>{ if(L.some(x=>x.id===k)) return; const w=want[k]; L.push({id:k,k:'med',t:w.tm,r:'daily',on:true,txt:w.txt,done:{},mid:w.m.id}); });
+  };
+
+  const stammName=()=>{ const sp=typeof stammInfo==='function'?stammInfo():null; return sp&&sp.n?sp.n:''; };
+  const timeFields=(pre,n)=>{ let h=''; for(let i=1;i<=n;i++) h+=fld(pre+i,t('omTimeN',{n:i}),'time'); return `<div class="md-times">${h}</div>`; };
+  const freqChips=(act,cur,withPrn)=>`<div class="chips" role="group" aria-labelledby="${act}-l">${FREQS.filter(k=>withPrn||k!=='prn').map(k=>`<button class="chip" data-act="${act}" data-v="${k}" aria-pressed="${cur===k}">${k==='prn'?t('omPrn'):t('omDaily',{n:k})}</button>`).join('')}</div>`;
+
+  function omRow(m,id){
+    const own=m.src==='own', st=medSt(m), act=st!=='ended';
+    const src=own?`<span class="pill info">${t('aByMe')}</span>`:`<span class="pill info">${t('mdByPrac')}</span>`;
+    const dates=(m.from?t('mdSince',{d:fmt(m.from)}):'')+(m.to?(m.from?' · ':'')+t('mdUntil',{d:fmt(m.to)}):'');
+    const rem=!own&&act&&m.times&&m.times.length?`<div class="md-line" style="color:var(--brand)">${t('omRemAt',{t:esc(timesTxt(m.times))})}</div>`:'';
+    const nm=esc(t(m.n));
+    let btns='';
+    if(own){ if(act) btns+=`<button class="btn ghost" data-act="omStop" data-pid="${id}" data-v="${m.id}">${t('mdStop')}</button>`;
+      btns+=`<button class="btn ghost" data-act="omDel" data-pid="${id}" data-v="${m.id}" aria-label="${esc(t('mdDel'))}: ${nm}">${t('mdDel')}</button>`; }
+    else if(act) btns+=`<button class="btn ghost" data-act="omTm" data-pid="${id}" data-v="${m.id}" aria-expanded="${S.om.tm===m.id}">${m.times&&m.times.length?t('omChgTimes'):t('omSetTimes')}</button>`;
+    const ask=S.om.del===m.id?`<div class="md-ask"><p class="note">${t('omDelAsk',{n:nm})}</p><div class="chips"><button class="btn crit" data-act="omDelYes" data-pid="${id}" data-v="${m.id}">${t('omDelYes')}</button><button class="btn ghost" data-act="omDelNo" data-v="${m.id}">${t('hhCancel')}</button></div></div>`:'';
+    let tmf='';
+    if(S.om.tm===m.id){ const n=+S.om.tmFreq||1;
+      tmf=`<div class="md-ask gp-form" id="om-tm"><span class="label" id="omTmF-l">${t('omTimesH',{n:nm})}</span>${freqChips('omTmF',S.om.tmFreq,false)}${timeFields('omR',n)}
+        <div class="chips"><button class="btn" data-act="omTmSave" data-pid="${id}" data-v="${m.id}">${t('omTimesSave')}</button>${m.times&&m.times.length?`<button class="btn ghost" data-act="omTmOff" data-pid="${id}" data-v="${m.id}">${t('omTimesOff')}</button>`:''}<button class="btn ghost" data-act="omTmNo" data-v="${m.id}">${t('hhCancel')}</button></div></div>`; }
+    return `<div class="row" style="align-items:flex-start;flex-wrap:wrap;gap:8px" data-med="${m.id}"><div class="grow" style="min-width:160px">
+      <div style="font-weight:600">${nm} ${src}</div>
+      <div class="md-line">${esc(medDosTxt(m))}</div>
+      ${m.why?`<div class="muted md-line">${esc(m.why)}</div>`:''}
+      ${m.by?`<div class="muted md-line">${t('omBySrc',{p:esc(m.by)})}</div>`:''}
+      ${dates?`<div class="muted mono" style="font-size:.78rem">${dates}</div>`:''}${rem}</div>
+      ${medPill(m)}${btns?`<div class="chips">${btns}</div>`:''}${ask}${tmf}</div>`;
+  }
+
+  function omForm(id){
+    const o=S.om, f=F(), n=o.freq==='prn'?0:+o.freq;
+    return `<div class="gp-form" id="om-form"><h3 style="margin:0">${t('mdAdd')}</h3>
+      ${fld('omName',t('mdName'),'text','maxlength="60" autocomplete="off"')}
+      <div class="grid g2">${fld('omAmt',t('omAmt'),'text','inputmode="decimal" maxlength="6" autocomplete="off"')}${sel('omUnit',t('omUnit'),UNITS.map(u=>[u,COUNTED[u]?t('u_'+u+'N'):t('u_'+u)]))}</div>
+      <span class="label" id="omFreq-l">${t('omFreq')}</span>${freqChips('omFreq',o.freq,true)}
+      ${n?`<span class="label">${t('gpTime')}</span>${timeFields('omT',n)}`:`<p class="note">${t('omPrnNote')}</p>`}
+      <span class="label" id="omHint-l">${t('omHint')}</span><div class="chips" role="group" aria-labelledby="omHint-l">${HINTS.map(k=>`<button class="chip" data-act="omHint" data-v="${k}" aria-pressed="${o.hint===k}">${t(k==='none'?'omHNone':k==='food'?'omHFood':'omHEmpty')}</button>`).join('')}</div>
+      ${fld('omHintTxt',t('omHintTxt'),'text','maxlength="80"')}
+      <div class="grid g2">${fld('omWhy',t('mdWhy'),'text','maxlength="80"')}${fld('omBy',t('omBy'),'text','maxlength="80"')}</div>
+      <div class="grid g2">${fld('omFrom',t('mdFrom'),'date')}${fld('omTo',t('mdTo'),'date')}</div>
+      ${n?chk('omPlan',t('omPlan')):''}
+      <div class="chips"><button class="btn" data-act="omSave" data-pid="${id}">${t('mdSave')}</button><button class="btn ghost" data-act="omCancel">${t('hhCancel')}</button></div></div>`;
+  }
+
+  function omCard(id){
+    const rows=medSorted(id).map(m=>omRow(m,id)).join('');
+    return `<div class="card" id="md-card"><h2>${t('mdTitle')}</h2><p class="md-safe" role="note">${t('omSafe')}</p>
+      <div class="list">${rows||`<p class="empty">${t('mdNone')}</p>`}</div>
+      ${S.om.open?omForm(id):`<div class="chips" style="margin-top:12px"><button class="btn ghost" data-act="omOpen" data-pid="${id}" aria-expanded="false">+ ${t('mdAdd')}</button></div>`}
+      ${medList(id).some(m=>m.src!=='own')?`<p class="note">${t('omPracOnly')}</p>`:''}</div>`;
+  }
+
+  /* Tierakte der Halter:in: Karte aus Etappe 6 (nur lesen) durch die bearbeitbare Karte ersetzen */
+  const _vA=vAkte;
+  vAkte=function(){ let h=_vA.apply(this,arguments); if(S.role==='vet'||S.impfView||S.docView||S.akteSub||!S.pets[S.pet]) return h;
+    const a=`<div class="card"><h2>${t('mdTitle')}</h2>`, i=h.indexOf(a), endMark=`<p class="note">${t('mdOwnerNote')}</p></div>`, j=i>=0?h.indexOf(endMark,i):-1;
+    if(i<0||j<0) return h;
+    return h.slice(0,i)+omCard(S.pet)+h.slice(j+endMark.length); };
+  VIEWS.akte=vAkte;
+  /* Tierwechsel in der Akte: offene Formulare schließen */
+  document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-pet-akte],[data-view]'); if(b){ S.om.open=false; S.om.del=null; S.om.tm=null; } },true);
+
+  const focus=sel=>{ const el=document.querySelector(sel); if(el) el.focus(); };
+  const findM=(pid,v)=>medList(pid).find(x=>String(x.id)===String(v));
+  const clearErr=keys=>{ const er=S.auth.errors; keys.forEach(k=>delete er[k]); };
+  const FORM_KEYS=['omName','omAmt','omUnit','omHintTxt','omWhy','omBy','omFrom','omTo','omPlan','omT1','omT2','omT3','omT4'];
+  const fillTimes=(pre,n,base)=>{ const f=F(); for(let i=1;i<=4;i++){ if(i>n) continue; if(!f[pre+i]) f[pre+i]=(base&&base[i-1])||DEF[n][i-1]; } };
+  const readTimes=(pre,n)=>{ const f=F(), er=S.auth.errors, ts=[]; let bad=false;
+    for(let i=1;i<=n;i++){ const v=(f[pre+i]||'').trim(); delete er[pre+i];
+      if(!/^\d{2}:\d{2}$/.test(v)){ er[pre+i]='omErrTime'; bad=true; } else if(ts.includes(v)){ er[pre+i]='omErrDup'; bad=true; } else ts.push(v); }
+    for(let i=n+1;i<=4;i++) delete er[pre+i];
+    return bad?null:ts.sort(); };
+
+  const _va=vetAction;
+  vetAction=function(a,d){
+    const f=F();
+    switch(a){
+    case 'omOpen': { S.om={open:true,freq:'1',hint:'none',del:null,tm:null,tmFreq:'1'}; FORM_KEYS.forEach(k=>delete f[k]); clearErr(FORM_KEYS);
+      f.omUnit='tab'; f.omFrom=isoDate(TODAY); f.omPlan=true; const sn=stammName(); if(sn) f.omBy=sn; fillTimes('omT',1);
+      render(); focus('#f-omName'); return true; }
+    case 'omCancel': S.om.open=false; clearErr(FORM_KEYS); render(); focus('[data-act="omOpen"]'); return true;
+    case 'omFreq': S.om.freq=d.v; if(d.v!=='prn') fillTimes('omT',+d.v); render(); focus(`#om-form [data-act="omFreq"][data-v="${d.v}"]`); return true;
+    case 'omHint': S.om.hint=d.v; render(); focus(`#om-form [data-act="omHint"][data-v="${d.v}"]`); return true;
+    case 'omSave': {
+      const er=S.auth.errors, nm=(f.omName||'').trim(), amt=(f.omAmt||'').trim().replace(/\s/g,''), n=S.om.freq==='prn'?0:+S.om.freq;
+      clearErr(['omName','omAmt','omTo']);
+      if(!nm) er.omName='omErrName';
+      const av=/^\d{1,3}([.,]\d{1,2})?$/.test(amt)?amtNum(amt):null; if(av==null||av<=0) er.omAmt='omErrAmt';
+      const ts=n?readTimes('omT',n):[];
+      const from=f.omFrom?parseD(f.omFrom):new Date(TODAY), to=f.omTo?parseD(f.omTo):null; if(to&&from&&to<from) er.omTo='mdBad';
+      if(er.omName||er.omAmt||er.omTo||ts==null){ render(); return true; }
+      const unit=UNITS.includes(f.omUnit)?f.omUnit:'tab';
+      const m={id:++WID,n:nm,amt:String(av),unit,freq:n?String(n):'prn',times:ts,hint:S.om.hint,hintTxt:(f.omHintTxt||'').trim(),why:(f.omWhy||'').trim(),by:(f.omBy||'').trim(),from,to,src:'own',plan:n?!!f.omPlan:false,dos:''};
+      medList(d.pid).push(m); FORM_KEYS.forEach(k=>delete f[k]); S.om.open=false; render();
+      toast(t(m.plan&&activeToday(m)?'omSavedPlan':'omSaved',{n:nm})); focus('[data-act="omOpen"]'); return true; }
+    case 'omStop': { const m=findM(d.pid,d.v); if(!m) return true; m.stopped=true; const y=new Date(TODAY); y.setDate(y.getDate()-1); m.to=m.from&&y<m.from?new Date(m.from):y;
+      render(); toast(t('mdStopped')); focus(`[data-med="${m.id}"] [data-act="omDel"]`); return true; }
+    case 'omDel': S.om.del=+d.v||d.v; render(); focus(`[data-act="omDelYes"][data-v="${d.v}"]`); return true;
+    case 'omDelNo': S.om.del=null; render(); focus(`[data-act="omDel"][data-v="${d.v}"]`); return true;
+    case 'omDelYes': { S.om.del=null; const L=medList(d.pid), i=L.findIndex(x=>String(x.id)===String(d.v)); if(i>=0&&L[i].src==='own'){ L.splice(i,1); render(); toast(t('mdDeleted')); } else render();
+      focus('#md-card [data-act="omOpen"]'); return true; }
+    case 'omTm': { const m=findM(d.pid,d.v); if(!m) return true; if(S.om.tm===m.id){ S.om.tm=null; render(); return true; }
+      const n=m.times&&m.times.length?m.times.length:1; S.om.tm=m.id; S.om.tmFreq=String(n); ['omR1','omR2','omR3','omR4'].forEach(k=>delete f[k]); clearErr(['omR1','omR2','omR3','omR4']); fillTimes('omR',n,m.times);
+      render(); focus('#om-tm [data-act="omTmF"][aria-pressed="true"]'); return true; }
+    case 'omTmF': S.om.tmFreq=d.v; fillTimes('omR',+d.v); render(); focus(`#om-tm [data-act="omTmF"][data-v="${d.v}"]`); return true;
+    case 'omTmNo': S.om.tm=null; clearErr(['omR1','omR2','omR3','omR4']); render(); focus(`[data-act="omTm"][data-v="${d.v}"]`); return true;
+    case 'omTmSave': { const m=findM(d.pid,d.v); if(!m) return true; const ts=readTimes('omR',+S.om.tmFreq||1); if(!ts){ render(); return true; }
+      m.times=ts; m.plan=true; S.om.tm=null; render(); toast(t('omTimesSaved',{n:t(m.n)})); focus(`[data-act="omTm"][data-v="${m.id}"]`); return true; }
+    case 'omTmOff': { const m=findM(d.pid,d.v); if(!m) return true; m.times=[]; S.om.tm=null; render(); toast(t('omTimesRemoved',{n:t(m.n)})); focus(`[data-act="omTm"][data-v="${m.id}"]`); return true; }
+    }
+    return _va.call(this,a,d);
+  };
 })();
 
 render();
